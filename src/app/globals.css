@@ -131,9 +131,7 @@
     @apply font-sans;
   }
   body {
-    background:
-      radial-gradient(circle at top left, rgba(220, 38, 38, 0.08), transparent 28%),
-      linear-gradient(180deg, #fbfbfa 0%, #f6f5f3 100%);
+    background-color: #f4f4f5;
   }
 }
 @layer utilities {
