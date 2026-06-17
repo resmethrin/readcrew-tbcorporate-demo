@@ -1,0 +1,20 @@
+[
+  { "id": "s001", "customerId": "c001", "businessId": "b001", "description": "エアコン設置一式", "amount": 320000, "month": "2026-06", "status": "paid" },
+  { "id": "s002", "customerId": "c001", "businessId": "b001", "description": "制御盤更新工事", "amount": 180000, "month": "2026-06", "status": "invoiced" },
+  { "id": "s003", "customerId": "c001", "businessId": "b002", "description": "月額保守費6月分", "amount": 80000, "month": "2026-06", "status": "uninvoiced" },
+  { "id": "s004", "customerId": "c001", "businessId": "b002", "description": "機器点検作業", "amount": 45000, "month": "2026-06", "status": "uninvoiced" },
+  { "id": "s005", "customerId": "c001", "businessId": "b003", "description": "電気設備点検", "amount": 150000, "month": "2026-06", "status": "invoiced" },
+  { "id": "s006", "customerId": "c001", "businessId": "b003", "description": "配管工事", "amount": 220000, "month": "2026-06", "status": "uninvoiced" },
+  { "id": "s007", "customerId": "c002", "businessId": "b001", "description": "空調システム導入", "amount": 580000, "month": "2026-06", "status": "paid" },
+  { "id": "s008", "customerId": "c002", "businessId": "b001", "description": "電動シャッター設置", "amount": 95000, "month": "2026-06", "status": "uninvoiced" },
+  { "id": "s009", "customerId": "c002", "businessId": "b002", "description": "定期メンテナンス", "amount": 60000, "month": "2026-06", "status": "invoiced" },
+  { "id": "s010", "customerId": "c002", "businessId": "b002", "description": "緊急対応費", "amount": 30000, "month": "2026-06", "status": "uninvoiced" },
+  { "id": "s011", "customerId": "c002", "businessId": "b003", "description": "内装工事", "amount": 340000, "month": "2026-06", "status": "uninvoiced" },
+  { "id": "s012", "customerId": "c002", "businessId": "b003", "description": "設備移設", "amount": 180000, "month": "2026-06", "status": "invoiced" },
+  { "id": "s013", "customerId": "c003", "businessId": "b001", "description": "産業用設備納品", "amount": 720000, "month": "2026-06", "status": "paid" },
+  { "id": "s014", "customerId": "c003", "businessId": "b001", "description": "制御システム", "amount": 430000, "month": "2026-06", "status": "uninvoiced" },
+  { "id": "s015", "customerId": "c003", "businessId": "b002", "description": "月次保守契約", "amount": 120000, "month": "2026-06", "status": "invoiced" },
+  { "id": "s016", "customerId": "c003", "businessId": "b002", "description": "設備診断", "amount": 55000, "month": "2026-06", "status": "uninvoiced" },
+  { "id": "s017", "customerId": "c003", "businessId": "b003", "description": "改修工事", "amount": 890000, "month": "2026-06", "status": "uninvoiced" },
+  { "id": "s018", "customerId": "c003", "businessId": "b003", "description": "基礎工事", "amount": 650000, "month": "2026-06", "status": "uninvoiced" }
+]

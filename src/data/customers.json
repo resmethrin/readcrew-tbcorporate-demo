@@ -1,0 +1,5 @@
+[
+  { "id": "c001", "name": "株式会社アルファテック", "contact": "山田 太郎", "email": "yamada@alphatech.co.jp" },
+  { "id": "c002", "name": "ベータ商事株式会社", "contact": "鈴木 花子", "email": "suzuki@beta-shoji.co.jp" },
+  { "id": "c003", "name": "ガンマ建設株式会社", "contact": "田中 一郎", "email": "tanaka@gamma-kensetsu.co.jp" }
+]

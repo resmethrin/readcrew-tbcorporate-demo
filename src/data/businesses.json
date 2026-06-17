@@ -1,0 +1,5 @@
+[
+  { "id": "b001", "name": "設備販売事業", "color": "blue" },
+  { "id": "b002", "name": "保守サービス事業", "color": "green" },
+  { "id": "b003", "name": "工事関連事業", "color": "orange" }
+]
