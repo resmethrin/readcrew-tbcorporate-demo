@@ -20,6 +20,8 @@ export default function BillingPage() {
   );
   const groups = useMemo(() => groupSalesByBusiness(targetSales), [targetSales]);
   const total = groups.reduce((sum, group) => sum + group.subtotal, 0);
+  const getQty = (sale: (typeof targetSales)[number]) => sale.qty ?? 1;
+  const getUnitPrice = (sale: (typeof targetSales)[number]) => sale.unitPrice ?? Math.round(sale.amount / getQty(sale));
 
   return (
     <div className="space-y-6">
@@ -77,10 +79,18 @@ export default function BillingPage() {
                 <div className="text-sm text-zinc-500">{group.items.length}件</div>
               </div>
               <div className="space-y-3 pt-4">
+                <div className="grid grid-cols-[1fr_90px_120px_120px] gap-3 border-b border-zinc-200 pb-2 text-xs font-medium text-zinc-500">
+                  <div>内容</div>
+                  <div className="text-right">数量</div>
+                  <div className="text-right">単価</div>
+                  <div className="text-right">金額</div>
+                </div>
                 {group.items.map((sale) => (
-                  <div key={sale.id} className="flex items-center justify-between text-sm">
+                  <div key={sale.id} className="grid grid-cols-[1fr_90px_120px_120px] items-center gap-3 text-sm">
                     <div>{sale.description}</div>
-                    <div className="font-medium">{formatYen(sale.amount)}</div>
+                    <div className="text-right">{getQty(sale)}</div>
+                    <div className="text-right">{formatYen(getUnitPrice(sale))}</div>
+                    <div className="text-right font-medium">{formatYen(sale.amount)}</div>
                   </div>
                 ))}
               </div>

@@ -1,18 +1,38 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useSalesStore } from "@/store/useSalesStore";
 import { demoBusinesses, formatYen } from "@/lib/demo-data";
 
 export default function DashboardPage() {
-  const sales = useSalesStore.getState().sales;
+  const sales = useSalesStore((state) => state.sales);
   const salesByBusiness = Object.fromEntries(
     demoBusinesses.map((business) => [
       business.id,
-      sales
-        .filter((sale) => sale.businessId === business.id)
-        .reduce((sum, sale) => sum + sale.amount, 0),
+      sales.filter((sale) => sale.businessId === business.id).reduce((sum, sale) => sum + sale.amount, 0),
     ]),
   );
+  const chartData = demoBusinesses.map((business) => ({
+    name: business.name,
+    売上: salesByBusiness[business.id],
+    fill:
+      business.id === "b001"
+        ? "#DC2626"
+        : business.id === "b002"
+          ? "#16A34A"
+          : "#EA580C",
+  }));
   const uninvoicedCount = sales.filter((sale) => sale.status === "uninvoiced").length;
   const invoicedCount = sales.filter((sale) => sale.status === "invoiced").length;
   const paidCount = sales.filter((sale) => sale.status === "paid").length;
@@ -68,6 +88,28 @@ export default function DashboardPage() {
           </Card>
         ))}
       </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>事業別売上</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-48 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="#e4e4e7" />
+                <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} />
+                <YAxis tickFormatter={(value) => `${Number(value) / 10000}万`} tickLine={false} axisLine={false} fontSize={12} />
+                <Tooltip formatter={(value) => formatYen(Number(value ?? 0))} />
+                <Bar dataKey="売上" radius={[8, 8, 0, 0]}>
+                  {chartData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>締め処理ステータス</CardTitle>
