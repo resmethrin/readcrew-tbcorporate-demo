@@ -2,7 +2,7 @@ export interface Customer {
   id: string
   name: string
   contact: string
-  email: string
+  email?: string
 }
 
 export interface Business {
@@ -13,6 +13,8 @@ export interface Business {
 
 export type SaleStatus = 'uninvoiced' | 'invoiced' | 'paid'
 
+export type BusinessColor = 'blue' | 'green' | 'orange'
+
 export interface Sale {
   id: string
   customerId: string
@@ -21,4 +23,11 @@ export interface Sale {
   amount: number
   month: string
   status: SaleStatus
+}
+
+export interface InvoiceGroup {
+  businessId: string
+  businessName: string
+  items: Sale[]
+  subtotal: number
 }
