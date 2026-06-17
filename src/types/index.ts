@@ -21,6 +21,8 @@ export interface Sale {
   businessId: string
   description: string
   amount: number
+  qty?: number
+  unitPrice?: number
   month: string
   status: SaleStatus
 }

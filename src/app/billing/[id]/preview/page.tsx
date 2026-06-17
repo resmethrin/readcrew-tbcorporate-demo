@@ -59,18 +59,20 @@ export default function InvoicePreviewPage() {
               <section key={group.businessId} className="space-y-3">
                 <h2 className="text-lg font-semibold">【{group.businessName}】</h2>
                 <div className="border-y border-zinc-900 py-3">
-                  <div className="grid grid-cols-[1fr_100px_140px] gap-4 border-b border-zinc-200 pb-2 text-sm font-medium">
-                    <div>品目</div>
+                  <div className="grid grid-cols-[1fr_100px_140px_140px] gap-4 border-b border-zinc-200 pb-2 text-sm font-medium">
+                    <div>内容</div>
                     <div className="text-right">数量</div>
+                    <div className="text-right">単価</div>
                     <div className="text-right">金額</div>
                   </div>
                   {group.items.map((sale) => (
                     <div
                       key={sale.id}
-                      className="grid grid-cols-[1fr_100px_140px] gap-4 border-b border-zinc-100 py-2 last:border-b-0"
+                      className="grid grid-cols-[1fr_100px_140px_140px] gap-4 border-b border-zinc-100 py-2 last:border-b-0"
                     >
                       <div>{sale.description}</div>
-                      <div className="text-right">1式</div>
+                      <div className="text-right">{sale.qty ?? 1}</div>
+                      <div className="text-right">{formatYen(sale.unitPrice ?? Math.round(sale.amount / (sale.qty ?? 1)))}</div>
                       <div className="text-right">{formatYen(sale.amount)}</div>
                     </div>
                   ))}
