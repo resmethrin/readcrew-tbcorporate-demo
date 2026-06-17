@@ -1,5 +1,14 @@
+"use client";
+
 import Link from "next/link";
-import { LayoutDashboard, ReceiptText, Table2, Banknote, Upload } from "lucide-react";
+import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  ReceiptText,
+  Table2,
+  Banknote,
+  Upload,
+} from "lucide-react";
 
 const nav = [
   { href: "/dashboard", label: "ダッシュボード", icon: LayoutDashboard },
@@ -10,40 +19,44 @@ const nav = [
 ];
 
 export function Sidebar() {
+  const pathname = usePathname();
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 w-72 border-r border-zinc-200 bg-white/95 backdrop-blur">
-      <div className="flex h-full flex-col px-6 py-7">
-        <div className="mb-8">
-          <div className="text-xs font-semibold uppercase tracking-[0.32em] text-accent">
-            ReadyCrew Demo
-          </div>
-          <div className="mt-3 text-2xl font-semibold tracking-tight text-zinc-950">
-            販売・請求ハブ
-          </div>
-          <p className="mt-3 text-sm leading-6 text-zinc-500">
-            事業ごとに入力や管理方法が違っても、請求業務は一元化できます。
-          </p>
+    <aside className="fixed inset-y-0 left-0 z-20 w-72 bg-zinc-950">
+      <div className="flex h-full flex-col px-5 py-7">
+        <div className="mb-8 border-l-2 border-red-600 pl-3">
+          <div className="text-lg font-semibold text-white">販売・請求ハブ</div>
+          <div className="mt-1 text-xs text-zinc-400">TBコーポレート様</div>
         </div>
-        <nav className="space-y-2">
+
+        <nav className="space-y-1">
           {nav.map((item) => {
             const Icon = item.icon;
+            const active = pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 rounded-xl border border-transparent px-4 py-3 text-sm font-medium text-zinc-700 transition hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-950"
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                  active
+                    ? "border-l-2 border-red-500 bg-zinc-800 text-white"
+                    : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                }`}
               >
-                <Icon className="h-4 w-4 text-accent" />
+                <Icon
+                  className={`h-4 w-4 shrink-0 ${active ? "text-red-500" : "text-zinc-400"}`}
+                />
                 {item.label}
               </Link>
             );
           })}
         </nav>
-        <div className="mt-auto rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-          <div className="text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">
+
+        <div className="mt-auto rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <div className="text-xs font-medium uppercase tracking-widest text-zinc-500">
             デモ用メモ
           </div>
-          <p className="mt-2 text-sm leading-6 text-zinc-700">
+          <p className="mt-2 text-xs leading-5 text-zinc-400">
             顧客切替・月切替・事業別集計がそのまま動くことを優先しています。
           </p>
         </div>
