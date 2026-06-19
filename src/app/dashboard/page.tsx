@@ -23,19 +23,8 @@ import {
 import { useSalesStore } from "@/store/useSalesStore";
 import { demoBusinesses, formatYen, formatMonth, PERIOD_MONTHS } from "@/lib/demo-data";
 
-const MONTHLY_TARGET = 21_000_000;
-const FORECAST = 16_500_000;
-
-const trendData = [
-  { month: "12月", 実績: 9_200_000 },
-  { month: "1月",  実績: 11_800_000 },
-  { month: "2月",  実績: 10_500_000 },
-  { month: "3月",  実績: 13_200_000 },
-  { month: "4月",  実績: 12_100_000 },
-  { month: "5月",  実績: 14_800_000, 見込み: 14_800_000 },
-  { month: "6月",  実績: null,        見込み: 16_500_000 },
-  { month: "7月",  実績: null,        見込み: 17_200_000 },
-];
+const MONTHLY_TARGET = 18_000_000;
+const CURRENT_MONTH = "2026-06";
 
 const actionItems = [
   { type: "overdue",  label: "株式会社ニシカワ — 電気設備点検",  amount: 150_000, note: "支払期日 6/15 超過（4日）" },
@@ -58,10 +47,27 @@ export default function DashboardPage() {
 
   const filteredSales = monthFilter === "all" ? sales : sales.filter((s) => s.month === monthFilter);
 
-  const paidTotal      = filteredSales.filter((s) => s.status === "paid").reduce((n, s) => n + s.amount, 0);
-  const invoicedTotal  = filteredSales.filter((s) => s.status === "invoiced").reduce((n, s) => n + s.amount, 0);
+  const paidTotal       = filteredSales.filter((s) => s.status === "paid").reduce((n, s) => n + s.amount, 0);
+  const invoicedTotal   = filteredSales.filter((s) => s.status === "invoiced").reduce((n, s) => n + s.amount, 0);
   const uninvoicedTotal = filteredSales.filter((s) => s.status === "uninvoiced").reduce((n, s) => n + s.amount, 0);
-  const achieveRate    = Math.round((FORECAST / MONTHLY_TARGET) * 100);
+
+  const currentMonthForecast = useMemo(
+    () => sales.filter((s) => s.month === CURRENT_MONTH).reduce((n, s) => n + s.amount, 0),
+    [sales],
+  );
+  const achieveRate = Math.round((currentMonthForecast / MONTHLY_TARGET) * 100);
+
+  const trendData = useMemo(() => {
+    const sorted = [...PERIOD_MONTHS].reverse(); // 1月 → 6月
+    const prevMonth = sorted[sorted.indexOf(CURRENT_MONTH) - 1] ?? null;
+    return sorted.map((month) => {
+      const total = sales.filter((s) => s.month === month).reduce((n, s) => n + s.amount, 0);
+      const label = `${Number(month.split("-")[1])}月`;
+      if (month === CURRENT_MONTH) return { month: label, 実績: null, 見込み: total };
+      if (month === prevMonth)     return { month: label, 実績: total, 見込み: total };
+      return { month: label, 実績: total, 見込み: null };
+    });
+  }, [sales]);
 
   const bizStats = demoBusinesses.map((b) => {
     const bSales     = filteredSales.filter((s) => s.businessId === b.id);
@@ -120,7 +126,7 @@ export default function DashboardPage() {
               </span>
             </div>
             <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">
-              ¥16,500,000
+              {formatYen(currentMonthForecast)}
             </p>
             <div className="mt-4">
               <div className="flex justify-between text-xs text-zinc-400 mb-1">
