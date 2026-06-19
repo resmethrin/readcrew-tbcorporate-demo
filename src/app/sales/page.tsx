@@ -33,7 +33,6 @@ const statusFilters: { id: "all" | SaleStatus; label: string }[] = [
 export default function SalesPage() {
   const sales = useSalesStore((s) => s.sales);
   const markInvoicedByIds = useSalesStore((s) => s.markInvoicedByIds);
-  const markPaidByIds = useSalesStore((s) => s.markPaidByIds);
   const addSale = useSalesStore((s) => s.addSale);
   const [businessId, setBusinessId] = useState("all");
   const [status, setStatus] = useState<"all" | SaleStatus>("all");
@@ -121,7 +120,6 @@ export default function SalesPage() {
   // 選択中アイテムのステータス分類
   const selectedSales = sales.filter((s) => selected.includes(s.id));
   const hasUninvoiced = selectedSales.some((s) => s.status === "uninvoiced");
-  const hasInvoiced   = selectedSales.some((s) => s.status === "invoiced");
   const allChecked = allFilteredIds.length > 0 && allFilteredIds.every((id) => selected.includes(id));
   const toggleAll = () =>
     setSelected(allChecked ? selected.filter((id) => !allFilteredIds.includes(id)) : [...new Set([...selected, ...allFilteredIds])]);
@@ -300,23 +298,6 @@ export default function SalesPage() {
                       <span className="rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-white">未請求</span>
                       <ArrowRight className="h-3 w-3 text-blue-400" />
                       <span className="rounded-full bg-[#0071e3] px-1.5 py-0.5 text-[10px] font-bold text-white">請求済</span>
-                    </span>
-                    にする
-                  </button>
-                )}
-                {hasInvoiced && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      markPaidByIds(selected.filter((id) => sales.find((s) => s.id === id)?.status === "invoiced"));
-                      setSelected([]);
-                    }}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      <span className="rounded-full bg-[#0071e3] px-1.5 py-0.5 text-[10px] font-bold text-white">請求済</span>
-                      <ArrowRight className="h-3 w-3 text-emerald-400" />
-                      <span className="rounded-full bg-emerald-500 px-1.5 py-0.5 text-[10px] font-bold text-white">入金済</span>
                     </span>
                     にする
                   </button>
