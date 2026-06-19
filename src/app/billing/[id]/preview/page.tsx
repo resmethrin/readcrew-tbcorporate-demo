@@ -105,11 +105,8 @@ export default function InvoicePreviewPage() {
                 </div>
               </div>
               {/* 角印 */}
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-sm border-2 border-red-600 text-center text-xs font-bold text-red-600 leading-snug">
-                <div>
-                  <div>ReadCrew</div>
-                  <div>之印</div>
-                </div>
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-sm border-2 border-red-600 text-center text-sm font-bold text-red-600 tracking-widest">
+                各印
               </div>
             </div>
           </div>
