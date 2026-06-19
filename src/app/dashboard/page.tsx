@@ -43,7 +43,7 @@ const actionItems = [
 ];
 
 const bizAccent: Record<string, string> = {
-  b001: "#00B98E",
+  b001: "rgb(0 113 227)",
   b002: "#2563EB",
   b003: "#EA580C",
 };
@@ -96,7 +96,7 @@ export default function DashboardPage() {
                 <span>目標 ¥21M</span>
               </div>
               <div className="h-1.5 w-full rounded-full bg-zinc-100 overflow-hidden">
-                <div className="h-full rounded-full bg-[#00B98E]" style={{ width: `${achieveRate}%` }} />
+                <div className="h-full rounded-full bg-[rgb(0 113 227)]" style={{ width: `${achieveRate}%` }} />
               </div>
             </div>
           </CardContent>
@@ -107,8 +107,8 @@ export default function DashboardPage() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-medium text-zinc-500">確定売上（入金済）</p>
-              <div className="rounded-lg bg-[#F0FBF8] p-1.5">
-                <TrendingUp className="h-4 w-4 text-[#00B98E]" />
+              <div className="rounded-lg bg-[#EFF6FF] p-1.5">
+                <TrendingUp className="h-4 w-4 text-[rgb(0 113 227)]" />
               </div>
             </div>
             <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">
@@ -147,10 +147,10 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-semibold text-zinc-700">売上推移</CardTitle>
             <div className="flex items-center gap-5 text-xs text-zinc-400">
               <span className="flex items-center gap-1.5">
-                <span className="inline-block h-2 w-2 rounded-full bg-[#00B98E]" />実績
+                <span className="inline-block h-2 w-2 rounded-full bg-[rgb(0 113 227)]" />実績
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="inline-block h-2 w-2 rounded-full border-2 border-[#00B98E] bg-white" />見込み
+                <span className="inline-block h-2 w-2 rounded-full border-2 border-[rgb(0 113 227)] bg-white" />見込み
               </span>
             </div>
           </div>
@@ -161,12 +161,12 @@ export default function DashboardPage() {
               <AreaChart data={trendData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gradActual" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#00B98E" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#00B98E" stopOpacity={0} />
+                    <stop offset="5%"  stopColor="rgb(0 113 227)" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="rgb(0 113 227)" stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="gradForecast" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor="#00B98E" stopOpacity={0.08} />
-                    <stop offset="95%" stopColor="#00B98E" stopOpacity={0} />
+                    <stop offset="5%"  stopColor="rgb(0 113 227)" stopOpacity={0.08} />
+                    <stop offset="95%" stopColor="rgb(0 113 227)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} stroke="#f0f0f0" />
@@ -181,10 +181,10 @@ export default function DashboardPage() {
                 />
                 <ReferenceLine
                   y={MONTHLY_TARGET}
-                  stroke="#00B98E"
+                  stroke="rgb(0 113 227)"
                   strokeDasharray="5 5"
                   strokeOpacity={0.5}
-                  label={{ value: "目標", position: "right", fontSize: 11, fill: "#00B98E" }}
+                  label={{ value: "目標", position: "right", fontSize: 11, fill: "rgb(0 113 227)" }}
                 />
                 <Tooltip
                   formatter={(v: number) => formatYen(v)}
@@ -193,20 +193,20 @@ export default function DashboardPage() {
                 />
                 <Area
                   dataKey="実績"
-                  stroke="#00B98E"
+                  stroke="rgb(0 113 227)"
                   strokeWidth={2.5}
                   fill="url(#gradActual)"
-                  dot={{ r: 4, fill: "#00B98E", strokeWidth: 0 }}
+                  dot={{ r: 4, fill: "rgb(0 113 227)", strokeWidth: 0 }}
                   activeDot={{ r: 5 }}
                   connectNulls={false}
                 />
                 <Area
                   dataKey="見込み"
-                  stroke="#00B98E"
+                  stroke="rgb(0 113 227)"
                   strokeWidth={2}
                   strokeDasharray="6 4"
                   fill="url(#gradForecast)"
-                  dot={{ r: 4, fill: "#fff", stroke: "#00B98E", strokeWidth: 2 }}
+                  dot={{ r: 4, fill: "#fff", stroke: "rgb(0 113 227)", strokeWidth: 2 }}
                   connectNulls={false}
                 />
               </AreaChart>
@@ -221,7 +221,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-semibold text-zinc-700">事業部別 売上状況</CardTitle>
             <div className="flex items-center gap-4 text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-[#00B98E]" />入金済</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-[rgb(0 113 227)]" />入金済</span>
               <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-blue-400" />請求済</span>
               <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-amber-400" />未請求</span>
             </div>
@@ -253,7 +253,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
                   <div className="flex h-full">
-                    <div className="bg-[#00B98E] transition-all" style={{ width: `${paidPct}%`, opacity: b.id === "b001" ? 1 : b.id === "b002" ? 0.9 : 0.8 }} />
+                    <div className="bg-[rgb(0 113 227)] transition-all" style={{ width: `${paidPct}%`, opacity: b.id === "b001" ? 1 : b.id === "b002" ? 0.9 : 0.8 }} />
                     <div className="bg-blue-400 transition-all"  style={{ width: `${invPct}%` }} />
                     <div className="bg-amber-400 transition-all" style={{ width: `${uninvPct}%` }} />
                   </div>

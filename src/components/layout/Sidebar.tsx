@@ -24,7 +24,7 @@ export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-20 w-72 border-r bg-gray-50" style={{ borderColor: "rgb(243 244 246)" }}>
       <div className="flex h-full flex-col px-5 py-7">
-        <div className="mb-8 border-l-2 border-[#00B98E] pl-3">
+        <div className="mb-8 border-l-2 border-[rgb(0 113 227)] pl-3">
           <div className="text-lg font-semibold text-zinc-900">販売・請求ハブ</div>
           <div className="mt-1 text-xs text-zinc-400">TBコーポレート様</div>
         </div>
@@ -37,9 +37,9 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
                   active
-                    ? "bg-[#00B98E] text-white"
+                    ? "bg-[rgb(0 113 227)] text-white"
                     : "text-zinc-500 hover:bg-white hover:text-zinc-800"
                 }`}
               >
