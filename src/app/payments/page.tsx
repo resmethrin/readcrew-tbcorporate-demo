@@ -2,11 +2,19 @@
 
 import { useMemo, useState } from "react";
 import { Upload } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { demoBusinesses, demoCustomers, formatMonth, formatYen, getBusinessName, statusLabels, PERIOD_MONTHS } from "@/lib/demo-data";
+import {
+  demoBusinesses,
+  demoCustomers,
+  formatMonth,
+  formatYen,
+  getCustomerName,
+  invoiceNumberForMonth,
+  statusLabels,
+  PERIOD_MONTHS,
+} from "@/lib/demo-data";
 import { useSalesStore } from "@/store/useSalesStore";
 import type { SaleStatus } from "@/types";
 
@@ -16,80 +24,138 @@ const BIZ_COLOR: Record<string, { dot: string; bg: string; text: string }> = {
   b003: { dot: "bg-orange-500",  bg: "bg-orange-50",  text: "text-orange-700" },
 };
 
-const STATUS_STYLE: Record<SaleStatus, { bg: string; text: string; dot: string }> = {
-  uninvoiced:   { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400" },
-  consolidated: { bg: "bg-violet-50",  text: "text-violet-700",  dot: "bg-violet-500" },
-  invoiced:     { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-[#0071e3]" },
-  paid:         { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
+const STATUS_STYLE: Record<"invoiced" | "paid", { bg: string; text: string; dot: string; border: string }> = {
+  invoiced: { bg: "bg-sky-50",     text: "text-sky-700",     dot: "bg-sky-500",     border: "border-sky-200" },
+  paid:     { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
 };
 
+// 請求一覧と同じ行ステータス判定
+function rowStatus(row: { uninvoiced: number; consolidated: number; invoiced: number; paid: number }): SaleStatus {
+  if (row.uninvoiced > 0)   return "uninvoiced";
+  if (row.consolidated > 0) return "consolidated";
+  if (row.invoiced > 0)     return "invoiced";
+  return "paid";
+}
+
 export default function PaymentsPage() {
-  const sales = useSalesStore((state) => state.sales);
+  const sales = useSalesStore((s) => s.sales);
   const markPaidByIds = useSalesStore((s) => s.markPaidByIds);
 
   const [monthFilter, setMonthFilter] = useState("all");
   const [bizFilter, setBizFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "invoiced" | "paid">("all");
 
-  const availableMonths = PERIOD_MONTHS;
+  // 請求一覧と同じ「顧客×月」集計
+  const invoiceRows = useMemo(() => {
+    type Row = {
+      id: string;
+      customerId: string;
+      customerName: string;
+      month: string;
+      bizIds: string[];
+      bizNames: string[];
+      saleIds: string[];
+      invoicedIds: string[];
+      itemCount: number;
+      subtotal: number;
+      uninvoiced: number;
+      consolidated: number;
+      invoiced: number;
+      paid: number;
+    };
+    const map = new Map<string, Row>();
+    for (const sale of sales) {
+      const id = `${sale.customerId}-${sale.month}`;
+      const row: Row = map.get(id) ?? {
+        id,
+        customerId: sale.customerId,
+        customerName: getCustomerName(sale.customerId),
+        month: sale.month,
+        bizIds: [],
+        bizNames: [],
+        saleIds: [],
+        invoicedIds: [],
+        itemCount: 0,
+        subtotal: 0,
+        uninvoiced: 0,
+        consolidated: 0,
+        invoiced: 0,
+        paid: 0,
+      };
+      if (!row.bizIds.includes(sale.businessId)) {
+        row.bizIds.push(sale.businessId);
+        const biz = demoBusinesses.find((b) => b.id === sale.businessId);
+        if (biz) row.bizNames.push(biz.name);
+      }
+      row.saleIds.push(sale.id);
+      if (sale.status === "invoiced") row.invoicedIds.push(sale.id);
+      row.itemCount += 1;
+      row.subtotal += sale.amount;
+      row[sale.status] += 1;
+      map.set(id, row);
+    }
+    return Array.from(map.values()).sort((a, b) => b.month.localeCompare(a.month));
+  }, [sales]);
 
-  // invoiced + paid のみ対象
-  const paymentSales = useMemo(() =>
-    sales.filter(s =>
-      (s.status === "invoiced" || s.status === "paid") &&
-      (monthFilter === "all" || s.month === monthFilter) &&
-      (bizFilter === "all" || s.businessId === bizFilter)
-    ),
-    [sales, monthFilter, bizFilter]
-  );
+  // invoiced / paid 行のみ対象
+  const paymentRows = useMemo(() => {
+    return invoiceRows.filter((row) => {
+      const st = rowStatus(row);
+      if (st !== "invoiced" && st !== "paid") return false;
+      if (monthFilter !== "all" && row.month !== monthFilter) return false;
+      if (bizFilter !== "all" && !row.bizIds.includes(bizFilter)) return false;
+      if (statusFilter !== "all" && st !== statusFilter) return false;
+      return true;
+    });
+  }, [invoiceRows, monthFilter, bizFilter, statusFilter]);
 
-  const paidTotal = paymentSales.filter(s => s.status === "paid").reduce((n, s) => n + s.amount, 0);
-  const invoicedTotal = paymentSales.filter(s => s.status === "invoiced").reduce((n, s) => n + s.amount, 0);
-
-  const handleCsvExport = () => {
-    const rows = paymentSales.map(s => [
-      demoCustomers.find(c => c.id === s.customerId)?.name ?? s.customerId,
-      getBusinessName(s.businessId),
-      s.description,
-      String(s.amount),
-      formatMonth(s.month),
-      s.status,
-    ].join(",")).join("\n");
-    const csv = "顧客名,事業部,内容,金額,月,ステータス\n" + rows;
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "入金データ.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const paidTotal    = useMemo(() => paymentRows.filter((r) => rowStatus(r) === "paid").reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0), [paymentRows]);
+  const invoicedTotal = useMemo(() => paymentRows.filter((r) => rowStatus(r) === "invoiced").reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0), [paymentRows]);
+  const paidCount    = paymentRows.filter((r) => rowStatus(r) === "paid").length;
+  const invoicedCount = paymentRows.filter((r) => rowStatus(r) === "invoiced").length;
 
   return (
     <div className="space-y-6">
       {/* ヘッダー */}
       <div className="flex items-end justify-between gap-4">
         <div>
-          <div className="text-sm font-medium text-zinc-500">Payments</div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">入金管理</h1>
+          <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Payments</p>
+          <h1 className="mt-1 text-xl font-semibold text-zinc-900">入金管理</h1>
         </div>
-        <Button variant="outline" onClick={handleCsvExport}>
+        <Button variant="outline">
           <Upload className="h-4 w-4" />
           CSV出力
         </Button>
       </div>
 
       {/* KPI */}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <div className="text-xs font-medium text-zinc-400">入金済</div>
-          <div className="mt-1 text-2xl font-bold text-zinc-900">{formatYen(paidTotal)}</div>
-          <div className="mt-0.5 text-xs text-zinc-400">{paymentSales.filter(s => s.status === "paid").length}件</div>
-        </div>
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <div className="text-xs font-medium text-zinc-400">未入金（請求済）</div>
-          <div className="mt-1 text-2xl font-bold text-blue-700">{formatYen(invoicedTotal)}</div>
-          <div className="mt-0.5 text-xs text-zinc-400">{paymentSales.filter(s => s.status === "invoiced").length}件</div>
-        </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={() => setStatusFilter(statusFilter === "invoiced" ? "all" : "invoiced")}
+          className={`rounded-2xl border bg-white p-4 text-left shadow-sm transition-all ${statusFilter === "invoiced" ? "ring-2 ring-sky-500 ring-offset-1" : "hover:shadow-md"}`}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-block h-2 w-2 rounded-full bg-sky-500" />
+            <span className={`text-xs font-medium ${statusFilter === "invoiced" ? "text-sky-600" : "text-zinc-500"}`}>未入金（請求済）</span>
+            {statusFilter === "invoiced" && <span className="ml-auto text-[10px] font-medium text-sky-600">選択中</span>}
+          </div>
+          <p className="text-xl font-bold text-zinc-900 tracking-tight">{formatYen(invoicedTotal)}</p>
+          <p className="mt-0.5 text-xs text-zinc-400">{invoicedCount}件</p>
+        </button>
+        <button
+          type="button"
+          onClick={() => setStatusFilter(statusFilter === "paid" ? "all" : "paid")}
+          className={`rounded-2xl border bg-white p-4 text-left shadow-sm transition-all ${statusFilter === "paid" ? "ring-2 ring-emerald-500 ring-offset-1" : "hover:shadow-md"}`}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+            <span className={`text-xs font-medium ${statusFilter === "paid" ? "text-emerald-600" : "text-zinc-500"}`}>入金済</span>
+            {statusFilter === "paid" && <span className="ml-auto text-[10px] font-medium text-emerald-600">選択中</span>}
+          </div>
+          <p className="text-xl font-bold text-zinc-900 tracking-tight">{formatYen(paidTotal)}</p>
+          <p className="mt-0.5 text-xs text-zinc-400">{paidCount}件</p>
+        </button>
       </div>
 
       {/* フィルターバー */}
@@ -104,7 +170,7 @@ export default function PaymentsPage() {
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${monthFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
                   全期間
                 </button>
-                {availableMonths.map(m => (
+                {PERIOD_MONTHS.map((m) => (
                   <button key={m} type="button" onClick={() => setMonthFilter(monthFilter === m ? "all" : m)}
                     className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${monthFilter === m ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
                     {formatMonth(m)}
@@ -120,7 +186,7 @@ export default function PaymentsPage() {
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${bizFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
                   全て
                 </button>
-                {demoBusinesses.map(b => {
+                {demoBusinesses.map((b) => {
                   const c = BIZ_COLOR[b.id];
                   const active = bizFilter === b.id;
                   return (
@@ -143,50 +209,55 @@ export default function PaymentsPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-zinc-100 hover:bg-transparent">
-                <TableHead className="pl-5 text-xs font-medium text-zinc-400">顧客名</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400">事業部</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400">内容</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400">月</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400 text-right">金額</TableHead>
+                <TableHead className="pl-5 text-xs font-medium text-zinc-400">請求番号</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">顧客</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">件名</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">期間</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400 text-right">金額（税込）</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">ステータス</TableHead>
                 <TableHead className="pr-5" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paymentSales.length === 0 && (
+              {paymentRows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-10 text-center text-sm text-zinc-400">
+                  <TableCell colSpan={7} className="py-12 text-center text-sm text-zinc-400">
                     該当するデータがありません
                   </TableCell>
                 </TableRow>
               )}
-              {paymentSales.map(sale => {
-                const customer = demoCustomers.find(c => c.id === sale.customerId);
-                const bc = BIZ_COLOR[sale.businessId];
-                const sc = STATUS_STYLE[sale.status];
+              {paymentRows.map((row) => {
+                const st = rowStatus(row) as "invoiced" | "paid";
+                const s = STATUS_STYLE[st];
+                const total = row.subtotal + Math.round(row.subtotal * 0.1);
+                const subject = row.bizNames.length === 1
+                  ? row.bizNames[0]
+                  : `${row.bizNames[0]} 他${row.bizNames.length - 1}件`;
                 return (
-                  <TableRow key={sale.id} className="border-zinc-50 hover:bg-zinc-50/50 transition-colors">
-                    <TableCell className="pl-5 font-medium text-zinc-800">{customer?.name}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium ${bc.bg} ${bc.text}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${bc.dot}`} />
-                        {getBusinessName(sale.businessId)}
-                      </span>
+                  <TableRow key={row.id} className="border-zinc-50 hover:bg-zinc-50/50 transition-colors">
+                    <TableCell className="pl-5 font-mono text-xs text-zinc-500">
+                      {invoiceNumberForMonth(row.month)}
                     </TableCell>
-                    <TableCell className="max-w-[180px] truncate text-sm text-zinc-600">{sale.description}</TableCell>
-                    <TableCell className="text-sm text-zinc-500 tabular-nums">{formatMonth(sale.month)}</TableCell>
-                    <TableCell className="text-right font-semibold text-zinc-900 tabular-nums">{formatYen(sale.amount)}</TableCell>
+                    <TableCell className="font-medium text-zinc-800">{row.customerName}</TableCell>
                     <TableCell>
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${sc.bg} ${sc.text}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${sc.dot}`} />
-                        {statusLabels[sale.status]}
+                      <div className="text-sm text-zinc-700">{subject}</div>
+                      <div className="text-xs text-zinc-400">{row.itemCount}件</div>
+                    </TableCell>
+                    <TableCell className="text-sm text-zinc-500 tabular-nums">{formatMonth(row.month)}</TableCell>
+                    <TableCell className="text-right font-semibold text-zinc-900 tabular-nums">
+                      {formatYen(total)}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${s.bg} ${s.text} ${s.border}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+                        {statusLabels[st]}
                       </span>
                     </TableCell>
                     <TableCell className="pr-5 text-right">
-                      {sale.status === "invoiced" && (
+                      {st === "invoiced" && (
                         <button
                           type="button"
-                          onClick={() => markPaidByIds([sale.id])}
+                          onClick={() => markPaidByIds(row.saleIds)}
                           className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors"
                         >
                           入金済にする
@@ -199,9 +270,9 @@ export default function PaymentsPage() {
             </TableBody>
           </Table>
           <div className="flex items-center justify-between border-t border-zinc-50 px-5 py-3">
-            <span className="text-xs text-zinc-400">{paymentSales.length}件表示</span>
+            <span className="text-xs text-zinc-400">{paymentRows.length}件表示</span>
             <span className="text-xs font-semibold text-zinc-700">
-              合計 {formatYen(paymentSales.reduce((n, s) => n + s.amount, 0))}
+              合計 {formatYen(paymentRows.reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0))}
             </span>
           </div>
         </CardContent>

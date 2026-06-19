@@ -13,7 +13,7 @@ import {
 const nav = [
   { href: "/dashboard", label: "ダッシュボード", icon: LayoutDashboard },
   { href: "/sales",     label: "売上一覧",       icon: Table2 },
-  { href: "/billing",   label: "請求統合",        icon: ReceiptText },
+  { href: "/billing",   label: "請求一覧",        icon: ReceiptText },
   { href: "/payments",  label: "入金管理",        icon: Banknote },
   { href: "/import",    label: "データ取込",      icon: Upload },
 ];
