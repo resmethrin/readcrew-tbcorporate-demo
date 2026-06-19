@@ -76,74 +76,68 @@ export default function DashboardPage() {
         <p className="text-sm text-zinc-400">2026年6月</p>
       </div>
 
-      {/* Hero + サブKPI */}
-      <div className="grid gap-4 xl:grid-cols-3">
-        {/* Hero: 今月着地予測 */}
-        <Card className="xl:col-span-2 rounded-2xl shadow-sm border-0 bg-white overflow-hidden">
-          <CardContent className="p-7">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm font-medium text-zinc-500">今月着地予測</p>
-                <p className="mt-2 text-6xl font-bold tracking-tight text-zinc-950 leading-none">
-                  ¥16.5<span className="text-3xl font-semibold text-zinc-400">M</span>
-                </p>
-                <div className="mt-3 flex items-center gap-4">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                    <ArrowUpRight className="h-3 w-3" />前月比 +11.5%
-                  </span>
-                  <span className="text-sm text-zinc-400">目標 ¥21M</span>
-                </div>
+      {/* 3カラム KPI */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {/* 今月着地予測 */}
+        <Card className="rounded-2xl shadow-sm border-0 bg-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-zinc-500">今月着地予測</p>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                <ArrowUpRight className="h-3 w-3" />+11.5%
+              </span>
+            </div>
+            <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">
+              ¥16.5<span className="text-2xl font-semibold text-zinc-400">M</span>
+            </p>
+            <div className="mt-4">
+              <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                <span>達成率 {achieveRate}%</span>
+                <span>目標 ¥21M</span>
               </div>
-              <div className="text-right">
-                <p className="text-xs text-zinc-400 mb-1">達成率</p>
-                <p className="text-4xl font-bold text-zinc-900">{achieveRate}<span className="text-2xl text-zinc-400">%</span></p>
-                <div className="mt-3 w-32 h-2 rounded-full bg-zinc-100 overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-[#00B98E] transition-all"
-                    style={{ width: `${achieveRate}%` }}
-                  />
-                </div>
-                <p className="mt-1 text-xs text-zinc-400">
-                  残り ¥{((MONTHLY_TARGET - FORECAST) / 1_000_000).toFixed(1)}M
-                </p>
+              <div className="h-1.5 w-full rounded-full bg-zinc-100 overflow-hidden">
+                <div className="h-full rounded-full bg-[#00B98E]" style={{ width: `${achieveRate}%` }} />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        {/* サブKPI 縦並び */}
-        <div className="flex flex-col gap-4">
-          <Card className="rounded-2xl shadow-sm border-0 bg-white flex-1">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-zinc-500">確定売上（入金済）</p>
-                <div className="rounded-lg bg-[#F0FBF8] p-1.5">
-                  <TrendingUp className="h-4 w-4 text-[#00B98E]" />
-                </div>
+        {/* 確定売上 */}
+        <Card className="rounded-2xl shadow-sm border-0 bg-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-zinc-500">確定売上（入金済）</p>
+              <div className="rounded-lg bg-[#F0FBF8] p-1.5">
+                <TrendingUp className="h-4 w-4 text-[#00B98E]" />
               </div>
-              <p className="text-3xl font-bold text-zinc-950">{formatYen(paidTotal)}</p>
-              <p className="mt-1 text-xs text-zinc-400">
-                {sales.filter((s) => s.status === "paid").length}件 確定済
-              </p>
-            </CardContent>
-          </Card>
+            </div>
+            <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">
+              {formatYen(paidTotal)}
+            </p>
+            <p className="mt-4 text-xs text-zinc-400">
+              {sales.filter((s) => s.status === "paid").length}件 確定済
+            </p>
+          </CardContent>
+        </Card>
 
-          <Card className="rounded-2xl shadow-sm border-0 bg-white flex-1">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-zinc-500">売掛残高</p>
-                <div className="rounded-lg bg-amber-50 p-1.5">
-                  <AlertTriangle className="h-4 w-4 text-amber-500" />
-                </div>
+        {/* 売掛残高 */}
+        <Card className="rounded-2xl shadow-sm border-0 bg-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-zinc-500">売掛残高</p>
+              <div className="rounded-lg bg-amber-50 p-1.5">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
               </div>
-              <p className="text-3xl font-bold text-zinc-950">{formatYen(invoicedTotal + uninvoicedTotal)}</p>
-              <div className="mt-1 flex gap-2 text-xs text-zinc-400">
-                <span className="text-amber-600">未請求 {formatYen(uninvoicedTotal)}</span>
-                <span>請求済 {formatYen(invoicedTotal)}</span>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+            <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">
+              {formatYen(invoicedTotal + uninvoicedTotal)}
+            </p>
+            <div className="mt-4 flex gap-3 text-xs">
+              <span className="text-amber-600">未請求 {formatYen(uninvoicedTotal)}</span>
+              <span className="text-zinc-400">請求済 {formatYen(invoicedTotal)}</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* 売上トレンド */}
