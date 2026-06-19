@@ -34,10 +34,19 @@ export default function InvoicePreviewPage() {
   const customerId = segments.slice(0, -2).join("-");
   const customer = demoCustomers.find((item) => item.id === customerId);
   const invoiceNo = searchParams.get("invoiceNo") || invoiceNumberForMonth(month);
+  const bizIdsParam = searchParams.get("bizIds");
+  const bizIdFilter = bizIdsParam ? new Set(bizIdsParam.split(",")) : null;
 
   const targetSales = useMemo(
-    () => sales.filter((sale) => sale.customerId === customerId && sale.month === month),
-    [customerId, month, sales],
+    () =>
+      sales.filter(
+        (sale) =>
+          sale.customerId === customerId &&
+          sale.month === month &&
+          (bizIdFilter === null || bizIdFilter.has(sale.businessId)),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [customerId, month, sales, bizIdsParam],
   );
   const groups = useMemo(() => groupSalesByBusiness(targetSales), [targetSales]);
   const total = groups.reduce((sum, group) => sum + group.subtotal, 0);
