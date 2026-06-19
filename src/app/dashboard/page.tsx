@@ -88,7 +88,7 @@ export default function DashboardPage() {
               </span>
             </div>
             <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">
-              ¥16.5<span className="text-2xl font-semibold text-zinc-400">M</span>
+              ¥16,500,000
             </p>
             <div className="mt-4">
               <div className="flex justify-between text-xs text-zinc-400 mb-1">
