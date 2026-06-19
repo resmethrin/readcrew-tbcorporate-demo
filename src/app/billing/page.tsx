@@ -2,15 +2,17 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, FileText, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   demoBusinesses,
   demoCustomers,
   formatYen,
   getBusinessName,
+  getCustomerName,
   groupSalesByBusiness,
   invoiceNumberForMonth,
   formatMonth,
@@ -21,56 +23,117 @@ import {
 import { useSalesStore } from "@/store/useSalesStore";
 import type { SaleStatus } from "@/types";
 
-const STATUS_STYLE: Record<SaleStatus, string> = {
-  uninvoiced: "bg-amber-50 text-amber-700 border-amber-200",
-  invoiced: "bg-sky-50 text-sky-700 border-sky-200",
-  paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
+const BIZ_COLOR: Record<string, { dot: string; bg: string; text: string }> = {
+  b001: { dot: "bg-[#0071e3]",   bg: "bg-blue-50",   text: "text-blue-700" },
+  b002: { dot: "bg-emerald-500", bg: "bg-emerald-50", text: "text-emerald-700" },
+  b003: { dot: "bg-orange-500",  bg: "bg-orange-50",  text: "text-orange-700" },
 };
 
-// 顧客の代表ステータス（未請求 > 請求済 > 入金済 の優先順）
-function dominantStatus(counts: Record<SaleStatus, number>): SaleStatus {
-  if (counts.uninvoiced > 0) return "uninvoiced";
-  if (counts.invoiced > 0) return "invoiced";
-  return "paid";
-}
+const STATUS_STYLE: Record<SaleStatus, { bg: string; text: string; dot: string; border: string }> = {
+  uninvoiced: { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400",   border: "border-amber-200" },
+  invoiced:   { bg: "bg-sky-50",     text: "text-sky-700",     dot: "bg-sky-500",     border: "border-sky-200" },
+  paid:       { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
+};
+
+const STATUS_FILTERS: { id: "all" | SaleStatus; label: string }[] = [
+  { id: "all",        label: "全て" },
+  { id: "uninvoiced", label: "未請求" },
+  { id: "invoiced",   label: "請求済" },
+  { id: "paid",       label: "入金済" },
+];
 
 export default function BillingPage() {
   const sales = useSalesStore((s) => s.sales);
 
-  // 選択中の顧客・月（統合画面）
+  // ── 統合画面の状態 ────────────────────────────────────
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [month, setMonth] = useState("2026-06");
   const [selectedBizIds, setSelectedBizIds] = useState<Set<string>>(new Set());
   const [invoiceNo, setInvoiceNo] = useState("");
 
-  // 一覧フィルター
+  // ── 一覧フィルター ────────────────────────────────────
   const [monthFilter, setMonthFilter] = useState("all");
   const [bizFilter, setBizFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | SaleStatus>("all");
 
-  // 顧客ごとのステータス集計
-  const customerStats = useMemo(() => {
-    const map = new Map<string, { uninvoiced: number; invoiced: number; paid: number; total: number }>();
+  // 請求行（顧客 × 月 単位）
+  const invoiceRows = useMemo(() => {
+    type Row = {
+      id: string;
+      customerId: string;
+      customerName: string;
+      month: string;
+      bizNames: string[];
+      bizIds: string[];
+      itemCount: number;
+      subtotal: number;
+      uninvoiced: number;
+      invoiced: number;
+      paid: number;
+    };
+    const map = new Map<string, Row>();
     for (const sale of sales) {
-      const s = map.get(sale.customerId) ?? { uninvoiced: 0, invoiced: 0, paid: 0, total: 0 };
-      s[sale.status] += 1;
-      s.total += sale.amount;
-      map.set(sale.customerId, s);
+      const id = `${sale.customerId}-${sale.month}`;
+      const row: Row = map.get(id) ?? {
+        id,
+        customerId: sale.customerId,
+        customerName: getCustomerName(sale.customerId),
+        month: sale.month,
+        bizNames: [],
+        bizIds: [],
+        itemCount: 0,
+        subtotal: 0,
+        uninvoiced: 0,
+        invoiced: 0,
+        paid: 0,
+      };
+      const bizName = getBusinessName(sale.businessId);
+      if (!row.bizIds.includes(sale.businessId)) {
+        row.bizIds.push(sale.businessId);
+        row.bizNames.push(bizName);
+      }
+      row.itemCount += 1;
+      row.subtotal += sale.amount;
+      row[sale.status] += 1;
+      map.set(id, row);
     }
-    return map;
+    return Array.from(map.values()).sort((a, b) => b.month.localeCompare(a.month));
   }, [sales]);
 
-  const availableMonths = PERIOD_MONTHS;
+  // 行ごとのステータス（未請求 > 請求済 > 入金済）
+  const rowStatus = (row: { uninvoiced: number; invoiced: number; paid: number }): SaleStatus => {
+    if (row.uninvoiced > 0) return "uninvoiced";
+    if (row.invoiced > 0) return "invoiced";
+    return "paid";
+  };
 
-  // filtered customer stats - only customers with matching sales
-  const filteredCustomerIds = useMemo(() => {
-    const matchingSales = sales.filter(s =>
-      (monthFilter === "all" || s.month === monthFilter) &&
-      (bizFilter === "all" || s.businessId === bizFilter)
-    );
-    return new Set(matchingSales.map(s => s.customerId));
-  }, [sales, monthFilter, bizFilter]);
+  // KPI集計（フィルターなし・全体）
+  const kpi = useMemo(() => {
+    const totals = { uninvoiced: 0, invoiced: 0, paid: 0, uninvoicedCount: 0, invoicedCount: 0, paidCount: 0 };
+    for (const row of invoiceRows) {
+      const st = rowStatus(row);
+      const withTax = row.subtotal + Math.round(row.subtotal * 0.1);
+      if (st === "uninvoiced") { totals.uninvoiced += withTax; totals.uninvoicedCount++; }
+      else if (st === "invoiced") { totals.invoiced += withTax; totals.invoicedCount++; }
+      else { totals.paid += withTax; totals.paidCount++; }
+    }
+    return totals;
+  }, [invoiceRows]);
 
-  // 選択顧客 × 選択月の事業部グループ
+  // フィルター適用
+  const filtered = useMemo(() =>
+    invoiceRows.filter((row) => {
+      const st = rowStatus(row);
+      return (
+        (monthFilter === "all" || row.month === monthFilter) &&
+        (bizFilter === "all" || row.bizIds.includes(bizFilter)) &&
+        (statusFilter === "all" || st === statusFilter)
+      );
+    }),
+    [invoiceRows, monthFilter, bizFilter, statusFilter],
+  );
+
+  // ── 統合画面（事業部選択）────────────────────────────
   const bizGroups = useMemo(() => {
     if (!selectedCustomerId) return [];
     return groupSalesByBusiness(
@@ -78,24 +141,21 @@ export default function BillingPage() {
     );
   }, [sales, selectedCustomerId, month]);
 
-  const toggleBiz = (bizId: string) => {
+  const toggleBiz = (bizId: string) =>
     setSelectedBizIds((prev) => {
       const next = new Set(prev);
       next.has(bizId) ? next.delete(bizId) : next.add(bizId);
       return next;
     });
-  };
 
-  const toggleAllBiz = () => {
-    if (selectedBizIds.size === bizGroups.length) {
-      setSelectedBizIds(new Set());
-    } else {
-      setSelectedBizIds(new Set(bizGroups.map((g) => g.businessId)));
-    }
-  };
+  const toggleAllBiz = () =>
+    setSelectedBizIds(
+      selectedBizIds.size === bizGroups.length ? new Set() : new Set(bizGroups.map((g) => g.businessId)),
+    );
 
-  const handleOpenCustomer = (customerId: string) => {
+  const handleOpenCustomer = (customerId: string, openMonth: string) => {
     setSelectedCustomerId(customerId);
+    setMonth(openMonth);
     setSelectedBizIds(new Set());
     setInvoiceNo("");
   };
@@ -109,7 +169,6 @@ export default function BillingPage() {
   const selectedGroups = bizGroups.filter((g) => selectedBizIds.has(g.businessId));
   const subtotal = selectedGroups.reduce((sum, g) => sum + g.subtotal, 0);
   const tax = Math.round(subtotal * 0.1);
-
   const resolvedInvoiceNo = invoiceNo.trim() || invoiceNumberForMonth(month);
   const bizIdsParam = Array.from(selectedBizIds).join(",");
   const previewHref =
@@ -119,7 +178,7 @@ export default function BillingPage() {
 
   const selectedCustomer = demoCustomers.find((c) => c.id === selectedCustomerId);
 
-  // ── 統合画面（事業部選択）────────────────────────────
+  // ── 統合画面 ─────────────────────────────────────────
   if (selectedCustomerId) {
     return (
       <div className="space-y-6">
@@ -133,9 +192,7 @@ export default function BillingPage() {
               請求一覧に戻る
             </button>
             <div className="text-sm font-medium text-zinc-500">Billing</div>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-              {selectedCustomer?.name}
-            </h1>
+            <h1 className="mt-1 text-3xl font-semibold tracking-tight">{selectedCustomer?.name}</h1>
           </div>
           <Button variant="outline">
             <Upload className="h-4 w-4" />
@@ -148,27 +205,19 @@ export default function BillingPage() {
             <CardTitle className="text-base">請求月を選択</CardTitle>
             <select
               value={month}
-              onChange={(e) => {
-                setMonth(e.target.value);
-                setSelectedBizIds(new Set());
-              }}
+              onChange={(e) => { setMonth(e.target.value); setSelectedBizIds(new Set()); }}
               className="h-9 rounded-lg border border-zinc-200 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
             >
-              {["2026-06", "2026-05", "2026-04"].map((v) => (
-                <option key={v} value={v}>
-                  {formatMonth(v)}
-                </option>
+              {PERIOD_MONTHS.map((v) => (
+                <option key={v} value={v}>{formatMonth(v)}</option>
               ))}
             </select>
           </CardHeader>
           <CardContent className="space-y-5">
             {bizGroups.length === 0 ? (
-              <p className="py-4 text-center text-sm text-zinc-400">
-                {monthToLabel(month)} の売上データがありません
-              </p>
+              <p className="py-4 text-center text-sm text-zinc-400">{monthToLabel(month)} の売上データがありません</p>
             ) : (
               <>
-                {/* 事業部チェックボックス一覧 */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 pb-2 border-b border-zinc-100">
                     <input
@@ -187,9 +236,7 @@ export default function BillingPage() {
                       key={group.businessId}
                       className={[
                         "rounded-xl border p-4 transition-colors",
-                        selectedBizIds.has(group.businessId)
-                          ? "border-accent/30 bg-red-50/40"
-                          : "border-zinc-200 bg-white",
+                        selectedBizIds.has(group.businessId) ? "border-accent/30 bg-red-50/40" : "border-zinc-200 bg-white",
                       ].join(" ")}
                     >
                       <div className="flex items-start gap-3">
@@ -201,21 +248,13 @@ export default function BillingPage() {
                           className="mt-0.5 h-4 w-4 rounded border-zinc-300 accent-accent"
                         />
                         <div className="flex-1 min-w-0">
-                          <label
-                            htmlFor={`biz-${group.businessId}`}
-                            className="flex items-center justify-between cursor-pointer"
-                          >
+                          <label htmlFor={`biz-${group.businessId}`} className="flex items-center justify-between cursor-pointer">
                             <span className="font-semibold text-zinc-900">{group.businessName}</span>
-                            <span className="text-sm font-medium text-zinc-700">
-                              {formatYen(group.subtotal)}
-                            </span>
+                            <span className="text-sm font-medium text-zinc-700">{formatYen(group.subtotal)}</span>
                           </label>
                           <div className="mt-2 space-y-1">
                             {group.items.map((item) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center justify-between text-xs text-zinc-500"
-                              >
+                              <div key={item.id} className="flex items-center justify-between text-xs text-zinc-500">
                                 <span>{item.description}</span>
                                 <span>{formatYen(item.amount)}</span>
                               </div>
@@ -227,7 +266,6 @@ export default function BillingPage() {
                   ))}
                 </div>
 
-                {/* 請求書番号 */}
                 <div className="grid gap-1.5">
                   <label className="text-sm font-medium">
                     請求書番号
@@ -242,17 +280,13 @@ export default function BillingPage() {
                       className="h-9 w-72 rounded-lg border border-zinc-200 bg-white px-3 font-mono text-sm placeholder:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-accent"
                     />
                     {invoiceNo.trim() && (
-                      <button
-                        onClick={() => setInvoiceNo("")}
-                        className="text-xs text-zinc-400 hover:text-zinc-600"
-                      >
+                      <button onClick={() => setInvoiceNo("")} className="text-xs text-zinc-400 hover:text-zinc-600">
                         リセット
                       </button>
                     )}
                   </div>
                 </div>
 
-                {/* 合計 + プレビュー */}
                 <div className="flex items-center justify-between rounded-xl bg-zinc-50 px-5 py-4">
                   <div className="space-y-0.5 text-sm">
                     <div className="text-zinc-500">
@@ -284,13 +318,13 @@ export default function BillingPage() {
     );
   }
 
-  // ── 請求一覧 ────────────────────────────────────────
+  // ── 請求一覧 ─────────────────────────────────────────
   return (
     <div className="space-y-6">
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex items-end justify-between">
         <div>
-          <div className="text-sm font-medium text-zinc-500">Billing</div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">請求一覧</h1>
+          <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Billing</p>
+          <h1 className="mt-1 text-xl font-semibold text-zinc-900">請求一覧</h1>
         </div>
         <Button variant="outline">
           <Upload className="h-4 w-4" />
@@ -298,122 +332,170 @@ export default function BillingPage() {
         </Button>
       </div>
 
-      {/* フィルターバー */}
-      <div className="flex flex-wrap items-center gap-6 rounded-2xl border bg-white px-5 py-3 shadow-sm">
-        {/* 期間 */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">期間</span>
-          <div className="flex flex-wrap gap-1.5">
-            <button type="button" onClick={() => setMonthFilter("all")}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${monthFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
-              全期間
+      {/* KPI カード（ステータス別・クリックでフィルター） */}
+      <div className="grid gap-3 md:grid-cols-3">
+        {(["uninvoiced", "invoiced", "paid"] as SaleStatus[]).map((st) => {
+          const s = STATUS_STYLE[st];
+          const amount = kpi[st];
+          const count = kpi[`${st}Count` as keyof typeof kpi];
+          const active = statusFilter === st;
+          return (
+            <button
+              key={st}
+              type="button"
+              onClick={() => setStatusFilter(active ? "all" : st)}
+              className={`rounded-2xl border bg-white p-4 text-left shadow-sm transition-all ${
+                active ? "ring-2 ring-accent ring-offset-1" : "hover:shadow-md"
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className={`inline-block h-2 w-2 rounded-full ${s.dot}`} />
+                <span className={`text-xs font-medium ${active ? "text-accent" : "text-zinc-500"}`}>
+                  {statusLabels[st]}
+                </span>
+                {active && <span className="ml-auto text-[10px] font-medium text-accent">選択中</span>}
+              </div>
+              <p className="text-xl font-bold text-zinc-900 tracking-tight">{formatYen(amount)}</p>
+              <p className="mt-0.5 text-xs text-zinc-400">{count}件</p>
             </button>
-            {availableMonths.map(m => (
-              <button key={m} type="button" onClick={() => setMonthFilter(monthFilter === m ? "all" : m)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${monthFilter === m ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
-                {formatMonth(m)}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* 事業部 */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">事業部</span>
-          <div className="flex flex-wrap gap-1.5">
-            <button type="button" onClick={() => setBizFilter("all")}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${bizFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
-              全て
-            </button>
-            {demoBusinesses.map(b => (
-              <button key={b.id} type="button" onClick={() => setBizFilter(bizFilter === b.id ? "all" : b.id)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${bizFilter === b.id ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
-                {b.name}
-              </button>
-            ))}
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      <Card>
+      {/* フィルターバー */}
+      <Card className="rounded-2xl shadow-sm bg-white">
+        <CardContent className="px-5 py-4">
+          <div className="flex flex-wrap items-center gap-6">
+            {/* 期間 */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">期間</span>
+              <div className="flex flex-wrap gap-1.5">
+                <button type="button" onClick={() => setMonthFilter("all")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${monthFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+                  全期間
+                </button>
+                {PERIOD_MONTHS.map((m) => (
+                  <button key={m} type="button" onClick={() => setMonthFilter(monthFilter === m ? "all" : m)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${monthFilter === m ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+                    {formatMonth(m)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* 事業部 */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">事業部</span>
+              <div className="flex flex-wrap gap-1.5">
+                <button type="button" onClick={() => setBizFilter("all")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${bizFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+                  全て
+                </button>
+                {demoBusinesses.map((b) => {
+                  const c = BIZ_COLOR[b.id];
+                  const active = bizFilter === b.id;
+                  return (
+                    <button key={b.id} type="button" onClick={() => setBizFilter(active ? "all" : b.id)}
+                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${active ? `${c.bg} ${c.text}` : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${active ? c.dot : "bg-zinc-400"}`} />
+                      {b.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            {/* ステータス */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">ステータス</span>
+              <div className="flex gap-1.5">
+                {STATUS_FILTERS.map((item) => {
+                  const s = item.id !== "all" ? STATUS_STYLE[item.id] : null;
+                  const active = statusFilter === item.id;
+                  return (
+                    <button key={item.id} type="button" onClick={() => setStatusFilter(item.id)}
+                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                        active && s ? `${s.bg} ${s.text}` : active ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                      }`}>
+                      {s && active && <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />}
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* テーブル */}
+      <Card className="rounded-2xl shadow-sm bg-white">
         <CardContent className="p-0">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-zinc-200 text-xs font-medium text-zinc-500">
-                <th className="px-5 py-3 text-left">顧客</th>
-                <th className="px-4 py-3 text-center">ステータス</th>
-                <th className="px-4 py-3 text-right">未請求</th>
-                <th className="px-4 py-3 text-right">請求済</th>
-                <th className="px-4 py-3 text-right">入金済</th>
-                <th className="px-4 py-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {demoCustomers.filter(c => filteredCustomerIds.has(c.id)).map((customer) => {
-                const stats = customerStats.get(customer.id) ?? {
-                  uninvoiced: 0,
-                  invoiced: 0,
-                  paid: 0,
-                  total: 0,
-                };
-                const status = dominantStatus(stats);
-                const hasData = stats.uninvoiced + stats.invoiced + stats.paid > 0;
+          <Table>
+            <TableHeader>
+              <TableRow className="border-zinc-100 hover:bg-transparent">
+                <TableHead className="pl-5 text-xs font-medium text-zinc-400">請求番号</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">顧客</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">件名</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">期間</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400 text-right">金額（税込）</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">ステータス</TableHead>
+                <TableHead className="pr-5" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="py-12 text-center text-sm text-zinc-400">
+                    該当する請求データがありません
+                  </TableCell>
+                </TableRow>
+              )}
+              {filtered.map((row) => {
+                const st = rowStatus(row);
+                const s = STATUS_STYLE[st];
+                const total = row.subtotal + Math.round(row.subtotal * 0.1);
+                const subject =
+                  row.bizNames.length === 1
+                    ? row.bizNames[0]
+                    : `${row.bizNames[0]} 他${row.bizNames.length - 1}件`;
                 return (
-                  <tr
-                    key={customer.id}
-                    className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50 transition-colors"
-                  >
-                    <td className="px-5 py-4">
-                      <div className="font-medium text-zinc-900">{customer.name}</div>
-                      <div className="text-xs text-zinc-400">{customer.contact}</div>
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      {hasData ? (
-                        <Badge
-                          className={[
-                            "border text-xs font-medium",
-                            STATUS_STYLE[status],
-                          ].join(" ")}
-                        >
-                          {statusLabels[status]}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-zinc-300">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      {stats.uninvoiced > 0 ? (
-                        <span className="font-medium text-amber-700">{stats.uninvoiced}件</span>
-                      ) : (
-                        <span className="text-zinc-300">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      {stats.invoiced > 0 ? (
-                        <span className="font-medium text-sky-700">{stats.invoiced}件</span>
-                      ) : (
-                        <span className="text-zinc-300">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 text-right">
-                      {stats.paid > 0 ? (
-                        <span className="font-medium text-emerald-700">{stats.paid}件</span>
-                      ) : (
-                        <span className="text-zinc-300">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 text-right">
+                  <TableRow key={row.id} className="border-zinc-50 hover:bg-zinc-50/50 transition-colors">
+                    <TableCell className="pl-5 font-mono text-xs text-zinc-500">
+                      {invoiceNumberForMonth(row.month)}
+                    </TableCell>
+                    <TableCell className="font-medium text-zinc-800">{row.customerName}</TableCell>
+                    <TableCell>
+                      <div className="text-sm text-zinc-700">{subject}</div>
+                      <div className="text-xs text-zinc-400">{row.itemCount}件</div>
+                    </TableCell>
+                    <TableCell className="text-sm text-zinc-500 tabular-nums">{formatMonth(row.month)}</TableCell>
+                    <TableCell className="text-right font-semibold text-zinc-900 tabular-nums">
+                      {formatYen(total)}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${s.bg} ${s.text} ${s.border}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+                        {statusLabels[st]}
+                      </span>
+                    </TableCell>
+                    <TableCell className="pr-5 text-right">
                       <button
-                        onClick={() => handleOpenCustomer(customer.id)}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 hover:bg-zinc-50 transition-colors"
+                        onClick={() => handleOpenCustomer(row.customerId, row.month)}
+                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800"
                       >
-                        請求統合
+                        統合 <ArrowRight className="h-3 w-3" />
                       </button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
+          <div className="flex items-center justify-between border-t border-zinc-50 px-5 py-3">
+            <span className="text-xs text-zinc-400">{filtered.length}件表示</span>
+            <span className="text-xs font-semibold text-zinc-700">
+              合計 {formatYen(filtered.reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0))}
+            </span>
+          </div>
         </CardContent>
       </Card>
     </div>
