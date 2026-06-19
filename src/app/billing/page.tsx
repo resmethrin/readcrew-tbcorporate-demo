@@ -547,7 +547,6 @@ export default function BillingPage() {
                                 <th className="pb-1.5 text-right font-medium">数量</th>
                                 <th className="pb-1.5 text-right font-medium">単価</th>
                                 <th className="pb-1.5 text-right font-medium">金額</th>
-                                <th className="pb-1.5 text-center font-medium">ステータス</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-100">
@@ -567,12 +566,6 @@ export default function BillingPage() {
                                     <td className="py-1.5 pr-3 text-right tabular-nums">{sale.qty ?? 1}</td>
                                     <td className="py-1.5 pr-3 text-right tabular-nums">{formatYen(sale.unitPrice ?? Math.round(sale.amount / (sale.qty ?? 1)))}</td>
                                     <td className="py-1.5 pr-3 text-right font-medium tabular-nums">{formatYen(sale.amount)}</td>
-                                    <td className="py-1.5 text-center">
-                                      <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${sc.bg} ${sc.text} ${sc.border}`}>
-                                        <span className={`h-1 w-1 rounded-full ${sc.dot}`} />
-                                        {statusLabels[sale.status]}
-                                      </span>
-                                    </td>
                                   </tr>
                                 );
                               })}
