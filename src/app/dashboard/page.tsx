@@ -79,7 +79,7 @@ export default function DashboardPage() {
       {/* 3カラム KPI */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* 今月着地予測 */}
-        <Card className="rounded-2xl shadow-sm border-0 bg-white">
+        <Card className="rounded-2xl shadow-card bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-medium text-zinc-500">今月着地予測</p>
@@ -103,7 +103,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* 確定売上 */}
-        <Card className="rounded-2xl shadow-sm border-0 bg-white">
+        <Card className="rounded-2xl shadow-card bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-medium text-zinc-500">確定売上（入金済）</p>
@@ -121,7 +121,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* 売掛残高 */}
-        <Card className="rounded-2xl shadow-sm border-0 bg-white">
+        <Card className="rounded-2xl shadow-card bg-white">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-medium text-zinc-500">売掛残高</p>
@@ -141,7 +141,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 売上トレンド */}
-      <Card className="rounded-2xl shadow-sm border-0 bg-white">
+      <Card className="rounded-2xl shadow-card bg-white">
         <CardHeader className="pb-0 px-7 pt-6">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-semibold text-zinc-700">売上推移</CardTitle>
@@ -216,7 +216,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* 事業部別 */}
-      <Card className="rounded-2xl shadow-sm border-0 bg-white">
+      <Card className="rounded-2xl shadow-card bg-white">
         <CardHeader className="px-7 pt-6 pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm font-semibold text-zinc-700">事業部別 売上状況</CardTitle>
@@ -270,7 +270,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* 今週のアクション */}
-      <Card className="rounded-2xl shadow-sm border-0 bg-white">
+      <Card className="rounded-2xl shadow-card bg-white">
         <CardHeader className="px-7 pt-6 pb-3">
           <CardTitle className="text-sm font-semibold text-zinc-700">今週のアクション</CardTitle>
         </CardHeader>

@@ -67,7 +67,8 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0 0 / 35%);
+  --border: rgb(243 244 246);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
@@ -138,4 +139,9 @@
   .text-accent { color: #00B98E; }
   .bg-accent { background-color: #00B98E; }
   .border-accent { border-color: #00B98E; }
+  .shadow-card {
+    --tw-shadow-color: var(--shadow-card);
+    --tw-shadow: var(--tw-shadow-colored);
+    box-shadow: var(--shadow-card);
+  }
 }
