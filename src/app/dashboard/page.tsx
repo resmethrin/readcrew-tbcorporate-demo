@@ -225,7 +225,7 @@ export default function DashboardPage() {
                   label={{ value: "目標", position: "right", fontSize: 11, fill: "rgb(0 113 227)" }}
                 />
                 <Tooltip
-                  formatter={(v: number) => formatYen(v)}
+                  formatter={(v) => formatYen(Number(v))}
                   contentStyle={{ borderRadius: 10, border: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.1)", fontSize: 13 }}
                   labelStyle={{ fontWeight: 600, color: "#18181b" }}
                 />
