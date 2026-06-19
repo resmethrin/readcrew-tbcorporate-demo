@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Building2, Calendar, ChevronDown, ChevronRight, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -316,9 +316,8 @@ export default function PaymentsPage() {
                   row.bizIds.includes(sale.businessId)
                 );
                 return (
-                  <>
+                  <React.Fragment key={row.id}>
                     <TableRow
-                      key={row.id}
                       className={`border-zinc-50 transition-colors ${isSelected ? "bg-emerald-50/40" : "hover:bg-zinc-50/50"}`}
                     >
                       <TableCell className="pl-5">
@@ -408,7 +407,7 @@ export default function PaymentsPage() {
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })}
             </TableBody>

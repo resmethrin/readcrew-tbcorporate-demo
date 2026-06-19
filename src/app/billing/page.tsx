@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Building2, Calendar, ChevronDown, ChevronRight, FileText, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -494,8 +494,8 @@ export default function BillingPage() {
                 const isExpanded = expandedRows.has(row.id);
                 const rowSales = sales.filter((s) => row.bizIds.some(() => true) && s.customerId === row.customerId && s.month === row.month && row.bizIds.includes(s.businessId));
                 return (
-                  <>
-                    <TableRow key={row.id} className="border-zinc-50 hover:bg-zinc-50/50 transition-colors">
+                  <React.Fragment key={row.id}>
+                    <TableRow className="border-zinc-50 hover:bg-zinc-50/50 transition-colors">
                       <TableCell className="pl-5 font-mono text-xs text-zinc-500">
                         {invoiceNumberForMonth(row.month)}
                       </TableCell>
@@ -572,7 +572,7 @@ export default function BillingPage() {
                         </TableCell>
                       </TableRow>
                     )}
-                  </>
+                  </React.Fragment>
                 );
               })}
             </TableBody>
