@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Building2, Calendar, ChevronDown, ChevronRight, Upload } from "lucide-react";
+import { Calendar, ChevronDown, ChevronRight, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,7 +36,6 @@ export default function PaymentsPage() {
   const markPaidByIds = useSalesStore((s) => s.markPaidByIds);
 
   const [monthFilter, setMonthFilter] = useState("all");
-  const [bizFilter, setBizFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "invoiced" | "paid">("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -102,12 +101,11 @@ export default function PaymentsPage() {
     return invoiceRows.filter((row) => {
       if (row.invoiced === 0 && row.paid === 0) return false;
       if (monthFilter !== "all" && row.month !== monthFilter) return false;
-      if (bizFilter !== "all" && !row.bizIds.includes(bizFilter)) return false;
       const st = paymentRowStatus(row);
       if (statusFilter !== "all" && st !== statusFilter) return false;
       return true;
     });
-  }, [invoiceRows, monthFilter, bizFilter, statusFilter]);
+  }, [invoiceRows, monthFilter, statusFilter]);
 
   const paidRows      = useMemo(() => paymentRows.filter((r) => paymentRowStatus(r) === "paid"), [paymentRows]);
   const invoicedRows  = useMemo(() => paymentRows.filter((r) => paymentRowStatus(r) === "invoiced"), [paymentRows]);
@@ -203,28 +201,6 @@ export default function PaymentsPage() {
                     {formatMonth(m)}
                   </button>
                 ))}
-              </div>
-            </div>
-            {/* 事業部 */}
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-zinc-400 shrink-0" />
-              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">事業部</span>
-              <div className="flex flex-wrap gap-1.5 ml-1">
-                <button type="button" onClick={() => setBizFilter("all")}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${bizFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
-                  全て
-                </button>
-                {demoBusinesses.map((b) => {
-                  const c = BIZ_COLOR[b.id];
-                  const active = bizFilter === b.id;
-                  return (
-                    <button key={b.id} type="button" onClick={() => setBizFilter(active ? "all" : b.id)}
-                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${active ? `${c.bg} ${c.text}` : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${active ? c.dot : "bg-zinc-400"}`} />
-                      {b.name}
-                    </button>
-                  );
-                })}
               </div>
             </div>
             {/* ステータス */}

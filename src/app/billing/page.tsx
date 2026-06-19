@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Building2, Calendar, ChevronDown, ChevronRight, FileText, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, ChevronDown, ChevronRight, FileText, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +59,6 @@ export default function BillingPage() {
 
   // ── 一覧フィルター ────────────────────────────────────
   const [monthFilter, setMonthFilter] = useState("all");
-  const [bizFilter, setBizFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | SaleStatus>("all");
 
   // 請求行（顧客 × 月 単位）
@@ -140,11 +139,10 @@ export default function BillingPage() {
       if (st === "paid") return false;
       return (
         (monthFilter === "all" || row.month === monthFilter) &&
-        (bizFilter === "all" || row.bizIds.includes(bizFilter)) &&
-        (statusFilter === "all" || st === statusFilter)
+(statusFilter === "all" || st === statusFilter)
       );
     }),
-    [invoiceRows, monthFilter, bizFilter, statusFilter],
+    [invoiceRows, monthFilter, statusFilter],
   );
 
   // ── 統合画面（事業部選択）────────────────────────────
@@ -417,28 +415,6 @@ export default function BillingPage() {
                     {formatMonth(m)}
                   </button>
                 ))}
-              </div>
-            </div>
-            {/* 事業部 */}
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-zinc-400 shrink-0" />
-              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">事業部</span>
-              <div className="flex flex-wrap gap-1.5 ml-1">
-                <button type="button" onClick={() => setBizFilter("all")}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${bizFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
-                  全て
-                </button>
-                {demoBusinesses.map((b) => {
-                  const c = BIZ_COLOR[b.id];
-                  const active = bizFilter === b.id;
-                  return (
-                    <button key={b.id} type="button" onClick={() => setBizFilter(active ? "all" : b.id)}
-                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${active ? `${c.bg} ${c.text}` : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
-                      <span className={`h-1.5 w-1.5 rounded-full ${active ? c.dot : "bg-zinc-400"}`} />
-                      {b.name}
-                    </button>
-                  );
-                })}
               </div>
             </div>
             {/* ステータス */}
