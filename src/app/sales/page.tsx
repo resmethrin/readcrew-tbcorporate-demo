@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { ArrowRight, Building2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -72,13 +73,13 @@ export default function SalesPage() {
           <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Sales</p>
           <h1 className="mt-1 text-xl font-semibold text-zinc-900">売上一覧</h1>
         </div>
-        <button
-          type="button"
+        <Link
+          href="/sales/new"
           className="inline-flex items-center gap-1.5 rounded-xl bg-[#0071e3] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#005fc2]"
         >
           <Plus className="h-4 w-4" />
           売上登録
-        </button>
+        </Link>
       </div>
 
       {/* 事業部別 ミニ KPI */}
