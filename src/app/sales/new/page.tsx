@@ -193,7 +193,7 @@ export default function NewSalePage() {
   const isEdit   = Boolean(editSale);
 
   const [customerId, setCustomerId]   = useState(editSale?.customerId ?? "");
-  const [businessId, setBusinessId]   = useState(editSale?.businessId ?? demoBusinesses[0]?.id ?? "");
+  const [businessId, setBusinessId]   = useState(editSale?.businessId ?? "");
   const [invoiceDate, setInvoiceDate] = useState(editSale ? `${editSale.month}-01` : TODAY);
   const [subject, setSubject]         = useState(editSale?.description ?? "");
   const [lines, setLines]             = useState<LineItem[]>(
@@ -230,6 +230,7 @@ export default function NewSalePage() {
   const validate = () => {
     const e: Record<string, string> = {};
     if (!customerId)    e.customer = "取引先を選択してください";
+    if (!businessId)    e.business = "事業部を選択してください";
     if (!subject.trim()) e.subject  = "件名を入力してください";
     if (lines.every((l) => !l.description.trim())) e.lines = "明細を1件以上入力してください";
     setErrors(e);
@@ -315,8 +316,8 @@ export default function NewSalePage() {
               <div>
                 <FieldLabel required>事業部</FieldLabel>
                 <Select value={businessId} onValueChange={(v) => v && setBusinessId(v)}>
-                  <SelectTrigger className="w-full rounded-md bg-gray-50">
-                    <SelectValue />
+                  <SelectTrigger className={`w-full rounded-md bg-gray-50 ${errors.business ? "border-red-400" : ""}`}>
+                    <SelectValue placeholder="事業部を選択" />
                   </SelectTrigger>
                   <SelectContent className="min-w-[180px]">
                     {demoBusinesses.map((b) => (
@@ -324,6 +325,7 @@ export default function NewSalePage() {
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.business && <p className="mt-1 text-xs text-red-500">{errors.business}</p>}
               </div>
             </div>
           </div>
