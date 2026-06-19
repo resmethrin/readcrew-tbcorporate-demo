@@ -124,6 +124,31 @@ export default function SalesPage() {
       <Card className="rounded-2xl shadow-card bg-white">
         <CardHeader className="px-6 pt-5 pb-0">
           <div className="flex flex-wrap items-center gap-6">
+            {/* 期間フィルター */}
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-zinc-400 shrink-0" />
+              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">期間</span>
+              <div className="flex flex-wrap gap-1.5 ml-1">
+                <button
+                  type="button"
+                  onClick={() => setMonthFilter("all")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                    monthFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                  }`}
+                >全期間</button>
+                {availableMonths.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMonthFilter(monthFilter === m ? "all" : m)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                      monthFilter === m ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                    }`}
+                  >{formatMonth(m)}</button>
+                ))}
+              </div>
+            </div>
+
             {/* 事業部フィルター */}
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-zinc-400 shrink-0" />
@@ -159,31 +184,6 @@ export default function SalesPage() {
                     </button>
                   );
                 })}
-              </div>
-            </div>
-
-            {/* 期間フィルター */}
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-zinc-400 shrink-0" />
-              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">期間</span>
-              <div className="flex flex-wrap gap-1.5 ml-1">
-                <button
-                  type="button"
-                  onClick={() => setMonthFilter("all")}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                    monthFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                  }`}
-                >全期間</button>
-                {availableMonths.map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setMonthFilter(monthFilter === m ? "all" : m)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                      monthFilter === m ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                    }`}
-                  >{formatMonth(m)}</button>
-                ))}
               </div>
             </div>
 
