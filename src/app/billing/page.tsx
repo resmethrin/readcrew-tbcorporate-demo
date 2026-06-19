@@ -76,6 +76,7 @@ export default function BillingPage() {
       consolidated: number;
       invoiced: number;
       paid: number;
+      issuer: string;
     };
     const map = new Map<string, Row>();
     for (const sale of sales) {
@@ -93,6 +94,7 @@ export default function BillingPage() {
         consolidated: 0,
         invoiced: 0,
         paid: 0,
+        issuer: sale.assignee ?? "—",
       };
       const bizName = getBusinessName(sale.businessId);
       if (!row.bizIds.includes(sale.businessId)) {
@@ -447,6 +449,7 @@ export default function BillingPage() {
                 <TableHead className="text-xs font-medium text-zinc-400">件名</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">請求日</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400 text-right">金額（税込）</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">発行者</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">ステータス</TableHead>
                 <TableHead className="pr-5" />
               </TableRow>
@@ -454,7 +457,7 @@ export default function BillingPage() {
             <TableBody>
               {filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-12 text-center text-sm text-zinc-400">
+                  <TableCell colSpan={8} className="py-12 text-center text-sm text-zinc-400">
                     該当する請求データがありません
                   </TableCell>
                 </TableRow>
@@ -495,6 +498,7 @@ export default function BillingPage() {
                       <TableCell className="text-right font-semibold text-zinc-900 tabular-nums">
                         {formatYen(total)}
                       </TableCell>
+                      <TableCell className="text-sm text-zinc-500">{row.issuer}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${s.bg} ${s.text} ${s.border}`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
@@ -512,7 +516,7 @@ export default function BillingPage() {
                     </TableRow>
                     {isExpanded && (
                       <TableRow key={`${row.id}-detail`} className="bg-zinc-50/60 border-zinc-100">
-                        <TableCell colSpan={7} className="px-8 py-3">
+                        <TableCell colSpan={8} className="px-8 py-3">
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="text-zinc-400 border-b border-zinc-200">
