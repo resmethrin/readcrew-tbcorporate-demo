@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Building2, Plus } from "lucide-react";
+import { ArrowRight, Building2, Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -36,16 +36,23 @@ export default function SalesPage() {
   const markPaidByIds = useSalesStore((s) => s.markPaidByIds);
   const [businessId, setBusinessId] = useState("all");
   const [status, setStatus] = useState<"all" | SaleStatus>("all");
+  const [monthFilter, setMonthFilter] = useState("all");
   const [selected, setSelected] = useState<string[]>([]);
+
+  const availableMonths = useMemo(() => {
+    const set = new Set(sales.map(s => s.month));
+    return Array.from(set).sort().reverse();
+  }, [sales]);
 
   const filtered = useMemo(
     () =>
       sales.filter((s) => {
         const bizMatch    = businessId === "all" || s.businessId === businessId;
         const statusMatch = status === "all"     || s.status === status;
-        return bizMatch && statusMatch;
+        const monthMatch  = monthFilter === "all" || s.month === monthFilter;
+        return bizMatch && statusMatch && monthMatch;
       }),
-    [businessId, sales, status],
+    [businessId, monthFilter, sales, status],
   );
 
   const bizTotals = useMemo(() =>
@@ -153,6 +160,31 @@ export default function SalesPage() {
                     </button>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* 期間フィルター */}
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-zinc-400 shrink-0" />
+              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">期間</span>
+              <div className="flex flex-wrap gap-1.5 ml-1">
+                <button
+                  type="button"
+                  onClick={() => setMonthFilter("all")}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                    monthFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                  }`}
+                >全期間</button>
+                {availableMonths.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMonthFilter(monthFilter === m ? "all" : m)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                      monthFilter === m ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                    }`}
+                  >{formatMonth(m)}</button>
+                ))}
               </div>
             </div>
 

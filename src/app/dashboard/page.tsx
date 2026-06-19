@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertTriangle,
   ArrowUpRight,
+  Calendar,
   ChevronRight,
   FileText,
   TrendingUp,
@@ -19,7 +21,7 @@ import {
   YAxis,
 } from "recharts";
 import { useSalesStore } from "@/store/useSalesStore";
-import { demoBusinesses, formatYen } from "@/lib/demo-data";
+import { demoBusinesses, formatYen, formatMonth } from "@/lib/demo-data";
 
 const MONTHLY_TARGET = 21_000_000;
 const FORECAST = 16_500_000;
@@ -51,13 +53,21 @@ const bizAccent: Record<string, string> = {
 export default function DashboardPage() {
   const sales = useSalesStore((s) => s.sales);
 
-  const paidTotal      = sales.filter((s) => s.status === "paid").reduce((n, s) => n + s.amount, 0);
-  const invoicedTotal  = sales.filter((s) => s.status === "invoiced").reduce((n, s) => n + s.amount, 0);
-  const uninvoicedTotal = sales.filter((s) => s.status === "uninvoiced").reduce((n, s) => n + s.amount, 0);
+  const [monthFilter, setMonthFilter] = useState("all");
+  const availableMonths = useMemo(() => {
+    const set = new Set(sales.map((s) => s.month));
+    return Array.from(set).sort().reverse();
+  }, [sales]);
+
+  const filteredSales = monthFilter === "all" ? sales : sales.filter((s) => s.month === monthFilter);
+
+  const paidTotal      = filteredSales.filter((s) => s.status === "paid").reduce((n, s) => n + s.amount, 0);
+  const invoicedTotal  = filteredSales.filter((s) => s.status === "invoiced").reduce((n, s) => n + s.amount, 0);
+  const uninvoicedTotal = filteredSales.filter((s) => s.status === "uninvoiced").reduce((n, s) => n + s.amount, 0);
   const achieveRate    = Math.round((FORECAST / MONTHLY_TARGET) * 100);
 
   const bizStats = demoBusinesses.map((b) => {
-    const bSales     = sales.filter((s) => s.businessId === b.id);
+    const bSales     = filteredSales.filter((s) => s.businessId === b.id);
     const paid       = bSales.filter((s) => s.status === "paid").reduce((n, s) => n + s.amount, 0);
     const invoiced   = bSales.filter((s) => s.status === "invoiced").reduce((n, s) => n + s.amount, 0);
     const uninvoiced = bSales.filter((s) => s.status === "uninvoiced").reduce((n, s) => n + s.amount, 0);
@@ -73,7 +83,32 @@ export default function DashboardPage() {
           <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Dashboard</p>
           <h1 className="mt-1 text-xl font-semibold text-zinc-900">経営サマリ</h1>
         </div>
-        <p className="text-sm text-zinc-400">2026年6月</p>
+        <p className="text-sm text-zinc-400">{monthFilter === "all" ? "全期間" : formatMonth(monthFilter)}</p>
+      </div>
+
+      {/* 期間フィルター */}
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border bg-white px-4 py-3 shadow-card">
+        <Calendar className="h-4 w-4 text-zinc-400 shrink-0" />
+        <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">期間</span>
+        <div className="flex flex-wrap gap-1.5">
+          <button
+            type="button"
+            onClick={() => setMonthFilter("all")}
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+              monthFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+            }`}
+          >全期間</button>
+          {availableMonths.map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMonthFilter(m)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                monthFilter === m ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+              }`}
+            >{formatMonth(m)}</button>
+          ))}
+        </div>
       </div>
 
       {/* 3カラム KPI */}
@@ -115,7 +150,7 @@ export default function DashboardPage() {
               {formatYen(paidTotal)}
             </p>
             <p className="mt-4 text-xs text-zinc-400">
-              {sales.filter((s) => s.status === "paid").length}件 確定済
+              {filteredSales.filter((s) => s.status === "paid").length}件 確定済
             </p>
           </CardContent>
         </Card>

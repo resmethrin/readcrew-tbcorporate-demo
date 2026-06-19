@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  demoBusinesses,
   demoCustomers,
   formatYen,
   getBusinessName,
@@ -41,6 +42,10 @@ export default function BillingPage() {
   const [selectedBizIds, setSelectedBizIds] = useState<Set<string>>(new Set());
   const [invoiceNo, setInvoiceNo] = useState("");
 
+  // 一覧フィルター
+  const [monthFilter, setMonthFilter] = useState("all");
+  const [bizFilter, setBizFilter] = useState("all");
+
   // 顧客ごとのステータス集計
   const customerStats = useMemo(() => {
     const map = new Map<string, { uninvoiced: number; invoiced: number; paid: number; total: number }>();
@@ -52,6 +57,20 @@ export default function BillingPage() {
     }
     return map;
   }, [sales]);
+
+  const availableMonths = useMemo(() => {
+    const set = new Set(sales.map(s => s.month));
+    return Array.from(set).sort().reverse();
+  }, [sales]);
+
+  // filtered customer stats - only customers with matching sales
+  const filteredCustomerIds = useMemo(() => {
+    const matchingSales = sales.filter(s =>
+      (monthFilter === "all" || s.month === monthFilter) &&
+      (bizFilter === "all" || s.businessId === bizFilter)
+    );
+    return new Set(matchingSales.map(s => s.customerId));
+  }, [sales, monthFilter, bizFilter]);
 
   // 選択顧客 × 選択月の事業部グループ
   const bizGroups = useMemo(() => {
@@ -281,6 +300,42 @@ export default function BillingPage() {
         </Button>
       </div>
 
+      {/* フィルターバー */}
+      <div className="flex flex-wrap items-center gap-6 rounded-2xl border bg-white px-5 py-3 shadow-sm">
+        {/* 期間 */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">期間</span>
+          <div className="flex flex-wrap gap-1.5">
+            <button type="button" onClick={() => setMonthFilter("all")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${monthFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+              全期間
+            </button>
+            {availableMonths.map(m => (
+              <button key={m} type="button" onClick={() => setMonthFilter(monthFilter === m ? "all" : m)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${monthFilter === m ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+                {formatMonth(m)}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* 事業部 */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">事業部</span>
+          <div className="flex flex-wrap gap-1.5">
+            <button type="button" onClick={() => setBizFilter("all")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${bizFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+              全て
+            </button>
+            {demoBusinesses.map(b => (
+              <button key={b.id} type="button" onClick={() => setBizFilter(bizFilter === b.id ? "all" : b.id)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${bizFilter === b.id ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
+                {b.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <Card>
         <CardContent className="p-0">
           <table className="w-full text-sm">
@@ -295,7 +350,7 @@ export default function BillingPage() {
               </tr>
             </thead>
             <tbody>
-              {demoCustomers.map((customer) => {
+              {demoCustomers.filter(c => filteredCustomerIds.has(c.id)).map((customer) => {
                 const stats = customerStats.get(customer.id) ?? {
                   uninvoiced: 0,
                   invoiced: 0,
