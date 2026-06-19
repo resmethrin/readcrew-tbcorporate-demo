@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Building2, Calendar, Plus } from "lucide-react";
+import { ArrowRight, Building2, Calendar, FileSpreadsheet, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { demoBusinesses, demoCustomers, formatMonth, formatYen, statusLabels, PERIOD_MONTHS } from "@/lib/demo-data";
 import { useSalesStore } from "@/store/useSalesStore";
-import type { SaleStatus } from "@/types";
+import type { Sale, SaleStatus } from "@/types";
 
 const BIZ_COLOR: Record<string, { dot: string; bg: string; text: string }> = {
   b001: { dot: "bg-[#0071e3]",   bg: "bg-blue-50",   text: "text-blue-700" },
@@ -36,10 +36,59 @@ export default function SalesPage() {
   const sales = useSalesStore((s) => s.sales);
   const markInvoicedByIds = useSalesStore((s) => s.markInvoicedByIds);
   const markPaidByIds = useSalesStore((s) => s.markPaidByIds);
+  const addSale = useSalesStore((s) => s.addSale);
   const [businessId, setBusinessId] = useState("all");
   const [status, setStatus] = useState<"all" | SaleStatus>("all");
   const [monthFilter, setMonthFilter] = useState("all");
   const [selected, setSelected] = useState<string[]>([]);
+
+  // Excel 取り込み
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importRows, setImportRows] = useState<Sale[]>([]);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importDone, setImportDone] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!fileInputRef.current) return;
+    fileInputRef.current.value = "";
+    if (!file) return;
+    setImportError(null);
+    setImportDone(false);
+
+    try {
+      const { read, utils } = await import("xlsx");
+      const buf = await file.arrayBuffer();
+      const wb = read(buf, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = utils.sheet_to_json<Record<string, unknown>>(ws, { defval: "" });
+
+      const parsed: Sale[] = rows.map((row, i) => ({
+        id: `excel-${Date.now()}-${i}`,
+        customerId: String(row["顧客ID"] ?? row["customerId"] ?? demoCustomers[0]?.id ?? "c001"),
+        businessId: String(row["事業部ID"] ?? row["businessId"] ?? demoBusinesses[0]?.id ?? "b001"),
+        description: String(row["内容"] ?? row["description"] ?? ""),
+        amount: Number(row["金額"] ?? row["amount"] ?? 0),
+        qty: row["数量"] != null ? Number(row["数量"]) : undefined,
+        unitPrice: row["単価"] != null ? Number(row["単価"]) : undefined,
+        month: String(row["月"] ?? row["month"] ?? "2026-06"),
+        status: "uninvoiced" as SaleStatus,
+      }));
+
+      if (parsed.length === 0) { setImportError("データが見つかりませんでした"); return; }
+      setImportRows(parsed);
+    } catch {
+      setImportError("ファイルの読み込みに失敗しました");
+    }
+  };
+
+  const handleImportConfirm = () => {
+    importRows.forEach((s) => addSale(s));
+    setImportDone(true);
+    setImportRows([]);
+  };
+
+  const closeImportModal = () => { setImportRows([]); setImportError(null); setImportDone(false); };
 
   const availableMonths = PERIOD_MONTHS;
 
@@ -85,13 +134,30 @@ export default function SalesPage() {
           <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Sales</p>
           <h1 className="mt-1 text-xl font-semibold text-zinc-900">売上一覧</h1>
         </div>
-        <Link
-          href="/sales/new"
-          className="inline-flex items-center gap-1.5 rounded-xl bg-[#0071e3] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#005fc2]"
-        >
-          <Plus className="h-4 w-4" />
-          売上登録
-        </Link>
+        <div className="flex items-center gap-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".xlsx,.xls"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
+          >
+            <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+            Excel取込
+          </button>
+          <Link
+            href="/sales/new"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-[#0071e3] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#005fc2]"
+          >
+            <Plus className="h-4 w-4" />
+            売上登録
+          </Link>
+        </div>
       </div>
 
       {/* 事業部別 ミニ KPI */}
@@ -336,6 +402,88 @@ export default function SalesPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Excel 取り込みモーダル */}
+      {(importRows.length > 0 || importError || importDone) && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-2xl rounded-2xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4">
+              <div className="flex items-center gap-2">
+                <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
+                <span className="font-semibold text-zinc-900">Excel 取り込み</span>
+              </div>
+              <button type="button" onClick={closeImportModal} className="rounded-lg p-1 hover:bg-zinc-100">
+                <X className="h-4 w-4 text-zinc-500" />
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              {importError && (
+                <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{importError}</p>
+              )}
+              {importDone && (
+                <p className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                  {`取り込み完了しました`}
+                </p>
+              )}
+              {importRows.length > 0 && (
+                <>
+                  <p className="mb-3 text-sm text-zinc-500">{importRows.length} 件のデータを取り込みます</p>
+                  <div className="max-h-72 overflow-y-auto rounded-xl border border-zinc-100">
+                    <table className="w-full text-sm">
+                      <thead className="bg-zinc-50 text-xs text-zinc-400">
+                        <tr>
+                          <th className="px-3 py-2 text-left font-medium">内容</th>
+                          <th className="px-3 py-2 text-left font-medium">顧客</th>
+                          <th className="px-3 py-2 text-left font-medium">事業部</th>
+                          <th className="px-3 py-2 text-left font-medium">月</th>
+                          <th className="px-3 py-2 text-right font-medium">金額</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-50">
+                        {importRows.map((row) => (
+                          <tr key={row.id} className="hover:bg-zinc-50/50">
+                            <td className="px-3 py-2 text-zinc-700">{row.description || "—"}</td>
+                            <td className="px-3 py-2 text-zinc-600">
+                              {demoCustomers.find((c) => c.id === row.customerId)?.name ?? row.customerId}
+                            </td>
+                            <td className="px-3 py-2 text-zinc-600">
+                              {demoBusinesses.find((b) => b.id === row.businessId)?.name ?? row.businessId}
+                            </td>
+                            <td className="px-3 py-2 text-zinc-500 tabular-nums">{formatMonth(row.month)}</td>
+                            <td className="px-3 py-2 text-right font-medium text-zinc-900 tabular-nums">
+                              {formatYen(row.amount)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-zinc-100 px-6 py-4">
+              <button
+                type="button"
+                onClick={closeImportModal}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors"
+              >
+                {importDone ? "閉じる" : "キャンセル"}
+              </button>
+              {importRows.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleImportConfirm}
+                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors"
+                >
+                  取り込む
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
