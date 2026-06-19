@@ -9,20 +9,20 @@ import { demoCustomers, formatYen, groupSalesByBusiness, invoiceNumberForMonth, 
 import { useSalesStore } from "@/store/useSalesStore";
 
 const ISSUER = {
-  name: "株式会社ReadCrew",
-  postal: "〒360-0000",
-  address: "埼玉県本庄市○○町1-2-3",
-  tel: "0495-00-0000",
-  email: "billing@readcrew.co.jp",
+  name: "株式会社エキサイター",
+  postal: "〒103-0007",
+  address: "東京都中央区日本橋浜町2-16-5 東味ビルディング４F",
+  tel: "00-0000-0000",
+  email: "billing@exciter.co.jp",
   registrationNo: "T1234567890123",
 };
 
 const BANK = {
   name: "三菱UFJ銀行",
-  branch: "本庄支店",
+  branch: "人形町支店",
   type: "普通",
   account: "1234567",
-  holder: "カ）リードクルー",
+  holder: "カ)エキサイター",
 };
 
 export default function InvoicePreviewPage() {
