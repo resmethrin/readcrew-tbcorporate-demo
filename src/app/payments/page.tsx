@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Upload } from "lucide-react";
+import { ChevronDown, ChevronRight, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -39,6 +39,9 @@ export default function PaymentsPage() {
   const [bizFilter, setBizFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "invoiced" | "paid">("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const toggleExpand = (id: string) =>
+    setExpandedRows((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   // 請求一覧と同じ「顧客×月」集計
   const invoiceRows = useMemo(() => {
@@ -301,56 +304,120 @@ export default function PaymentsPage() {
               )}
               {paymentRows.map((row) => {
                 const st = paymentRowStatus(row);
-                const s = STATUS_STYLE[st];
+                const rowStyle = STATUS_STYLE[st];
                 const total = row.subtotal + Math.round(row.subtotal * 0.1);
                 const subject = row.bizNames.length === 1
                   ? row.bizNames[0]
                   : `${row.bizNames[0]} 他${row.bizNames.length - 1}件`;
                 const isSelectable = st === "invoiced";
                 const isSelected = selected.has(row.id);
+                const isExpanded = expandedRows.has(row.id);
+                const rowSales = sales.filter((sale) =>
+                  sale.customerId === row.customerId &&
+                  sale.month === row.month &&
+                  row.bizIds.includes(sale.businessId)
+                );
                 return (
-                  <TableRow
-                    key={row.id}
-                    className={`border-zinc-50 transition-colors ${isSelected ? "bg-emerald-50/40" : "hover:bg-zinc-50/50"}`}
-                  >
-                    <TableCell className="pl-5">
-                      {isSelectable ? (
-                        <Checkbox checked={isSelected} onCheckedChange={() => toggleRow(row.id)} />
-                      ) : (
-                        <span className="inline-block h-4 w-4" />
-                      )}
-                    </TableCell>
-                    <TableCell className="font-mono text-xs text-zinc-500">
-                      {invoiceNumberForMonth(row.month)}
-                    </TableCell>
-                    <TableCell className="font-medium text-zinc-800">{row.customerName}</TableCell>
-                    <TableCell>
-                      <div className="text-sm text-zinc-700">{subject}</div>
-                      <div className="text-xs text-zinc-400">{row.itemCount}件</div>
-                    </TableCell>
-                    <TableCell className="text-sm text-zinc-500 tabular-nums">{invoiceDateLabel(row.month)}</TableCell>
-                    <TableCell className="text-sm tabular-nums text-zinc-600">{dueDateLabel(row.month)}</TableCell>
-                    <TableCell className="text-right font-semibold text-zinc-900 tabular-nums">
-                      {formatYen(total)}
-                    </TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${s.bg} ${s.text} ${s.border}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
-                        {statusLabels[st]}
-                      </span>
-                    </TableCell>
-                    <TableCell className="pr-5 text-right">
-                      {st === "invoiced" && (
+                  <>
+                    <TableRow
+                      key={row.id}
+                      className={`border-zinc-50 transition-colors ${isSelected ? "bg-emerald-50/40" : "hover:bg-zinc-50/50"}`}
+                    >
+                      <TableCell className="pl-5">
+                        {isSelectable ? (
+                          <Checkbox checked={isSelected} onCheckedChange={() => toggleRow(row.id)} />
+                        ) : (
+                          <span className="inline-block h-4 w-4" />
+                        )}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-zinc-500">
+                        {invoiceNumberForMonth(row.month)}
+                      </TableCell>
+                      <TableCell className="font-medium text-zinc-800">{row.customerName}</TableCell>
+                      <TableCell>
                         <button
                           type="button"
-                          onClick={() => markPaidByIds(row.saleIds)}
-                          className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors"
+                          onClick={() => toggleExpand(row.id)}
+                          className="flex items-center gap-1.5 text-left hover:text-accent transition-colors"
                         >
-                          入金済にする
+                          {isExpanded
+                            ? <ChevronDown className="h-3.5 w-3.5 shrink-0 text-zinc-400" />
+                            : <ChevronRight className="h-3.5 w-3.5 shrink-0 text-zinc-400" />}
+                          <div>
+                            <div className="text-sm text-zinc-700">{subject}</div>
+                            <div className="text-xs text-zinc-400">{row.itemCount}件</div>
+                          </div>
                         </button>
-                      )}
-                    </TableCell>
-                  </TableRow>
+                      </TableCell>
+                      <TableCell className="text-sm text-zinc-500 tabular-nums">{invoiceDateLabel(row.month)}</TableCell>
+                      <TableCell className="text-sm tabular-nums text-zinc-600">{dueDateLabel(row.month)}</TableCell>
+                      <TableCell className="text-right font-semibold text-zinc-900 tabular-nums">
+                        {formatYen(total)}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${rowStyle.bg} ${rowStyle.text} ${rowStyle.border}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${rowStyle.dot}`} />
+                          {statusLabels[st]}
+                        </span>
+                      </TableCell>
+                      <TableCell className="pr-5 text-right">
+                        {st === "invoiced" && (
+                          <button
+                            type="button"
+                            onClick={() => markPaidByIds(row.saleIds)}
+                            className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors"
+                          >
+                            入金済にする
+                          </button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                    {isExpanded && (
+                      <TableRow key={`${row.id}-detail`} className="bg-zinc-50/60 border-zinc-100">
+                        <TableCell colSpan={9} className="px-8 py-3">
+                          <table className="w-full text-xs">
+                            <thead>
+                              <tr className="text-zinc-400 border-b border-zinc-200">
+                                <th className="pb-1.5 text-left font-medium">事業部</th>
+                                <th className="pb-1.5 text-left font-medium">内容</th>
+                                <th className="pb-1.5 text-right font-medium">数量</th>
+                                <th className="pb-1.5 text-right font-medium">単価</th>
+                                <th className="pb-1.5 text-right font-medium">金額</th>
+                                <th className="pb-1.5 text-center font-medium">ステータス</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-zinc-100">
+                              {rowSales.map((sale) => {
+                                const biz = demoBusinesses.find((b) => b.id === sale.businessId);
+                                const bc = BIZ_COLOR[sale.businessId];
+                                const sc = STATUS_STYLE[sale.status as "invoiced" | "paid"] ?? STATUS_STYLE.invoiced;
+                                return (
+                                  <tr key={sale.id} className="text-zinc-600">
+                                    <td className="py-1.5 pr-3">
+                                      <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium ${bc.bg} ${bc.text}`}>
+                                        <span className={`h-1 w-1 rounded-full ${bc.dot}`} />
+                                        {biz?.name}
+                                      </span>
+                                    </td>
+                                    <td className="py-1.5 pr-3">{sale.description}</td>
+                                    <td className="py-1.5 pr-3 text-right tabular-nums">{sale.qty ?? 1}</td>
+                                    <td className="py-1.5 pr-3 text-right tabular-nums">{formatYen(sale.unitPrice ?? Math.round(sale.amount / (sale.qty ?? 1)))}</td>
+                                    <td className="py-1.5 pr-3 text-right font-medium tabular-nums">{formatYen(sale.amount)}</td>
+                                    <td className="py-1.5 text-center">
+                                      <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${sc.bg} ${sc.text} ${sc.border}`}>
+                                        <span className={`h-1 w-1 rounded-full ${sc.dot}`} />
+                                        {statusLabels[sale.status]}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
                 );
               })}
             </TableBody>
