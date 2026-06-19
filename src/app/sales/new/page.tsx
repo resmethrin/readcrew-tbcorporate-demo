@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Plus, Trash2 } from "lucide-react";
 import { demoBusinesses, demoCustomers, formatYen } from "@/lib/demo-data";
@@ -179,7 +179,7 @@ function InvoicePreview({
 }
 
 /* ─── メインページ ─── */
-export default function NewSalePage() {
+function NewSalePageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get("id");
@@ -530,5 +530,13 @@ export default function NewSalePage() {
 
       </div>
     </div>
+  );
+}
+
+export default function NewSalePage() {
+  return (
+    <Suspense>
+      <NewSalePageInner />
+    </Suspense>
   );
 }
