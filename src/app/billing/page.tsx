@@ -99,7 +99,7 @@ export default function BillingPage() {
               </div>
             </div>
           ))}
-          <div className="flex items-center justify-between rounded-2xl bg-[rgb(0 113 227)] px-5 py-4 text-white">
+          <div className="flex items-center justify-between rounded-2xl bg-[#0071e3] px-5 py-4 text-white">
             <div className="text-sm">合計</div>
             <div className="text-2xl font-semibold">{formatYen(total)}</div>
           </div>

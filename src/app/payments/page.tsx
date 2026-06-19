@@ -57,7 +57,7 @@ export default function PaymentsPage() {
               <div className="font-medium">株式会社アルファテック</div>
               <div className="text-sm text-zinc-500">2026年6月請求分</div>
             </div>
-            <Badge className="bg-[rgb(0 113 227)] text-white">入金済</Badge>
+            <Badge className="bg-[#0071e3] text-white">入金済</Badge>
           </div>
           <div className="flex items-center justify-between rounded-xl border border-zinc-200 p-4">
             <div>

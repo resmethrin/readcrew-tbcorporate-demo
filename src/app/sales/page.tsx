@@ -80,7 +80,7 @@ export default function SalesPage() {
                 key={item.id}
                 type="button"
                 variant={status === item.id ? "default" : "outline"}
-                className={status === item.id ? "bg-[rgb(0 113 227)] text-white hover:bg-[rgb(0 95 194)]" : ""}
+                className={status === item.id ? "bg-[#0071e3] text-white hover:bg-[rgb(0 95 194)]" : ""}
                 onClick={() => setStatus(item.id)}
               >
                 {item.label}
