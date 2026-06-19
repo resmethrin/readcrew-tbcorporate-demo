@@ -270,14 +270,14 @@ export default function NewSalePage() {
           {/* 取引先・事業部 */}
           <div className="rounded-2xl bg-white shadow-card p-6 space-y-4">
             <SectionTitle>取引先情報</SectionTitle>
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-[1fr_200px]">
               <div>
                 <FieldLabel required>取引先</FieldLabel>
                 <Select value={customerId} onValueChange={(v) => v && setCustomerId(v)}>
-                  <SelectTrigger className={`bg-gray-50 ${errors.customer ? "border-red-400" : ""}`}>
+                  <SelectTrigger className={`w-full rounded-md bg-gray-50 ${errors.customer ? "border-red-400" : ""}`}>
                     <SelectValue placeholder="取引先を選択" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="min-w-[260px]">
                     {demoCustomers.map((c) => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                     ))}
@@ -288,10 +288,10 @@ export default function NewSalePage() {
               <div>
                 <FieldLabel required>事業部</FieldLabel>
                 <Select value={businessId} onValueChange={(v) => v && setBusinessId(v)}>
-                  <SelectTrigger className="bg-gray-50">
+                  <SelectTrigger className="w-full rounded-md bg-gray-50">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="min-w-[180px]">
                     {demoBusinesses.map((b) => (
                       <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                     ))}
@@ -332,7 +332,7 @@ export default function NewSalePage() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="例：2026年6月分 設備保守サービス"
-                className={`block w-full rounded-lg border bg-gray-50 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-300 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3] ${errors.subject ? "border-red-400" : "border-zinc-200"}`}
+                className={`block w-full rounded-md border bg-gray-50 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-300 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3] ${errors.subject ? "border-red-400" : "border-zinc-200"}`}
               />
               {errors.subject && <p className="mt-1 text-xs text-red-500">{errors.subject}</p>}
             </div>
@@ -368,7 +368,7 @@ export default function NewSalePage() {
                     value={line.description}
                     onChange={(e) => updateLine(line.id, { description: e.target.value })}
                     placeholder={`明細 ${idx + 1}`}
-                    className="rounded-lg border border-zinc-200 bg-white px-2.5 py-1.5 text-sm text-zinc-800 placeholder:text-zinc-300 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3]"
+                    className="rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-sm text-zinc-800 placeholder:text-zinc-300 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3]"
                   />
                   {/* 数量 */}
                   <input
@@ -382,7 +382,7 @@ export default function NewSalePage() {
                   <select
                     value={line.unit}
                     onChange={(e) => updateLine(line.id, { unit: e.target.value })}
-                    className="rounded-lg border border-zinc-200 bg-white px-1 py-1.5 text-center text-sm focus:border-[#0071e3] focus:outline-none"
+                    className="w-full rounded-md border border-zinc-200 bg-white px-1 py-1.5 text-center text-sm focus:border-[#0071e3] focus:outline-none"
                   >
                     {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
                   </select>
@@ -399,7 +399,7 @@ export default function NewSalePage() {
                   <select
                     value={line.taxRate}
                     onChange={(e) => updateLine(line.id, { taxRate: Number(e.target.value) as TaxRate })}
-                    className="rounded-lg border border-zinc-200 bg-white px-1 py-1.5 text-center text-sm focus:border-[#0071e3] focus:outline-none"
+                    className="w-full rounded-md border border-zinc-200 bg-white px-1 py-1.5 text-center text-sm focus:border-[#0071e3] focus:outline-none"
                   >
                     <option value={10}>10%</option>
                     <option value={8}>8%</option>
@@ -466,7 +466,7 @@ export default function NewSalePage() {
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 placeholder="振込手数料はご負担ください。など"
-                className="block w-full resize-none rounded-lg border border-zinc-200 bg-gray-50 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-300 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3]"
+                className="block w-full resize-none rounded-md border border-zinc-200 bg-gray-50 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-300 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3]"
               />
             </div>
             <div>
@@ -476,7 +476,7 @@ export default function NewSalePage() {
                 onChange={(e) => setMemo(e.target.value)}
                 rows={2}
                 placeholder="担当者への申し送り事項など"
-                className="block w-full resize-none rounded-lg border border-zinc-200 bg-gray-50 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-300 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3]"
+                className="block w-full resize-none rounded-md border border-zinc-200 bg-gray-50 px-3 py-2 text-sm text-zinc-800 placeholder:text-zinc-300 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3]"
               />
             </div>
           </div>
