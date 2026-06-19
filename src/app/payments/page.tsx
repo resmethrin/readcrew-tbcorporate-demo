@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   demoBusinesses,
+  dueDateLabel,
   formatMonth,
   formatYen,
   getCustomerName,
@@ -283,6 +284,7 @@ export default function PaymentsPage() {
                 <TableHead className="text-xs font-medium text-zinc-400">顧客</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">件名</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">期間</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">入金期限</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400 text-right">金額（税込）</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">ステータス</TableHead>
                 <TableHead className="pr-5" />
@@ -291,7 +293,7 @@ export default function PaymentsPage() {
             <TableBody>
               {paymentRows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-12 text-center text-sm text-zinc-400">
+                  <TableCell colSpan={9} className="py-12 text-center text-sm text-zinc-400">
                     該当するデータがありません
                   </TableCell>
                 </TableRow>
@@ -326,6 +328,7 @@ export default function PaymentsPage() {
                       <div className="text-xs text-zinc-400">{row.itemCount}件</div>
                     </TableCell>
                     <TableCell className="text-sm text-zinc-500 tabular-nums">{formatMonth(row.month)}</TableCell>
+                    <TableCell className="text-sm tabular-nums text-zinc-600">{dueDateLabel(row.month)}</TableCell>
                     <TableCell className="text-right font-semibold text-zinc-900 tabular-nums">
                       {formatYen(total)}
                     </TableCell>

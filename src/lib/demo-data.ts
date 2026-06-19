@@ -66,3 +66,12 @@ export const monthToLabel = (month: string) => {
 
 // 2026-01 から現在（デモ: 2026-06）までの全月リスト（新しい順）
 export const PERIOD_MONTHS = ["2026-06","2026-05","2026-04","2026-03","2026-02","2026-01"];
+
+// 翌月末を "YYYY年M月D日" 形式で返す
+export const dueDateLabel = (month: string): string => {
+  const [y, m] = month.split("-").map(Number);
+  const dueMonth = m === 12 ? 1 : m + 1;
+  const dueYear  = m === 12 ? y + 1 : y;
+  const days = new Date(dueYear, dueMonth, 0).getDate();
+  return `${dueYear}年${dueMonth}月${days}日`;
+};
