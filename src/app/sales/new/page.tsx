@@ -527,22 +527,6 @@ export default function NewSalePage() {
           </div>
         </div>
 
-        {/* ── 右：プレビュー ── */}
-        <div className="w-[400px] shrink-0 sticky top-8">
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs font-medium text-zinc-400">プレビュー</p>
-            <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500">
-              リアルタイム更新
-            </span>
-          </div>
-          <InvoicePreview
-            customer={customer?.name ?? ""}
-            subject={subject}
-            lines={lines}
-            invoiceDate={invoiceDate}
-            notes={notes}
-          />
-        </div>
       </div>
     </div>
   );
