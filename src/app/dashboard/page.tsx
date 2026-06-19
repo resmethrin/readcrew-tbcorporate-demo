@@ -218,7 +218,14 @@ export default function DashboardPage() {
       {/* 事業部別 */}
       <Card className="rounded-2xl shadow-sm border-0 bg-white">
         <CardHeader className="px-7 pt-6 pb-3">
-          <CardTitle className="text-sm font-semibold text-zinc-700">事業部別 売上状況</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-semibold text-zinc-700">事業部別 売上状況</CardTitle>
+            <div className="flex items-center gap-4 text-xs text-zinc-400">
+              <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-[#00B98E]" />入金済</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-blue-400" />請求済</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-amber-400" />未請求</span>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="px-7 pb-6 space-y-5">
           {bizStats.map((b) => {
