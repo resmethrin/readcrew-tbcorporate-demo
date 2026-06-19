@@ -317,7 +317,7 @@ export default function SalesPage() {
                 <TableHead className="text-xs font-medium text-zinc-400">事業部</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">内容</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">金額</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400">月</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">担当</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">ステータス</TableHead>
                 <TableHead className="pr-6" />
               </TableRow>
@@ -353,7 +353,7 @@ export default function SalesPage() {
                     </TableCell>
                     <TableCell className="text-sm text-zinc-600 max-w-[200px] truncate">{sale.description}</TableCell>
                     <TableCell className="font-semibold text-zinc-900 tabular-nums">{formatYen(sale.amount)}</TableCell>
-                    <TableCell className="text-sm text-zinc-500 tabular-nums">{formatMonth(sale.month)}</TableCell>
+                    <TableCell className="text-sm text-zinc-500">{sale.assignee ?? "—"}</TableCell>
                     <TableCell>
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${sc.bg} ${sc.text}`}>
                         <span className={`h-1.5 w-1.5 rounded-full ${sc.dot}`} />

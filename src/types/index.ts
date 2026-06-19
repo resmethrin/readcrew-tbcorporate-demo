@@ -25,6 +25,7 @@ export interface Sale {
   unitPrice?: number
   month: string
   status: SaleStatus
+  assignee?: string
 }
 
 export interface InvoiceGroup {
