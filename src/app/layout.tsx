@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja" className={`h-full antialiased ${notoSansJP.variable}`}>
-      <body className="min-h-full bg-[#EEF2F7] text-zinc-950">
+      <body className="min-h-full bg-gray-50 text-zinc-950">
         <div className="flex min-h-screen">
           <Sidebar />
           <main className="flex-1 pl-72">
