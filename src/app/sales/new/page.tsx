@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Plus, Trash2 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { demoBusinesses, demoCustomers, formatYen } from "@/lib/demo-data";
 import { useSalesStore } from "@/store/useSalesStore";
 
@@ -301,30 +300,30 @@ export default function NewSalePage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <FieldLabel required>取引先</FieldLabel>
-                <Select value={customerId} onValueChange={(v) => v && setCustomerId(v)}>
-                  <SelectTrigger className={`w-full rounded-md bg-gray-50 ${errors.customer ? "border-red-400" : ""}`}>
-                    <SelectValue placeholder="取引先を選択" />
-                  </SelectTrigger>
-                  <SelectContent className="min-w-[260px]">
-                    {demoCustomers.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  value={customerId}
+                  onChange={(e) => setCustomerId(e.target.value)}
+                  className={`block w-full rounded-md border bg-gray-50 px-3 py-2 text-sm text-zinc-800 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3] ${errors.customer ? "border-red-400" : "border-zinc-200"}`}
+                >
+                  <option value="">取引先を選択</option>
+                  {demoCustomers.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
                 {errors.customer && <p className="mt-1 text-xs text-red-500">{errors.customer}</p>}
               </div>
               <div>
                 <FieldLabel required>事業部</FieldLabel>
-                <Select value={businessId} onValueChange={(v) => v && setBusinessId(v)}>
-                  <SelectTrigger className={`w-full rounded-md bg-gray-50 ${errors.business ? "border-red-400" : ""}`}>
-                    <SelectValue placeholder="事業部を選択" />
-                  </SelectTrigger>
-                  <SelectContent className="min-w-[180px]">
-                    {demoBusinesses.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <select
+                  value={businessId}
+                  onChange={(e) => setBusinessId(e.target.value)}
+                  className={`block w-full rounded-md border bg-gray-50 px-3 py-2 text-sm text-zinc-800 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3] ${errors.business ? "border-red-400" : "border-zinc-200"}`}
+                >
+                  <option value="">事業部を選択</option>
+                  {demoBusinesses.map((b) => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
                 {errors.business && <p className="mt-1 text-xs text-red-500">{errors.business}</p>}
               </div>
             </div>
