@@ -18,16 +18,18 @@ const BIZ_COLOR: Record<string, { dot: string; bg: string; text: string }> = {
 };
 
 const STATUS_STYLE: Record<SaleStatus, { bg: string; text: string; dot: string }> = {
-  uninvoiced: { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400" },
-  invoiced:   { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-[#0071e3]" },
-  paid:       { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
+  uninvoiced:   { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400" },
+  consolidated: { bg: "bg-violet-50",  text: "text-violet-700",  dot: "bg-violet-500" },
+  invoiced:     { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-[#0071e3]" },
+  paid:         { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
 };
 
 const statusFilters: { id: "all" | SaleStatus; label: string }[] = [
-  { id: "all",        label: "全て" },
-  { id: "uninvoiced", label: "未請求" },
-  { id: "invoiced",   label: "請求済" },
-  { id: "paid",       label: "入金済" },
+  { id: "all",          label: "全て" },
+  { id: "uninvoiced",   label: "未請求" },
+  { id: "consolidated", label: "統合済み" },
+  { id: "invoiced",     label: "請求済" },
+  { id: "paid",         label: "入金済" },
 ];
 
 export default function SalesPage() {

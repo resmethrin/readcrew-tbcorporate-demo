@@ -30,16 +30,18 @@ const BIZ_COLOR: Record<string, { dot: string; bg: string; text: string }> = {
 };
 
 const STATUS_STYLE: Record<SaleStatus, { bg: string; text: string; dot: string; border: string }> = {
-  uninvoiced: { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400",   border: "border-amber-200" },
-  invoiced:   { bg: "bg-sky-50",     text: "text-sky-700",     dot: "bg-sky-500",     border: "border-sky-200" },
-  paid:       { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
+  uninvoiced:   { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400",   border: "border-amber-200" },
+  consolidated: { bg: "bg-violet-50",  text: "text-violet-700",  dot: "bg-violet-500",  border: "border-violet-200" },
+  invoiced:     { bg: "bg-sky-50",     text: "text-sky-700",     dot: "bg-sky-500",     border: "border-sky-200" },
+  paid:         { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
 };
 
 const STATUS_FILTERS: { id: "all" | SaleStatus; label: string }[] = [
-  { id: "all",        label: "全て" },
-  { id: "uninvoiced", label: "未請求" },
-  { id: "invoiced",   label: "請求済" },
-  { id: "paid",       label: "入金済" },
+  { id: "all",          label: "全て" },
+  { id: "uninvoiced",   label: "未請求" },
+  { id: "consolidated", label: "統合済み" },
+  { id: "invoiced",     label: "請求済" },
+  { id: "paid",         label: "入金済" },
 ];
 
 export default function BillingPage() {
@@ -68,6 +70,7 @@ export default function BillingPage() {
       itemCount: number;
       subtotal: number;
       uninvoiced: number;
+      consolidated: number;
       invoiced: number;
       paid: number;
     };
@@ -84,6 +87,7 @@ export default function BillingPage() {
         itemCount: 0,
         subtotal: 0,
         uninvoiced: 0,
+        consolidated: 0,
         invoiced: 0,
         paid: 0,
       };
@@ -100,22 +104,27 @@ export default function BillingPage() {
     return Array.from(map.values()).sort((a, b) => b.month.localeCompare(a.month));
   }, [sales]);
 
-  // 行ごとのステータス（未請求 > 請求済 > 入金済）
-  const rowStatus = (row: { uninvoiced: number; invoiced: number; paid: number }): SaleStatus => {
-    if (row.uninvoiced > 0) return "uninvoiced";
-    if (row.invoiced > 0) return "invoiced";
+  // 行ごとのステータス（未請求 > 統合済み > 請求済 > 入金済）
+  const rowStatus = (row: { uninvoiced: number; consolidated: number; invoiced: number; paid: number }): SaleStatus => {
+    if (row.uninvoiced > 0)   return "uninvoiced";
+    if (row.consolidated > 0) return "consolidated";
+    if (row.invoiced > 0)     return "invoiced";
     return "paid";
   };
 
   // KPI集計（フィルターなし・全体）
   const kpi = useMemo(() => {
-    const totals = { uninvoiced: 0, invoiced: 0, paid: 0, uninvoicedCount: 0, invoicedCount: 0, paidCount: 0 };
+    const totals = {
+      uninvoiced: 0, consolidated: 0, invoiced: 0, paid: 0,
+      uninvoicedCount: 0, consolidatedCount: 0, invoicedCount: 0, paidCount: 0,
+    };
     for (const row of invoiceRows) {
       const st = rowStatus(row);
       const withTax = row.subtotal + Math.round(row.subtotal * 0.1);
-      if (st === "uninvoiced") { totals.uninvoiced += withTax; totals.uninvoicedCount++; }
-      else if (st === "invoiced") { totals.invoiced += withTax; totals.invoicedCount++; }
-      else { totals.paid += withTax; totals.paidCount++; }
+      if (st === "uninvoiced")   { totals.uninvoiced   += withTax; totals.uninvoicedCount++; }
+      else if (st === "consolidated") { totals.consolidated += withTax; totals.consolidatedCount++; }
+      else if (st === "invoiced")     { totals.invoiced     += withTax; totals.invoicedCount++; }
+      else                            { totals.paid         += withTax; totals.paidCount++; }
     }
     return totals;
   }, [invoiceRows]);
@@ -166,6 +175,7 @@ export default function BillingPage() {
     setInvoiceNo("");
   };
 
+  const markConsolidatedByIds = useSalesStore((s) => s.markConsolidatedByIds);
   const selectedGroups = bizGroups.filter((g) => selectedBizIds.has(g.businessId));
   const subtotal = selectedGroups.reduce((sum, g) => sum + g.subtotal, 0);
   const tax = Math.round(subtotal * 0.1);
@@ -175,6 +185,12 @@ export default function BillingPage() {
     `/billing/${selectedCustomerId}-${month}/preview` +
     `?invoiceNo=${encodeURIComponent(resolvedInvoiceNo)}` +
     (selectedBizIds.size < bizGroups.length ? `&bizIds=${encodeURIComponent(bizIdsParam)}` : "");
+
+  const handleMarkConsolidated = () => {
+    const ids = selectedGroups.flatMap((g) => g.items.map((item) => item.id));
+    markConsolidatedByIds(ids);
+    handleBack();
+  };
 
   const selectedCustomer = demoCustomers.find((c) => c.id === selectedCustomerId);
 
@@ -297,18 +313,33 @@ export default function BillingPage() {
                       <span className="ml-1 text-xs font-normal text-zinc-500">（税込）</span>
                     </div>
                   </div>
-                  <Link
-                    href={previewHref}
-                    className={[
-                      "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
-                      selectedBizIds.size === 0
-                        ? "pointer-events-none bg-zinc-100 text-zinc-400"
-                        : "bg-accent text-white hover:bg-[#b91c1c]",
-                    ].join(" ")}
-                  >
-                    <FileText className="h-4 w-4" />
-                    請求書プレビュー
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={selectedBizIds.size === 0}
+                      onClick={handleMarkConsolidated}
+                      className={[
+                        "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                        selectedBizIds.size === 0
+                          ? "pointer-events-none bg-zinc-100 text-zinc-400"
+                          : "bg-violet-600 text-white hover:bg-violet-700",
+                      ].join(" ")}
+                    >
+                      統合済みにする
+                    </button>
+                    <Link
+                      href={previewHref}
+                      className={[
+                        "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+                        selectedBizIds.size === 0
+                          ? "pointer-events-none bg-zinc-100 text-zinc-400"
+                          : "bg-accent text-white hover:bg-[#b91c1c]",
+                      ].join(" ")}
+                    >
+                      <FileText className="h-4 w-4" />
+                      請求書プレビュー
+                    </Link>
+                  </div>
                 </div>
               </>
             )}
@@ -333,8 +364,8 @@ export default function BillingPage() {
       </div>
 
       {/* KPI カード（ステータス別・クリックでフィルター） */}
-      <div className="grid gap-3 md:grid-cols-3">
-        {(["uninvoiced", "invoiced", "paid"] as SaleStatus[]).map((st) => {
+      <div className="grid gap-3 md:grid-cols-4">
+        {(["uninvoiced", "consolidated", "invoiced", "paid"] as SaleStatus[]).map((st) => {
           const s = STATUS_STYLE[st];
           const amount = kpi[st];
           const count = kpi[`${st}Count` as keyof typeof kpi];

@@ -7,6 +7,7 @@ interface SalesStore {
   addSale: (sale: Sale) => void;
   updateSale: (id: string, patch: Partial<Omit<Sale, "id">>) => void;
   updateStatus: (id: string, status: SaleStatus) => void;
+  markConsolidatedByIds: (ids: string[]) => void;
   markInvoicedByIds: (ids: string[]) => void;
   markPaidByIds: (ids: string[]) => void;
 }
@@ -21,6 +22,12 @@ export const useSalesStore = create<SalesStore>((set) => ({
   updateStatus: (id, status) =>
     set((state) => ({
       sales: state.sales.map((sale) => (sale.id === id ? { ...sale, status } : sale)),
+    })),
+  markConsolidatedByIds: (ids) =>
+    set((state) => ({
+      sales: state.sales.map((sale) =>
+        ids.includes(sale.id) ? { ...sale, status: "consolidated" } : sale,
+      ),
     })),
   markInvoicedByIds: (ids) =>
     set((state) => ({

@@ -11,7 +11,7 @@ export interface Business {
   color: string
 }
 
-export type SaleStatus = 'uninvoiced' | 'invoiced' | 'paid'
+export type SaleStatus = 'uninvoiced' | 'consolidated' | 'invoiced' | 'paid'
 
 export type BusinessColor = 'blue' | 'green' | 'orange'
 

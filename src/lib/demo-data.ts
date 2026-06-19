@@ -18,9 +18,10 @@ export const businessColorClasses: Record<string, string> = {
 };
 
 export const statusLabels: Record<SaleStatus, string> = {
-  uninvoiced: "未請求",
-  invoiced: "請求済",
-  paid: "入金済",
+  uninvoiced:   "未請求",
+  consolidated: "統合済み",
+  invoiced:     "請求済",
+  paid:         "入金済",
 };
 
 export const formatYen = (value: number) =>
