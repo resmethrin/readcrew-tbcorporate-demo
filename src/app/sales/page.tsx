@@ -93,6 +93,7 @@ export default function SalesPage() {
   const filtered = useMemo(
     () =>
       sales.filter((s) => {
+        if (s.status !== "uninvoiced" && s.status !== "invoiced") return false;
         const bizMatch    = businessId === "all" || s.businessId === businessId;
         const statusMatch = status === "all"     || s.status === status;
         const monthMatch  = monthFilter === "all" || s.month === monthFilter;
@@ -104,7 +105,8 @@ export default function SalesPage() {
   const bizTotals = useMemo(() =>
     demoBusinesses.map((b) => {
       const items = sales.filter(
-        (s) => s.businessId === b.id && (status === "all" || s.status === status)
+        (s) => (s.status === "uninvoiced" || s.status === "invoiced") &&
+               s.businessId === b.id && (status === "all" || s.status === status)
       );
       return { ...b, total: items.reduce((n, s) => n + s.amount, 0), count: items.length };
     }),
