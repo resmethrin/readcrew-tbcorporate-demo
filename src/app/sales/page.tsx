@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { demoBusinesses, demoCustomers, formatMonth, formatYen, statusLabels } from "@/lib/demo-data";
+import { demoBusinesses, demoCustomers, formatMonth, formatYen, statusLabels, PERIOD_MONTHS } from "@/lib/demo-data";
 import { useSalesStore } from "@/store/useSalesStore";
 import type { SaleStatus } from "@/types";
 
@@ -39,10 +39,7 @@ export default function SalesPage() {
   const [monthFilter, setMonthFilter] = useState("all");
   const [selected, setSelected] = useState<string[]>([]);
 
-  const availableMonths = useMemo(() => {
-    const set = new Set(sales.map(s => s.month));
-    return Array.from(set).sort().reverse();
-  }, [sales]);
+  const availableMonths = PERIOD_MONTHS;
 
   const filtered = useMemo(
     () =>

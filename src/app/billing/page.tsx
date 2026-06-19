@@ -16,6 +16,7 @@ import {
   formatMonth,
   monthToLabel,
   statusLabels,
+  PERIOD_MONTHS,
 } from "@/lib/demo-data";
 import { useSalesStore } from "@/store/useSalesStore";
 import type { SaleStatus } from "@/types";
@@ -58,10 +59,7 @@ export default function BillingPage() {
     return map;
   }, [sales]);
 
-  const availableMonths = useMemo(() => {
-    const set = new Set(sales.map(s => s.month));
-    return Array.from(set).sort().reverse();
-  }, [sales]);
+  const availableMonths = PERIOD_MONTHS;
 
   // filtered customer stats - only customers with matching sales
   const filteredCustomerIds = useMemo(() => {

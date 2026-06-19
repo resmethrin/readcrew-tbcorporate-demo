@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { demoBusinesses, demoCustomers, formatMonth, formatYen, getBusinessName, statusLabels } from "@/lib/demo-data";
+import { demoBusinesses, demoCustomers, formatMonth, formatYen, getBusinessName, statusLabels, PERIOD_MONTHS } from "@/lib/demo-data";
 import { useSalesStore } from "@/store/useSalesStore";
 import type { SaleStatus } from "@/types";
 
@@ -29,10 +29,7 @@ export default function PaymentsPage() {
   const [monthFilter, setMonthFilter] = useState("all");
   const [bizFilter, setBizFilter] = useState("all");
 
-  const availableMonths = useMemo(() => {
-    const set = new Set(sales.map(s => s.month));
-    return Array.from(set).sort().reverse();
-  }, [sales]);
+  const availableMonths = PERIOD_MONTHS;
 
   // invoiced + paid のみ対象
   const paymentSales = useMemo(() =>

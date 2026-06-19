@@ -21,7 +21,7 @@ import {
   YAxis,
 } from "recharts";
 import { useSalesStore } from "@/store/useSalesStore";
-import { demoBusinesses, formatYen, formatMonth } from "@/lib/demo-data";
+import { demoBusinesses, formatYen, formatMonth, PERIOD_MONTHS } from "@/lib/demo-data";
 
 const MONTHLY_TARGET = 21_000_000;
 const FORECAST = 16_500_000;
@@ -54,10 +54,7 @@ export default function DashboardPage() {
   const sales = useSalesStore((s) => s.sales);
 
   const [monthFilter, setMonthFilter] = useState("all");
-  const availableMonths = useMemo(() => {
-    const set = new Set(sales.map((s) => s.month));
-    return Array.from(set).sort().reverse();
-  }, [sales]);
+  const availableMonths = PERIOD_MONTHS;
 
   const filteredSales = monthFilter === "all" ? sales : sales.filter((s) => s.month === monthFilter);
 

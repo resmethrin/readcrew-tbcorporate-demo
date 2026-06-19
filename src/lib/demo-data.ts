@@ -62,3 +62,6 @@ export const monthToLabel = (month: string) => {
   const [year, mm] = month.split("-");
   return `${year}年${Number(mm)}月`;
 };
+
+// 2026-01 から現在（デモ: 2026-06）までの全月リスト（新しい順）
+export const PERIOD_MONTHS = ["2026-06","2026-05","2026-04","2026-03","2026-02","2026-01"];
