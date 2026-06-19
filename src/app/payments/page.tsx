@@ -59,6 +59,7 @@ export default function PaymentsPage() {
       consolidated: number;
       invoiced: number;
       paid: number;
+      confirmer: string;
     };
     const map = new Map<string, Row>();
     for (const sale of sales) {
@@ -78,6 +79,7 @@ export default function PaymentsPage() {
         consolidated: 0,
         invoiced: 0,
         paid: 0,
+        confirmer: sale.assignee ?? "—",
       };
       if (!row.bizIds.includes(sale.businessId)) {
         row.bizIds.push(sale.businessId);
@@ -261,9 +263,9 @@ export default function PaymentsPage() {
                 <TableHead className="text-xs font-medium text-zinc-400">請求番号</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">顧客</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">件名</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400">請求日</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400">入金期限</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">請求日 / 入金期限</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400 text-right">金額（税込）</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">確認者</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">ステータス</TableHead>
                 <TableHead className="pr-5" />
               </TableRow>
@@ -322,11 +324,14 @@ export default function PaymentsPage() {
                           </div>
                         </button>
                       </TableCell>
-                      <TableCell className="text-sm text-zinc-500 tabular-nums">{invoiceDateLabel(row.month)}</TableCell>
-                      <TableCell className="text-sm tabular-nums text-zinc-600">{dueDateLabel(row.month)}</TableCell>
+                      <TableCell>
+                        <div className="text-xs text-zinc-500 tabular-nums">{invoiceDateLabel(row.month)}</div>
+                        <div className="text-xs text-zinc-400 tabular-nums mt-0.5">{dueDateLabel(row.month)}</div>
+                      </TableCell>
                       <TableCell className="text-right font-semibold text-zinc-900 tabular-nums">
                         {formatYen(total)}
                       </TableCell>
+                      <TableCell className="text-sm text-zinc-500">{row.confirmer}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${rowStyle.bg} ${rowStyle.text} ${rowStyle.border}`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${rowStyle.dot}`} />
