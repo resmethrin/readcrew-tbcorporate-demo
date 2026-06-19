@@ -11,7 +11,7 @@ export interface Business {
   color: string
 }
 
-export type SaleStatus = 'uninvoiced' | 'invoiced' | 'paid'
+export type SaleStatus = 'uninvoiced' | 'consolidated' | 'invoiced' | 'paid'
 
 export type BusinessColor = 'blue' | 'green' | 'orange'
 
@@ -25,6 +25,7 @@ export interface Sale {
   unitPrice?: number
   month: string
   status: SaleStatus
+  assignee?: string
 }
 
 export interface InvoiceGroup {

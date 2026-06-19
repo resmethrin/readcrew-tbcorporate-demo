@@ -1,20 +1,722 @@
 [
-  { "id": "s001", "customerId": "c001", "businessId": "b001", "description": "エアコン設置一式", "amount": 320000, "month": "2026-06", "status": "paid" },
-  { "id": "s002", "customerId": "c001", "businessId": "b001", "description": "制御盤更新工事", "amount": 180000, "month": "2026-06", "status": "invoiced" },
-  { "id": "s003", "customerId": "c001", "businessId": "b002", "description": "月額保守費6月分", "amount": 80000, "month": "2026-06", "status": "uninvoiced" },
-  { "id": "s004", "customerId": "c001", "businessId": "b002", "description": "機器点検作業", "amount": 45000, "month": "2026-06", "status": "uninvoiced" },
-  { "id": "s005", "customerId": "c001", "businessId": "b003", "description": "電気設備点検", "amount": 150000, "month": "2026-06", "status": "invoiced" },
-  { "id": "s006", "customerId": "c001", "businessId": "b003", "description": "配管工事", "amount": 220000, "month": "2026-06", "status": "uninvoiced" },
-  { "id": "s007", "customerId": "c002", "businessId": "b001", "description": "空調システム導入", "amount": 580000, "month": "2026-06", "status": "paid" },
-  { "id": "s008", "customerId": "c002", "businessId": "b001", "description": "電動シャッター設置", "amount": 95000, "month": "2026-06", "status": "uninvoiced" },
-  { "id": "s009", "customerId": "c002", "businessId": "b002", "description": "定期メンテナンス", "amount": 60000, "month": "2026-06", "status": "invoiced" },
-  { "id": "s010", "customerId": "c002", "businessId": "b002", "description": "緊急対応費", "amount": 30000, "month": "2026-06", "status": "uninvoiced" },
-  { "id": "s011", "customerId": "c002", "businessId": "b003", "description": "内装工事", "amount": 340000, "month": "2026-06", "status": "uninvoiced" },
-  { "id": "s012", "customerId": "c002", "businessId": "b003", "description": "設備移設", "amount": 180000, "month": "2026-06", "status": "invoiced" },
-  { "id": "s013", "customerId": "c003", "businessId": "b001", "description": "産業用設備納品", "amount": 720000, "month": "2026-06", "status": "paid" },
-  { "id": "s014", "customerId": "c003", "businessId": "b001", "description": "制御システム", "amount": 430000, "month": "2026-06", "status": "uninvoiced" },
-  { "id": "s015", "customerId": "c003", "businessId": "b002", "description": "月次保守契約", "amount": 120000, "month": "2026-06", "status": "invoiced" },
-  { "id": "s016", "customerId": "c003", "businessId": "b002", "description": "設備診断", "amount": 55000, "month": "2026-06", "status": "uninvoiced" },
-  { "id": "s017", "customerId": "c003", "businessId": "b003", "description": "改修工事", "amount": 890000, "month": "2026-06", "status": "uninvoiced" },
-  { "id": "s018", "customerId": "c003", "businessId": "b003", "description": "基礎工事", "amount": 650000, "month": "2026-06", "status": "uninvoiced" }
+  {
+    "id": "s001",
+    "customerId": "c001",
+    "businessId": "b001",
+    "description": "エアコン設置一式",
+    "amount": 320000,
+    "month": "2026-06",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s002",
+    "customerId": "c001",
+    "businessId": "b001",
+    "description": "制御盤更新工事",
+    "amount": 180000,
+    "month": "2026-06",
+    "status": "invoiced",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s003",
+    "customerId": "c001",
+    "businessId": "b002",
+    "description": "月額保守費6月分",
+    "amount": 80000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s004",
+    "customerId": "c001",
+    "businessId": "b002",
+    "description": "機器点検作業",
+    "amount": 45000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s005",
+    "customerId": "c001",
+    "businessId": "b003",
+    "description": "電気設備点検",
+    "amount": 150000,
+    "month": "2026-06",
+    "status": "invoiced",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s006",
+    "customerId": "c001",
+    "businessId": "b003",
+    "description": "配管工事",
+    "amount": 220000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s007",
+    "customerId": "c002",
+    "businessId": "b001",
+    "description": "空調システム導入",
+    "amount": 580000,
+    "month": "2026-06",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s008",
+    "customerId": "c002",
+    "businessId": "b001",
+    "description": "電動シャッター設置",
+    "amount": 95000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s009",
+    "customerId": "c002",
+    "businessId": "b002",
+    "description": "定期メンテナンス",
+    "amount": 60000,
+    "month": "2026-06",
+    "status": "invoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s010",
+    "customerId": "c002",
+    "businessId": "b002",
+    "description": "緊急対応費",
+    "amount": 30000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s011",
+    "customerId": "c002",
+    "businessId": "b003",
+    "description": "内装工事",
+    "amount": 340000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s012",
+    "customerId": "c002",
+    "businessId": "b003",
+    "description": "設備移設",
+    "amount": 180000,
+    "month": "2026-06",
+    "status": "invoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s013",
+    "customerId": "c003",
+    "businessId": "b001",
+    "description": "産業用設備納品",
+    "amount": 720000,
+    "month": "2026-06",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s014",
+    "customerId": "c003",
+    "businessId": "b001",
+    "description": "制御システム",
+    "amount": 430000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s015",
+    "customerId": "c003",
+    "businessId": "b002",
+    "description": "月次保守契約",
+    "amount": 120000,
+    "month": "2026-06",
+    "status": "invoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s016",
+    "customerId": "c003",
+    "businessId": "b002",
+    "description": "設備診断",
+    "amount": 55000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s017",
+    "customerId": "c003",
+    "businessId": "b003",
+    "description": "改修工事",
+    "amount": 890000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s018",
+    "customerId": "c003",
+    "businessId": "b003",
+    "description": "基礎工事",
+    "amount": 650000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s064",
+    "customerId": "c001",
+    "businessId": "b001",
+    "description": "空調機器更新",
+    "amount": 1200000,
+    "month": "2026-06",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s065",
+    "customerId": "c001",
+    "businessId": "b001",
+    "description": "制御システム導入",
+    "amount": 850000,
+    "month": "2026-06",
+    "status": "invoiced",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s066",
+    "customerId": "c001",
+    "businessId": "b003",
+    "description": "電気工事一式",
+    "amount": 1400000,
+    "month": "2026-06",
+    "status": "invoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s067",
+    "customerId": "c002",
+    "businessId": "b001",
+    "description": "産業用設備設置",
+    "amount": 1600000,
+    "month": "2026-06",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s068",
+    "customerId": "c002",
+    "businessId": "b001",
+    "description": "空調設備工事",
+    "amount": 900000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s069",
+    "customerId": "c002",
+    "businessId": "b003",
+    "description": "設備増設工事",
+    "amount": 1250000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s070",
+    "customerId": "c003",
+    "businessId": "b001",
+    "description": "電気系統更新",
+    "amount": 1800000,
+    "month": "2026-06",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s071",
+    "customerId": "c003",
+    "businessId": "b002",
+    "description": "保守診断費",
+    "amount": 320000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s072",
+    "customerId": "c003",
+    "businessId": "b003",
+    "description": "外構改修工事",
+    "amount": 1350000,
+    "month": "2026-06",
+    "status": "uninvoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s019",
+    "customerId": "c001",
+    "businessId": "b001",
+    "description": "空調更新工事",
+    "amount": 1800000,
+    "month": "2026-05",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s020",
+    "customerId": "c001",
+    "businessId": "b002",
+    "description": "保守費5月分",
+    "amount": 490000,
+    "month": "2026-05",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s021",
+    "customerId": "c001",
+    "businessId": "b003",
+    "description": "設備工事",
+    "amount": 2010000,
+    "month": "2026-05",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s022",
+    "customerId": "c002",
+    "businessId": "b001",
+    "description": "空調設備導入",
+    "amount": 2410000,
+    "month": "2026-05",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s023",
+    "customerId": "c002",
+    "businessId": "b002",
+    "description": "月次メンテナンス",
+    "amount": 510000,
+    "month": "2026-05",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s024",
+    "customerId": "c002",
+    "businessId": "b003",
+    "description": "内装工事",
+    "amount": 1990000,
+    "month": "2026-05",
+    "status": "invoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s025",
+    "customerId": "c003",
+    "businessId": "b001",
+    "description": "産業設備更新",
+    "amount": 2490000,
+    "month": "2026-05",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s026",
+    "customerId": "c003",
+    "businessId": "b002",
+    "description": "設備診断費",
+    "amount": 600000,
+    "month": "2026-05",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s027",
+    "customerId": "c003",
+    "businessId": "b003",
+    "description": "大規模改修工事",
+    "amount": 2500000,
+    "month": "2026-05",
+    "status": "invoiced",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s028",
+    "customerId": "c001",
+    "businessId": "b001",
+    "description": "電気設備工事",
+    "amount": 2050000,
+    "month": "2026-04",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s029",
+    "customerId": "c001",
+    "businessId": "b002",
+    "description": "保守費4月分",
+    "amount": 400000,
+    "month": "2026-04",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s030",
+    "customerId": "c001",
+    "businessId": "b003",
+    "description": "設備増設工事",
+    "amount": 1620000,
+    "month": "2026-04",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s031",
+    "customerId": "c002",
+    "businessId": "b001",
+    "description": "制御盤更新",
+    "amount": 1960000,
+    "month": "2026-04",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s032",
+    "customerId": "c002",
+    "businessId": "b002",
+    "description": "設備診断費",
+    "amount": 420000,
+    "month": "2026-04",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s033",
+    "customerId": "c002",
+    "businessId": "b003",
+    "description": "工場設備工事",
+    "amount": 1620000,
+    "month": "2026-04",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s034",
+    "customerId": "c003",
+    "businessId": "b001",
+    "description": "電気工事一式",
+    "amount": 2060000,
+    "month": "2026-04",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s035",
+    "customerId": "c003",
+    "businessId": "b002",
+    "description": "定期保守費",
+    "amount": 480000,
+    "month": "2026-04",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s036",
+    "customerId": "c003",
+    "businessId": "b003",
+    "description": "施設改修工事",
+    "amount": 1490000,
+    "month": "2026-04",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s037",
+    "customerId": "c001",
+    "businessId": "b001",
+    "description": "電気設備工事",
+    "amount": 2050000,
+    "month": "2026-03",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s038",
+    "customerId": "c001",
+    "businessId": "b002",
+    "description": "保守費3月分",
+    "amount": 430000,
+    "month": "2026-03",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s039",
+    "customerId": "c001",
+    "businessId": "b003",
+    "description": "設備増設工事",
+    "amount": 1820000,
+    "month": "2026-03",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s040",
+    "customerId": "c002",
+    "businessId": "b001",
+    "description": "空調システム更新",
+    "amount": 2140000,
+    "month": "2026-03",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s041",
+    "customerId": "c002",
+    "businessId": "b002",
+    "description": "定期点検費",
+    "amount": 460000,
+    "month": "2026-03",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s042",
+    "customerId": "c002",
+    "businessId": "b003",
+    "description": "改修工事",
+    "amount": 1800000,
+    "month": "2026-03",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s043",
+    "customerId": "c003",
+    "businessId": "b001",
+    "description": "産業機器納品",
+    "amount": 2210000,
+    "month": "2026-03",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s044",
+    "customerId": "c003",
+    "businessId": "b002",
+    "description": "月次保守費",
+    "amount": 510000,
+    "month": "2026-03",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s045",
+    "customerId": "c003",
+    "businessId": "b003",
+    "description": "基礎設備工事",
+    "amount": 1780000,
+    "month": "2026-03",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s046",
+    "customerId": "c001",
+    "businessId": "b001",
+    "description": "制御設備更新",
+    "amount": 1620000,
+    "month": "2026-02",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s047",
+    "customerId": "c001",
+    "businessId": "b002",
+    "description": "保守費2月分",
+    "amount": 340000,
+    "month": "2026-02",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s048",
+    "customerId": "c001",
+    "businessId": "b003",
+    "description": "配管工事",
+    "amount": 1440000,
+    "month": "2026-02",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s049",
+    "customerId": "c002",
+    "businessId": "b001",
+    "description": "空調設備入れ替え",
+    "amount": 1700000,
+    "month": "2026-02",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s050",
+    "customerId": "c002",
+    "businessId": "b002",
+    "description": "月次メンテナンス",
+    "amount": 370000,
+    "month": "2026-02",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s051",
+    "customerId": "c002",
+    "businessId": "b003",
+    "description": "外壁工事",
+    "amount": 1130000,
+    "month": "2026-02",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s052",
+    "customerId": "c003",
+    "businessId": "b001",
+    "description": "電気系統整備",
+    "amount": 1780000,
+    "month": "2026-02",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s053",
+    "customerId": "c003",
+    "businessId": "b002",
+    "description": "設備点検費",
+    "amount": 390000,
+    "month": "2026-02",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s054",
+    "customerId": "c003",
+    "businessId": "b003",
+    "description": "内装改装工事",
+    "amount": 1730000,
+    "month": "2026-02",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s055",
+    "customerId": "c001",
+    "businessId": "b001",
+    "description": "エアコン更新工事",
+    "amount": 1800000,
+    "month": "2026-01",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s056",
+    "customerId": "c001",
+    "businessId": "b002",
+    "description": "保守費1月分",
+    "amount": 380000,
+    "month": "2026-01",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s057",
+    "customerId": "c001",
+    "businessId": "b003",
+    "description": "改修工事一式",
+    "amount": 1600000,
+    "month": "2026-01",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s058",
+    "customerId": "c002",
+    "businessId": "b001",
+    "description": "電気設備工事",
+    "amount": 1920000,
+    "month": "2026-01",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s059",
+    "customerId": "c002",
+    "businessId": "b002",
+    "description": "定期メンテナンス",
+    "amount": 420000,
+    "month": "2026-01",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s060",
+    "customerId": "c002",
+    "businessId": "b003",
+    "description": "設備移設工事",
+    "amount": 1280000,
+    "month": "2026-01",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  },
+  {
+    "id": "s061",
+    "customerId": "c003",
+    "businessId": "b001",
+    "description": "産業設備導入",
+    "amount": 2080000,
+    "month": "2026-01",
+    "status": "paid",
+    "assignee": "田村 誠"
+  },
+  {
+    "id": "s062",
+    "customerId": "c003",
+    "businessId": "b002",
+    "description": "年次点検費",
+    "amount": 400000,
+    "month": "2026-01",
+    "status": "paid",
+    "assignee": "中村 あかり"
+  },
+  {
+    "id": "s063",
+    "customerId": "c003",
+    "businessId": "b003",
+    "description": "工場改修工事",
+    "amount": 1920000,
+    "month": "2026-01",
+    "status": "paid",
+    "assignee": "佐藤 健太"
+  }
 ]
