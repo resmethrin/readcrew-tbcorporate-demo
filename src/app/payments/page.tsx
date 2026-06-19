@@ -149,23 +149,6 @@ export default function PaymentsPage() {
           <h1 className="mt-1 text-xl font-semibold text-zinc-900">入金管理</h1>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleBulkPaid}
-            disabled={selected.size === 0}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-              selected.size > 0
-                ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                : "bg-zinc-100 text-zinc-400 cursor-not-allowed"
-            }`}
-          >
-            まとめて入金済にする
-            {selected.size > 0 && (
-              <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-xs font-bold leading-none">
-                {selected.size}
-              </span>
-            )}
-          </button>
           <Button variant="outline">
             <Upload className="h-4 w-4" />
             CSV出力
@@ -253,6 +236,25 @@ export default function PaymentsPage() {
           </div>
         </CardHeader>
         <CardContent className="px-0 pb-0 pt-4">
+          <div className="flex items-center justify-between px-5 pb-3">
+            <button
+              type="button"
+              onClick={handleBulkPaid}
+              disabled={selected.size === 0}
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+                selected.size > 0
+                  ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                  : "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+              }`}
+            >
+              まとめて入金済にする
+              {selected.size > 0 && (
+                <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-xs font-bold leading-none">
+                  {selected.size}
+                </span>
+              )}
+            </button>
+          </div>
           <Table>
             <TableHeader>
               <TableRow className="border-zinc-100 hover:bg-transparent">
