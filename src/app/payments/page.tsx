@@ -283,7 +283,7 @@ export default function PaymentsPage() {
                 <TableHead className="text-xs font-medium text-zinc-400">請求番号</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">顧客</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">件名</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400">期間</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">請求日</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">入金期限</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400 text-right">金額（税込）</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">ステータス</TableHead>
