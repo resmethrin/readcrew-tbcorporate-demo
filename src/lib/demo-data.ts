@@ -67,6 +67,13 @@ export const monthToLabel = (month: string) => {
 // 2026-01 から現在（デモ: 2026-06）までの全月リスト（新しい順）
 export const PERIOD_MONTHS = ["2026-06","2026-05","2026-04","2026-03","2026-02","2026-01"];
 
+// 当月末を "YYYY年M月D日" 形式で返す（請求日）
+export const invoiceDateLabel = (month: string): string => {
+  const [y, m] = month.split("-").map(Number);
+  const days = new Date(y, m, 0).getDate();
+  return `${y}年${m}月${days}日`;
+};
+
 // 翌月末を "YYYY年M月D日" 形式で返す
 export const dueDateLabel = (month: string): string => {
   const [y, m] = month.split("-").map(Number);

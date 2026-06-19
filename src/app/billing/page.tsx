@@ -14,6 +14,7 @@ import {
   getBusinessName,
   getCustomerName,
   groupSalesByBusiness,
+  invoiceDateLabel,
   invoiceNumberForMonth,
   formatMonth,
   monthToLabel,
@@ -498,7 +499,7 @@ export default function BillingPage() {
                       <div className="text-sm text-zinc-700">{subject}</div>
                       <div className="text-xs text-zinc-400">{row.itemCount}件</div>
                     </TableCell>
-                    <TableCell className="text-sm text-zinc-500 tabular-nums">{formatMonth(row.month)}</TableCell>
+                    <TableCell className="text-sm text-zinc-500 tabular-nums">{invoiceDateLabel(row.month)}</TableCell>
                     <TableCell className="text-right font-semibold text-zinc-900 tabular-nums">
                       {formatYen(total)}
                     </TableCell>
