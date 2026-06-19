@@ -33,6 +33,7 @@ const statusFilters: { id: "all" | SaleStatus; label: string }[] = [
 export default function SalesPage() {
   const sales = useSalesStore((s) => s.sales);
   const markInvoicedByIds = useSalesStore((s) => s.markInvoicedByIds);
+  const markPaidByIds = useSalesStore((s) => s.markPaidByIds);
   const [businessId, setBusinessId] = useState("all");
   const [status, setStatus] = useState<"all" | SaleStatus>("all");
   const [selected, setSelected] = useState<string[]>([]);
@@ -61,6 +62,11 @@ export default function SalesPage() {
     setSelected((cur) => cur.includes(id) ? cur.filter((v) => v !== id) : [...cur, id]);
 
   const allFilteredIds = filtered.map((s) => s.id);
+
+  // 選択中アイテムのステータス分類
+  const selectedSales = sales.filter((s) => selected.includes(s.id));
+  const hasUninvoiced = selectedSales.some((s) => s.status === "uninvoiced");
+  const hasInvoiced   = selectedSales.some((s) => s.status === "invoiced");
   const allChecked = allFilteredIds.length > 0 && allFilteredIds.every((id) => selected.includes(id));
   const toggleAll = () =>
     setSelected(allChecked ? selected.filter((id) => !allFilteredIds.includes(id)) : [...new Set([...selected, ...allFilteredIds])]);
@@ -180,15 +186,44 @@ export default function SalesPage() {
 
             {/* 一括操作 */}
             {selected.length > 0 && (
-              <div className="ml-auto flex items-center gap-3">
-                <span className="text-xs text-zinc-500">{selected.length}件選択</span>
-                <button
-                  type="button"
-                  onClick={() => { markInvoicedByIds(selected); setSelected([]); }}
-                  className="rounded-lg bg-[#0071e3] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#005fc2]"
-                >
-                  請求処理へ
-                </button>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600">
+                  {selected.length}件選択中
+                </span>
+                {hasUninvoiced && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      markInvoicedByIds(selected.filter((id) => sales.find((s) => s.id === id)?.status === "uninvoiced"));
+                      setSelected([]);
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100"
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      <span className="rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-white">未請求</span>
+                      <ArrowRight className="h-3 w-3 text-blue-400" />
+                      <span className="rounded-full bg-[#0071e3] px-1.5 py-0.5 text-[10px] font-bold text-white">請求済</span>
+                    </span>
+                    にする
+                  </button>
+                )}
+                {hasInvoiced && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      markPaidByIds(selected.filter((id) => sales.find((s) => s.id === id)?.status === "invoiced"));
+                      setSelected([]);
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-100"
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      <span className="rounded-full bg-[#0071e3] px-1.5 py-0.5 text-[10px] font-bold text-white">請求済</span>
+                      <ArrowRight className="h-3 w-3 text-emerald-400" />
+                      <span className="rounded-full bg-emerald-500 px-1.5 py-0.5 text-[10px] font-bold text-white">入金済</span>
+                    </span>
+                    にする
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -248,12 +283,12 @@ export default function SalesPage() {
                       </span>
                     </TableCell>
                     <TableCell className="pr-6 text-right">
-                      <button
-                        type="button"
+                      <Link
+                        href={`/sales/new?id=${sale.id}`}
                         className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800"
                       >
                         詳細 <ArrowRight className="h-3 w-3" />
-                      </button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 );

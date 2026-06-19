@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Plus, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { demoBusinesses, demoCustomers, formatYen } from "@/lib/demo-data";
@@ -182,13 +182,25 @@ function InvoicePreview({
 /* ─── メインページ ─── */
 export default function NewSalePage() {
   const router = useRouter();
-  const addSale = useSalesStore((s) => s.addSale);
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("id");
 
-  const [customerId, setCustomerId]   = useState("");
-  const [businessId, setBusinessId]   = useState(demoBusinesses[0]?.id ?? "");
-  const [invoiceDate, setInvoiceDate] = useState(TODAY);
-  const [subject, setSubject]         = useState("");
-  const [lines, setLines]             = useState<LineItem[]>([newLine()]);
+  const sales    = useSalesStore((s) => s.sales);
+  const addSale  = useSalesStore((s) => s.addSale);
+  const updateSale = useSalesStore((s) => s.updateSale);
+
+  const editSale = editId ? sales.find((s) => s.id === editId) : null;
+  const isEdit   = Boolean(editSale);
+
+  const [customerId, setCustomerId]   = useState(editSale?.customerId ?? "");
+  const [businessId, setBusinessId]   = useState(editSale?.businessId ?? demoBusinesses[0]?.id ?? "");
+  const [invoiceDate, setInvoiceDate] = useState(editSale ? `${editSale.month}-01` : TODAY);
+  const [subject, setSubject]         = useState(editSale?.description ?? "");
+  const [lines, setLines]             = useState<LineItem[]>(
+    editSale
+      ? [{ id: crypto.randomUUID(), description: editSale.description, qty: editSale.qty ?? 1, unit: "式", unitPrice: editSale.unitPrice ?? editSale.amount, taxRate: 10 }]
+      : [newLine()]
+  );
   const [notes, setNotes]             = useState("");
   const [memo, setMemo]               = useState("");
   const [errors, setErrors]           = useState<Record<string, string>>({});
@@ -227,21 +239,36 @@ export default function NewSalePage() {
   const handleSave = () => {
     if (!validate()) return;
     const month = invoiceDate.slice(0, 7);
-    lines
-      .filter((l) => l.description.trim())
-      .forEach((l) => {
-        addSale({
-          id: `s${Date.now()}-${l.id.slice(0, 6)}`,
+    if (isEdit && editSale) {
+      const firstLine = lines.find((l) => l.description.trim());
+      if (firstLine) {
+        updateSale(editSale.id, {
           customerId,
           businessId,
-          description: l.description,
-          amount: l.qty * l.unitPrice,
-          qty: l.qty,
-          unitPrice: l.unitPrice,
+          description: firstLine.description,
+          amount: firstLine.qty * firstLine.unitPrice,
+          qty: firstLine.qty,
+          unitPrice: firstLine.unitPrice,
           month,
-          status: "uninvoiced",
         });
-      });
+      }
+    } else {
+      lines
+        .filter((l) => l.description.trim())
+        .forEach((l) => {
+          addSale({
+            id: `s${Date.now()}-${l.id.slice(0, 6)}`,
+            customerId,
+            businessId,
+            description: l.description,
+            amount: l.qty * l.unitPrice,
+            qty: l.qty,
+            unitPrice: l.unitPrice,
+            month,
+            status: "uninvoiced",
+          });
+        });
+    }
     router.push("/sales");
   };
 
@@ -258,7 +285,7 @@ export default function NewSalePage() {
         </button>
         <div>
           <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Sales</p>
-          <h1 className="mt-0.5 text-xl font-semibold text-zinc-900">売上登録</h1>
+          <h1 className="mt-0.5 text-xl font-semibold text-zinc-900">{isEdit ? "売上編集" : "売上登録"}</h1>
         </div>
       </div>
 
@@ -488,7 +515,7 @@ export default function NewSalePage() {
               onClick={handleSave}
               className="rounded-xl bg-[#0071e3] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#005fc2]"
             >
-              保存する
+              {isEdit ? "更新する" : "保存する"}
             </button>
             <button
               type="button"
