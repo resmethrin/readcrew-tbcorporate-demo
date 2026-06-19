@@ -41,7 +41,6 @@ const STATUS_FILTERS: { id: "all" | SaleStatus; label: string }[] = [
   { id: "uninvoiced",   label: "未請求" },
   { id: "consolidated", label: "統合済み" },
   { id: "invoiced",     label: "請求済" },
-  { id: "paid",         label: "入金済" },
 ];
 
 export default function BillingPage() {
@@ -129,10 +128,11 @@ export default function BillingPage() {
     return totals;
   }, [invoiceRows]);
 
-  // フィルター適用
+  // フィルター適用（入金済みは非表示）
   const filtered = useMemo(() =>
     invoiceRows.filter((row) => {
       const st = rowStatus(row);
+      if (st === "paid") return false;
       return (
         (monthFilter === "all" || row.month === monthFilter) &&
         (bizFilter === "all" || row.bizIds.includes(bizFilter)) &&
@@ -364,8 +364,8 @@ export default function BillingPage() {
       </div>
 
       {/* KPI カード（ステータス別・クリックでフィルター） */}
-      <div className="grid gap-3 md:grid-cols-4">
-        {(["uninvoiced", "consolidated", "invoiced", "paid"] as SaleStatus[]).map((st) => {
+      <div className="grid gap-3 md:grid-cols-3">
+        {(["uninvoiced", "consolidated", "invoiced"] as SaleStatus[]).map((st) => {
           const s = STATUS_STYLE[st];
           const amount = kpi[st];
           const count = kpi[`${st}Count` as keyof typeof kpi];
