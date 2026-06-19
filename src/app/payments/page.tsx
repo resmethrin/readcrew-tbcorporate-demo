@@ -4,10 +4,10 @@ import { useMemo, useState } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   demoBusinesses,
-  demoCustomers,
   formatMonth,
   formatYen,
   getCustomerName,
@@ -29,7 +29,6 @@ const STATUS_STYLE: Record<"invoiced" | "paid", { bg: string; text: string; dot:
   paid:     { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
 };
 
-
 export default function PaymentsPage() {
   const sales = useSalesStore((s) => s.sales);
   const markPaidByIds = useSalesStore((s) => s.markPaidByIds);
@@ -37,6 +36,7 @@ export default function PaymentsPage() {
   const [monthFilter, setMonthFilter] = useState("all");
   const [bizFilter, setBizFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "invoiced" | "paid">("all");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   // 請求一覧と同じ「顧客×月」集計
   const invoiceRows = useMemo(() => {
@@ -90,8 +90,6 @@ export default function PaymentsPage() {
     return Array.from(map.values()).sort((a, b) => b.month.localeCompare(a.month));
   }, [sales]);
 
-  // invoiced または paid が1件以上ある行を対象
-  // 同一行内にステータス混在する場合: invoiced>0 → 請求済（入金待ち）、全て paid → 入金済
   const paymentRowStatus = (row: { invoiced: number; paid: number }): "invoiced" | "paid" =>
     row.invoiced > 0 ? "invoiced" : "paid";
 
@@ -106,12 +104,36 @@ export default function PaymentsPage() {
     });
   }, [invoiceRows, monthFilter, bizFilter, statusFilter]);
 
-  const paidRows     = useMemo(() => paymentRows.filter((r) => paymentRowStatus(r) === "paid"), [paymentRows]);
-  const invoicedRows = useMemo(() => paymentRows.filter((r) => paymentRowStatus(r) === "invoiced"), [paymentRows]);
-  const paidTotal    = paidRows.reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0);
+  const paidRows      = useMemo(() => paymentRows.filter((r) => paymentRowStatus(r) === "paid"), [paymentRows]);
+  const invoicedRows  = useMemo(() => paymentRows.filter((r) => paymentRowStatus(r) === "invoiced"), [paymentRows]);
+  const paidTotal     = paidRows.reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0);
   const invoicedTotal = invoicedRows.reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0);
-  const paidCount    = paidRows.length;
-  const invoicedCount = invoicedRows.length;
+
+  // 選択操作（請求済み行のみ選択可）
+  const selectableIds = invoicedRows.map((r) => r.id);
+  const allChecked = selectableIds.length > 0 && selectableIds.every((id) => selected.has(id));
+  const someChecked = selectableIds.some((id) => selected.has(id));
+
+  const toggleRow = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const toggleAll = () =>
+    setSelected(allChecked
+      ? new Set([...selected].filter((id) => !selectableIds.includes(id)))
+      : new Set([...selected, ...selectableIds])
+    );
+
+  const handleBulkPaid = () => {
+    const ids = paymentRows
+      .filter((r) => selected.has(r.id))
+      .flatMap((r) => r.invoicedIds);
+    markPaidByIds(ids);
+    setSelected(new Set());
+  };
 
   return (
     <div className="space-y-6">
@@ -140,7 +162,7 @@ export default function PaymentsPage() {
             {statusFilter === "invoiced" && <span className="ml-auto text-[10px] font-medium text-sky-600">選択中</span>}
           </div>
           <p className="text-xl font-bold text-zinc-900 tracking-tight">{formatYen(invoicedTotal)}</p>
-          <p className="mt-0.5 text-xs text-zinc-400">{invoicedCount}件</p>
+          <p className="mt-0.5 text-xs text-zinc-400">{invoicedRows.length}件</p>
         </button>
         <button
           type="button"
@@ -153,7 +175,7 @@ export default function PaymentsPage() {
             {statusFilter === "paid" && <span className="ml-auto text-[10px] font-medium text-emerald-600">選択中</span>}
           </div>
           <p className="text-xl font-bold text-zinc-900 tracking-tight">{formatYen(paidTotal)}</p>
-          <p className="mt-0.5 text-xs text-zinc-400">{paidCount}件</p>
+          <p className="mt-0.5 text-xs text-zinc-400">{paidRows.length}件</p>
         </button>
       </div>
 
@@ -203,27 +225,42 @@ export default function PaymentsPage() {
               <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">ステータス</span>
               <div className="flex gap-1.5">
                 {([
-                  { id: "all",      label: "全て",           dot: null,             active_text: "text-zinc-900" },
-                  { id: "invoiced", label: "未入金（請求済）", dot: "bg-sky-500",     active_text: "text-sky-700" },
-                  { id: "paid",     label: "入金済",          dot: "bg-emerald-500", active_text: "text-emerald-700" },
-                ] as { id: "all" | "invoiced" | "paid"; label: string; dot: string | null; active_text: string }[]).map((item) => {
+                  { id: "all",      label: "全て" },
+                  { id: "invoiced", label: "未入金（請求済）" },
+                  { id: "paid",     label: "入金済" },
+                ] as { id: "all" | "invoiced" | "paid"; label: string }[]).map((item) => {
                   const active = statusFilter === item.id;
                   return (
                     <button key={item.id} type="button" onClick={() => setStatusFilter(item.id)}
-                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                         active
                           ? item.id === "invoiced" ? "bg-sky-50 text-sky-700"
                           : item.id === "paid"     ? "bg-emerald-50 text-emerald-700"
                           : "bg-zinc-900 text-white"
                           : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
                       }`}>
-                      {item.dot && active && <span className={`h-1.5 w-1.5 rounded-full ${item.dot}`} />}
                       {item.label}
                     </button>
                   );
                 })}
               </div>
             </div>
+
+            {/* 一括操作 */}
+            {selected.size > 0 && (
+              <div className="ml-auto flex items-center gap-2">
+                <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600">
+                  {selected.size}件選択中
+                </span>
+                <button
+                  type="button"
+                  onClick={handleBulkPaid}
+                  className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors"
+                >
+                  まとめて入金済にする
+                </button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -234,7 +271,15 @@ export default function PaymentsPage() {
           <Table>
             <TableHeader>
               <TableRow className="border-zinc-100 hover:bg-transparent">
-                <TableHead className="pl-5 text-xs font-medium text-zinc-400">請求番号</TableHead>
+                <TableHead className="w-10 pl-5">
+                  <Checkbox
+                    checked={allChecked}
+                    onCheckedChange={toggleAll}
+                    aria-label="全選択"
+                    className={someChecked && !allChecked ? "opacity-50" : ""}
+                  />
+                </TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">請求番号</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">顧客</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">件名</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">期間</TableHead>
@@ -246,7 +291,7 @@ export default function PaymentsPage() {
             <TableBody>
               {paymentRows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-12 text-center text-sm text-zinc-400">
+                  <TableCell colSpan={8} className="py-12 text-center text-sm text-zinc-400">
                     該当するデータがありません
                   </TableCell>
                 </TableRow>
@@ -258,9 +303,21 @@ export default function PaymentsPage() {
                 const subject = row.bizNames.length === 1
                   ? row.bizNames[0]
                   : `${row.bizNames[0]} 他${row.bizNames.length - 1}件`;
+                const isSelectable = st === "invoiced";
+                const isSelected = selected.has(row.id);
                 return (
-                  <TableRow key={row.id} className="border-zinc-50 hover:bg-zinc-50/50 transition-colors">
-                    <TableCell className="pl-5 font-mono text-xs text-zinc-500">
+                  <TableRow
+                    key={row.id}
+                    className={`border-zinc-50 transition-colors ${isSelected ? "bg-emerald-50/40" : "hover:bg-zinc-50/50"}`}
+                  >
+                    <TableCell className="pl-5">
+                      {isSelectable ? (
+                        <Checkbox checked={isSelected} onCheckedChange={() => toggleRow(row.id)} />
+                      ) : (
+                        <span className="inline-block h-4 w-4" />
+                      )}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-zinc-500">
                       {invoiceNumberForMonth(row.month)}
                     </TableCell>
                     <TableCell className="font-medium text-zinc-800">{row.customerName}</TableCell>
