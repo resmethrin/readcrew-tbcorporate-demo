@@ -2,19 +2,17 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  TrendingUp,
-  AlertCircle,
-  Clock,
+  AlertTriangle,
+  ArrowUpRight,
+  ChevronRight,
   FileText,
-  CheckCircle,
-  Loader2,
-  Circle,
+  TrendingUp,
 } from "lucide-react";
 import {
-  Bar,
-  BarChart,
+  Area,
+  AreaChart,
   CartesianGrid,
-  Cell,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -23,179 +21,285 @@ import {
 import { useSalesStore } from "@/store/useSalesStore";
 import { demoBusinesses, formatYen } from "@/lib/demo-data";
 
-const kpiCards = [
-  {
-    label: "今月売上",
-    value: "¥12,480,000",
-    sub: "先月比 +12.3%",
-    bar: "bg-red-600",
-    icon: TrendingUp,
-    iconColor: "text-red-600",
-    iconBg: "bg-red-50",
-    span: "xl:col-span-2",
-  },
-  {
-    label: "未請求",
-    value: null,
-    sub: "請求処理が必要です",
-    bar: "bg-amber-500",
-    icon: AlertCircle,
-    iconColor: "text-amber-600",
-    iconBg: "bg-amber-50",
-    span: "",
-  },
-  {
-    label: "未入金",
-    value: null,
-    sub: "回収要確認",
-    bar: "bg-blue-500",
-    icon: Clock,
-    iconColor: "text-blue-600",
-    iconBg: "bg-blue-50",
-    span: "",
-  },
-  {
-    label: "請求書発行待ち",
-    value: null,
-    sub: "今月締め切り",
-    bar: "bg-emerald-500",
-    icon: FileText,
-    iconColor: "text-emerald-600",
-    iconBg: "bg-emerald-50",
-    span: "",
-  },
+const MONTHLY_TARGET = 21_000_000;
+const FORECAST = 16_500_000;
+
+const trendData = [
+  { month: "12月", 実績: 9_200_000 },
+  { month: "1月",  実績: 11_800_000 },
+  { month: "2月",  実績: 10_500_000 },
+  { month: "3月",  実績: 13_200_000 },
+  { month: "4月",  実績: 12_100_000 },
+  { month: "5月",  実績: 14_800_000, 見込み: 14_800_000 },
+  { month: "6月",  実績: null,        見込み: 16_500_000 },
+  { month: "7月",  実績: null,        見込み: 17_200_000 },
 ];
 
-const closingStatus = [
-  { id: "b001", label: "設備販売事業", status: "done" },
-  { id: "b002", label: "保守サービス事業", status: "processing" },
-  { id: "b003", label: "工事関連事業", status: "pending" },
+const actionItems = [
+  { type: "overdue",  label: "株式会社ニシカワ — 電気設備点検",  amount: 150_000, note: "支払期日 6/15 超過（4日）" },
+  { type: "overdue",  label: "山田商事 — 定期メンテナンス",       amount: 60_000,  note: "支払期日 6/16 超過（3日）" },
+  { type: "deadline", label: "未請求 5件 — 6月末締め切り",        amount: null,    note: "今月末までに請求書を発行してください" },
+  { type: "forecast", label: "来月見込み受注 — 改修工事",         amount: 890_000, note: "契約確定待ち（工事関連事業）" },
 ];
+
+const bizAccent: Record<string, string> = {
+  b001: "#00B98E",
+  b002: "#2563EB",
+  b003: "#EA580C",
+};
 
 export default function DashboardPage() {
-  const sales = useSalesStore((state) => state.sales);
+  const sales = useSalesStore((s) => s.sales);
 
-  const uninvoicedCount = sales.filter((s) => s.status === "uninvoiced").length;
-  const invoicedCount = sales.filter((s) => s.status === "invoiced").length;
-  const paidCount = sales.filter((s) => s.status === "paid").length;
+  const paidTotal      = sales.filter((s) => s.status === "paid").reduce((n, s) => n + s.amount, 0);
+  const invoicedTotal  = sales.filter((s) => s.status === "invoiced").reduce((n, s) => n + s.amount, 0);
+  const uninvoicedTotal = sales.filter((s) => s.status === "uninvoiced").reduce((n, s) => n + s.amount, 0);
+  const achieveRate    = Math.round((FORECAST / MONTHLY_TARGET) * 100);
 
-  const dynamicValues: Record<string, string> = {
-    未請求: `${uninvoicedCount}件`,
-    未入金: `${paidCount}件`,
-    請求書発行待ち: `${invoicedCount}件`,
-  };
-
-  const salesByBusiness = Object.fromEntries(
-    demoBusinesses.map((b) => [
-      b.id,
-      sales.filter((s) => s.businessId === b.id).reduce((sum, s) => sum + s.amount, 0),
-    ])
-  );
-
-  const chartData = demoBusinesses.map((b) => ({
-    name: b.name.replace("事業", ""),
-    売上: salesByBusiness[b.id],
-    fill: b.id === "b001" ? "#DC2626" : b.id === "b002" ? "#16A34A" : "#EA580C",
-  }));
+  const bizStats = demoBusinesses.map((b) => {
+    const bSales     = sales.filter((s) => s.businessId === b.id);
+    const paid       = bSales.filter((s) => s.status === "paid").reduce((n, s) => n + s.amount, 0);
+    const invoiced   = bSales.filter((s) => s.status === "invoiced").reduce((n, s) => n + s.amount, 0);
+    const uninvoiced = bSales.filter((s) => s.status === "uninvoiced").reduce((n, s) => n + s.amount, 0);
+    const total      = paid + invoiced + uninvoiced;
+    return { ...b, paid, invoiced, uninvoiced, total, alert: uninvoiced > total * 0.4 };
+  });
 
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Dashboard</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
-          販売・請求統合デモ
-        </h1>
+    <div className="space-y-6">
+      {/* ページヘッダー */}
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Dashboard</p>
+          <h1 className="mt-1 text-xl font-semibold text-zinc-900">経営サマリ</h1>
+        </div>
+        <p className="text-sm text-zinc-400">2026年6月</p>
       </div>
 
-      <section className="grid gap-4 xl:grid-cols-4">
-        {kpiCards.map((card) => {
-          const Icon = card.icon;
-          const value = card.value ?? dynamicValues[card.label];
-          return (
-            <Card key={card.label} className={`overflow-hidden ${card.span}`}>
-              <div className={`h-1 ${card.bar}`} />
-              <CardContent className="pt-5">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <p className="text-sm text-zinc-500">{card.label}</p>
-                    <p className="mt-1 text-3xl font-semibold tracking-tight text-zinc-950">
-                      {value}
-                    </p>
-                    <p className="mt-1 text-xs text-zinc-400">{card.sub}</p>
-                  </div>
-                  <div className={`rounded-lg p-2 ${card.iconBg}`}>
-                    <Icon className={`h-5 w-5 ${card.iconColor}`} />
-                  </div>
+      {/* Hero + サブKPI */}
+      <div className="grid gap-4 xl:grid-cols-3">
+        {/* Hero: 今月着地予測 */}
+        <Card className="xl:col-span-2 rounded-2xl shadow-sm border-0 bg-white overflow-hidden">
+          <CardContent className="p-7">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-sm font-medium text-zinc-500">今月着地予測</p>
+                <p className="mt-2 text-6xl font-bold tracking-tight text-zinc-950 leading-none">
+                  ¥16.5<span className="text-3xl font-semibold text-zinc-400">M</span>
+                </p>
+                <div className="mt-3 flex items-center gap-4">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                    <ArrowUpRight className="h-3 w-3" />前月比 +11.5%
+                  </span>
+                  <span className="text-sm text-zinc-400">目標 ¥21M</span>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </section>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-zinc-400 mb-1">達成率</p>
+                <p className="text-4xl font-bold text-zinc-900">{achieveRate}<span className="text-2xl text-zinc-400">%</span></p>
+                <div className="mt-3 w-32 h-2 rounded-full bg-zinc-100 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-[#00B98E] transition-all"
+                    style={{ width: `${achieveRate}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-zinc-400">
+                  残り ¥{((MONTHLY_TARGET - FORECAST) / 1_000_000).toFixed(1)}M
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-      <section className="grid gap-4 xl:grid-cols-3">
-        {demoBusinesses.map((b) => {
-          const cs = closingStatus.find((c) => c.id === b.id);
-          return (
-            <Card key={b.id}>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium text-zinc-700">{b.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-semibold tracking-tight text-zinc-950">
-                  {formatYen(salesByBusiness[b.id])}
+        {/* サブKPI 縦並び */}
+        <div className="flex flex-col gap-4">
+          <Card className="rounded-2xl shadow-sm border-0 bg-white flex-1">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-zinc-500">確定売上（入金済）</p>
+                <div className="rounded-lg bg-[#F0FBF8] p-1.5">
+                  <TrendingUp className="h-4 w-4 text-[#00B98E]" />
                 </div>
-                <div className="mt-3 text-sm">
-                  {cs?.status === "done" && (
-                    <span className="inline-flex items-center gap-1.5 text-emerald-600">
-                      <CheckCircle className="h-3.5 w-3.5" />
-                      締め完了
-                    </span>
-                  )}
-                  {cs?.status === "processing" && (
-                    <span className="inline-flex items-center gap-1.5 text-amber-600">
-                      <Loader2 className="h-3.5 w-3.5" />
-                      処理中
-                    </span>
-                  )}
-                  {cs?.status === "pending" && (
-                    <span className="inline-flex items-center gap-1.5 text-zinc-400">
-                      <Circle className="h-3.5 w-3.5" />
-                      未着手
-                    </span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </section>
+              </div>
+              <p className="text-3xl font-bold text-zinc-950">{formatYen(paidTotal)}</p>
+              <p className="mt-1 text-xs text-zinc-400">
+                {sales.filter((s) => s.status === "paid").length}件 確定済
+              </p>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium text-zinc-700">事業別売上</CardTitle>
+          <Card className="rounded-2xl shadow-sm border-0 bg-white flex-1">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-zinc-500">売掛残高</p>
+                <div className="rounded-lg bg-amber-50 p-1.5">
+                  <AlertTriangle className="h-4 w-4 text-amber-500" />
+                </div>
+              </div>
+              <p className="text-3xl font-bold text-zinc-950">{formatYen(invoicedTotal + uninvoicedTotal)}</p>
+              <div className="mt-1 flex gap-2 text-xs text-zinc-400">
+                <span className="text-amber-600">未請求 {formatYen(uninvoicedTotal)}</span>
+                <span>請求済 {formatYen(invoicedTotal)}</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* 売上トレンド */}
+      <Card className="rounded-2xl shadow-sm border-0 bg-white">
+        <CardHeader className="pb-0 px-7 pt-6">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-sm font-semibold text-zinc-700">売上推移</CardTitle>
+            <div className="flex items-center gap-5 text-xs text-zinc-400">
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-[#00B98E]" />実績
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full border-2 border-[#00B98E] bg-white" />見込み
+              </span>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <div className="h-52 w-full">
+        <CardContent className="px-4 pb-4 pt-2">
+          <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <CartesianGrid vertical={false} stroke="#e4e4e7" />
-                <XAxis dataKey="name" tickLine={false} axisLine={false} fontSize={12} />
+              <AreaChart data={trendData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradActual" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#00B98E" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#00B98E" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gradForecast" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%"  stopColor="#00B98E" stopOpacity={0.08} />
+                    <stop offset="95%" stopColor="#00B98E" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} stroke="#f0f0f0" />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={12} tick={{ fill: "#a1a1aa" }} />
                 <YAxis
-                  tickFormatter={(v) => `${Number(v) / 10000}万`}
+                  tickFormatter={(v) => `${v / 1_000_000}M`}
                   tickLine={false}
                   axisLine={false}
                   fontSize={12}
+                  tick={{ fill: "#a1a1aa" }}
+                  width={38}
                 />
-                <Tooltip formatter={(v) => formatYen(Number(v ?? 0))} />
-                <Bar dataKey="売上" radius={[6, 6, 0, 0]}>
-                  {chartData.map((entry) => (
-                    <Cell key={entry.name} fill={entry.fill} />
-                  ))}
-                </Bar>
-              </BarChart>
+                <ReferenceLine
+                  y={MONTHLY_TARGET}
+                  stroke="#00B98E"
+                  strokeDasharray="5 5"
+                  strokeOpacity={0.5}
+                  label={{ value: "目標", position: "right", fontSize: 11, fill: "#00B98E" }}
+                />
+                <Tooltip
+                  formatter={(v: number) => formatYen(v)}
+                  contentStyle={{ borderRadius: 10, border: "none", boxShadow: "0 4px 20px rgba(0,0,0,0.1)", fontSize: 13 }}
+                  labelStyle={{ fontWeight: 600, color: "#18181b" }}
+                />
+                <Area
+                  dataKey="実績"
+                  stroke="#00B98E"
+                  strokeWidth={2.5}
+                  fill="url(#gradActual)"
+                  dot={{ r: 4, fill: "#00B98E", strokeWidth: 0 }}
+                  activeDot={{ r: 5 }}
+                  connectNulls={false}
+                />
+                <Area
+                  dataKey="見込み"
+                  stroke="#00B98E"
+                  strokeWidth={2}
+                  strokeDasharray="6 4"
+                  fill="url(#gradForecast)"
+                  dot={{ r: 4, fill: "#fff", stroke: "#00B98E", strokeWidth: 2 }}
+                  connectNulls={false}
+                />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* 事業部別 */}
+      <Card className="rounded-2xl shadow-sm border-0 bg-white">
+        <CardHeader className="px-7 pt-6 pb-3">
+          <CardTitle className="text-sm font-semibold text-zinc-700">事業部別 売上状況</CardTitle>
+        </CardHeader>
+        <CardContent className="px-7 pb-6 space-y-5">
+          {bizStats.map((b) => {
+            const accent = bizAccent[b.id];
+            const paidPct = b.total > 0 ? (b.paid / b.total) * 100 : 0;
+            const invPct  = b.total > 0 ? (b.invoiced / b.total) * 100 : 0;
+            const uninvPct = b.total > 0 ? (b.uninvoiced / b.total) * 100 : 0;
+            return (
+              <div key={b.id}>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: accent }} />
+                    <span className="text-sm font-medium text-zinc-700">{b.name}</span>
+                    {b.alert && (
+                      <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600 flex items-center gap-1">
+                        <AlertTriangle className="h-2.5 w-2.5" />要対応
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-6 text-sm">
+                    <span className="text-zinc-400 text-xs">未請求 <span className="font-semibold text-amber-600">{formatYen(b.uninvoiced)}</span></span>
+                    <span className="text-zinc-400 text-xs">未入金 <span className="font-semibold text-blue-600">{formatYen(b.invoiced)}</span></span>
+                    <span className="font-bold text-zinc-900">{formatYen(b.total)}</span>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
+                  <div className="flex h-full">
+                    <div className="bg-[#00B98E] transition-all" style={{ width: `${paidPct}%`, opacity: b.id === "b001" ? 1 : b.id === "b002" ? 0.9 : 0.8 }} />
+                    <div className="bg-blue-400 transition-all"  style={{ width: `${invPct}%` }} />
+                    <div className="bg-amber-400 transition-all" style={{ width: `${uninvPct}%` }} />
+                  </div>
+                </div>
+                <div className="mt-1 flex gap-4 text-xs text-zinc-400">
+                  <span>入金済 {Math.round(paidPct)}%</span>
+                  <span>請求済 {Math.round(invPct)}%</span>
+                  <span>未請求 {Math.round(uninvPct)}%</span>
+                </div>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      {/* 今週のアクション */}
+      <Card className="rounded-2xl shadow-sm border-0 bg-white">
+        <CardHeader className="px-7 pt-6 pb-3">
+          <CardTitle className="text-sm font-semibold text-zinc-700">今週のアクション</CardTitle>
+        </CardHeader>
+        <CardContent className="px-7 pb-4 divide-y divide-zinc-50">
+          {actionItems.map((item, i) => (
+            <div key={i} className="flex items-center gap-4 py-3.5">
+              <div className={`shrink-0 rounded-xl p-2 ${
+                item.type === "overdue"  ? "bg-red-50"    :
+                item.type === "deadline" ? "bg-amber-50"  : "bg-zinc-100"
+              }`}>
+                {item.type === "overdue"  && <AlertTriangle className="h-4 w-4 text-red-500" />}
+                {item.type === "deadline" && <FileText      className="h-4 w-4 text-amber-500" />}
+                {item.type === "forecast" && <TrendingUp    className="h-4 w-4 text-zinc-400" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-zinc-800 truncate">{item.label}</p>
+                <p className={`text-xs mt-0.5 ${item.type === "overdue" ? "text-red-500" : "text-zinc-400"}`}>
+                  {item.note}
+                </p>
+              </div>
+              <div className="shrink-0 flex items-center gap-3">
+                {item.amount != null && (
+                  <span className={`text-sm font-bold ${item.type === "overdue" ? "text-red-600" : "text-zinc-700"}`}>
+                    {formatYen(item.amount)}
+                  </span>
+                )}
+                <ChevronRight className="h-4 w-4 text-zinc-200" />
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
     </div>
