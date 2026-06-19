@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Upload } from "lucide-react";
+import { Building2, Calendar, ChevronDown, ChevronRight, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
@@ -159,7 +159,7 @@ export default function PaymentsPage() {
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === "invoiced" ? "all" : "invoiced")}
-          className={`rounded-2xl border bg-white p-4 text-left shadow-sm transition-all ${statusFilter === "invoiced" ? "ring-2 ring-sky-500 ring-offset-1" : "hover:shadow-md"}`}
+          className={`rounded-2xl border bg-white p-4 text-left shadow-card transition-all ${statusFilter === "invoiced" ? "ring-2 ring-sky-500 ring-offset-1" : "hover:shadow-md"}`}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-block h-2 w-2 rounded-full bg-sky-500" />
@@ -172,7 +172,7 @@ export default function PaymentsPage() {
         <button
           type="button"
           onClick={() => setStatusFilter(statusFilter === "paid" ? "all" : "paid")}
-          className={`rounded-2xl border bg-white p-4 text-left shadow-sm transition-all ${statusFilter === "paid" ? "ring-2 ring-emerald-500 ring-offset-1" : "hover:shadow-md"}`}
+          className={`rounded-2xl border bg-white p-4 text-left shadow-card transition-all ${statusFilter === "paid" ? "ring-2 ring-emerald-500 ring-offset-1" : "hover:shadow-md"}`}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
@@ -184,14 +184,15 @@ export default function PaymentsPage() {
         </button>
       </div>
 
-      {/* フィルターバー */}
-      <Card className="rounded-2xl shadow-sm bg-white">
-        <CardContent className="px-5 py-4">
+      {/* フィルターバー + テーブル */}
+      <Card className="rounded-2xl shadow-card bg-white">
+        <CardHeader className="px-6 pt-5 pb-0">
           <div className="flex flex-wrap items-center gap-6">
             {/* 期間 */}
             <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-zinc-400 shrink-0" />
               <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">期間</span>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 ml-1">
                 <button type="button" onClick={() => setMonthFilter("all")}
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${monthFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
                   全期間
@@ -206,8 +207,9 @@ export default function PaymentsPage() {
             </div>
             {/* 事業部 */}
             <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-zinc-400 shrink-0" />
               <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">事業部</span>
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1.5 ml-1">
                 <button type="button" onClick={() => setBizFilter("all")}
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${bizFilter === "all" ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"}`}>
                   全て
@@ -267,12 +269,8 @@ export default function PaymentsPage() {
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
-
-      {/* テーブル */}
-      <Card className="rounded-2xl shadow-sm bg-white">
-        <CardContent className="p-0">
+        </CardHeader>
+        <CardContent className="px-0 pb-0 pt-4">
           <Table>
             <TableHeader>
               <TableRow className="border-zinc-100 hover:bg-transparent">
