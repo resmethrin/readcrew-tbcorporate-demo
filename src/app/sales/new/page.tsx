@@ -347,11 +347,11 @@ export default function NewSalePage() {
             <div className="mb-1 grid text-[11px] font-medium text-zinc-400"
               style={{ gridTemplateColumns: "1fr 64px 64px 120px 80px 100px 32px" }}>
               <span className="pl-1">摘要</span>
-              <span className="text-center">数量</span>
-              <span className="text-center">単位</span>
-              <span className="text-right">単価</span>
-              <span className="text-center">税率</span>
-              <span className="text-right">金額</span>
+              <span className="pl-1">数量</span>
+              <span className="pl-1">単位</span>
+              <span className="pl-1">単価</span>
+              <span className="pl-1">税率</span>
+              <span className="pl-1">金額</span>
               <span />
             </div>
 
