@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
+import { Check, Copy, Link2, Mail, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,6 +30,19 @@ export default function InvoicePreviewPage() {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const sales = useSalesStore((state) => state.sales);
+  const markInvoicedByIds = useSalesStore((s) => s.markInvoicedByIds);
+
+  // メール送付モーダル
+  const [showMailModal, setShowMailModal] = useState(false);
+  const [mailTo, setMailTo] = useState("");
+  const [mailFrom, setMailFrom] = useState(ISSUER.email);
+  const [mailBody, setMailBody] = useState("");
+  const [mailSent, setMailSent] = useState(false);
+
+  // 共有リンクモーダル
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [markInvoiced, setMarkInvoiced] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const segments = params.id.split("-");
   const month = segments.slice(-2).join("-");
   const customerId = segments.slice(0, -2).join("-");
@@ -52,6 +66,40 @@ export default function InvoicePreviewPage() {
   const total = groups.reduce((sum, group) => sum + group.subtotal, 0);
   const tax = Math.round(total * 0.1);
 
+  // メールモーダルを開く際に初期値をセット
+  const openMailModal = () => {
+    setMailTo(customer?.email ?? "");
+    setMailFrom(ISSUER.email);
+    setMailBody(
+      `${customer?.name} ${customer?.contact} 様\n\n` +
+      `いつもお世話になっております。\n${ISSUER.name}でございます。\n\n` +
+      `${monthToLabel(month)}分の請求書（${invoiceNo}）をお送りいたします。\n` +
+      `ご確認のうえ、期日までにお振込みいただけますようお願い申し上げます。\n\n` +
+      `何かご不明な点がございましたら、お気軽にご連絡ください。\n\n` +
+      `${ISSUER.name}\n${ISSUER.email}`
+    );
+    setMailSent(false);
+    setShowMailModal(true);
+  };
+
+  const handleSendMail = () => {
+    const subject = encodeURIComponent(`【請求書】${monthToLabel(month)}分 ${invoiceNo} / ${ISSUER.name}`);
+    const body = encodeURIComponent(mailBody);
+    window.open(`mailto:${mailTo}?cc=${mailFrom}&subject=${subject}&body=${body}`);
+    setMailSent(true);
+  };
+
+  // 共有リンク発行
+  const handleIssueLink = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).catch(() => {});
+    if (markInvoiced) {
+      const ids = targetSales.map((s) => s.id);
+      markInvoicedByIds(ids);
+    }
+    setLinkCopied(true);
+  };
+
   // 入金期限: 翌月末
   const [y, m] = month.split("-").map(Number);
   const dueMonth = m === 12 ? 1 : m + 1;
@@ -66,11 +114,18 @@ export default function InvoicePreviewPage() {
           <div className="text-sm font-medium text-zinc-500">Billing</div>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight">請求書プレビュー</h1>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <Button variant="outline" onClick={() => window.print()}>
             PDF出力
           </Button>
-          <Button className="bg-accent text-white hover:bg-[#b91c1c]">発行済にする</Button>
+          <Button variant="outline" onClick={openMailModal}>
+            <Mail className="h-4 w-4" />
+            メール送付
+          </Button>
+          <Button variant="outline" onClick={() => { setLinkCopied(false); setMarkInvoiced(false); setShowShareModal(true); }}>
+            <Link2 className="h-4 w-4" />
+            共有リンク
+          </Button>
         </div>
       </div>
 
@@ -225,6 +280,142 @@ export default function InvoicePreviewPage() {
 
         </CardContent>
       </Card>
+
+      {/* ── メール送付モーダル ── */}
+      {showMailModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4">
+              <div className="flex items-center gap-2 font-semibold text-zinc-900">
+                <Mail className="h-4 w-4 text-zinc-500" />
+                メール送付
+              </div>
+              <button type="button" onClick={() => setShowMailModal(false)} className="rounded-lg p-1 hover:bg-zinc-100">
+                <X className="h-4 w-4 text-zinc-400" />
+              </button>
+            </div>
+
+            <div className="space-y-4 px-6 py-5">
+              <div className="grid gap-1.5">
+                <label className="text-xs font-medium text-zinc-500">担当者メールアドレス（宛先）</label>
+                <input
+                  type="email"
+                  value={mailTo}
+                  onChange={(e) => setMailTo(e.target.value)}
+                  placeholder="customer@example.co.jp"
+                  className="h-9 w-full rounded-lg border border-zinc-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <label className="text-xs font-medium text-zinc-500">自社メールアドレス（CC）</label>
+                <input
+                  type="email"
+                  value={mailFrom}
+                  onChange={(e) => setMailFrom(e.target.value)}
+                  className="h-9 w-full rounded-lg border border-zinc-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                />
+              </div>
+              <div className="grid gap-1.5">
+                <label className="text-xs font-medium text-zinc-500">本文</label>
+                <textarea
+                  value={mailBody}
+                  onChange={(e) => setMailBody(e.target.value)}
+                  rows={8}
+                  className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm leading-6 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+                />
+              </div>
+              {mailSent && (
+                <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+                  <Check className="h-4 w-4" />
+                  メールクライアントを開きました
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-zinc-100 px-6 py-4">
+              <button type="button" onClick={() => setShowMailModal(false)}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
+                閉じる
+              </button>
+              <button type="button" onClick={handleSendMail} disabled={!mailTo}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#b91c1c] disabled:opacity-40">
+                <Mail className="h-4 w-4" />
+                送信する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 共有リンクモーダル ── */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
+            <div className="px-6 pt-6 pb-2">
+              <h2 className="text-lg font-semibold text-zinc-900">共有リンクを発行します</h2>
+            </div>
+
+            <div className="space-y-4 px-6 py-4">
+              <p className="text-sm text-zinc-600 leading-6">
+                請求書をWebで共有するリンク（URL）を発行します。<br />
+                リンクの発行と同時に、請求書を送付済みのステータスに変更することができます。
+              </p>
+              <p className="text-sm text-zinc-500">
+                共有リンクの<span className="font-medium text-zinc-700">有効期限は発行より60日</span>です。
+              </p>
+
+              {!linkCopied ? (
+                <label className="flex cursor-pointer items-center gap-2.5">
+                  <input
+                    type="checkbox"
+                    checked={markInvoiced}
+                    onChange={(e) => setMarkInvoiced(e.target.checked)}
+                    className="h-4 w-4 rounded border-zinc-300 accent-accent"
+                  />
+                  <span className="text-sm text-zinc-700">請求書を送付済みにする</span>
+                </label>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-2.5 text-sm text-emerald-700">
+                    <Check className="h-4 w-4 shrink-0" />
+                    リンクをクリップボードにコピーしました
+                  </div>
+                  <div className="flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
+                    <span className="flex-1 truncate font-mono text-xs text-zinc-600">
+                      {typeof window !== "undefined" ? window.location.href : ""}
+                    </span>
+                    <button type="button" onClick={() => navigator.clipboard.writeText(window.location.href)}
+                      className="shrink-0 text-zinc-400 hover:text-zinc-600">
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-start gap-2 border-t border-zinc-100 px-6 py-4">
+              {!linkCopied ? (
+                <>
+                  <button type="button" onClick={handleIssueLink}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#005fc2]">
+                    <Link2 className="h-4 w-4" />
+                    共有リンク発行
+                  </button>
+                  <button type="button" onClick={() => setShowShareModal(false)}
+                    className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
+                    キャンセル
+                  </button>
+                </>
+              ) : (
+                <button type="button" onClick={() => setShowShareModal(false)}
+                  className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
+                  閉じる
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
