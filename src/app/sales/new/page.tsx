@@ -270,7 +270,7 @@ export default function NewSalePage() {
           {/* 取引先・事業部 */}
           <div className="rounded-2xl bg-white shadow-card p-6 space-y-4">
             <SectionTitle>取引先情報</SectionTitle>
-            <div className="grid gap-4 sm:grid-cols-[1fr_200px]">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <FieldLabel required>取引先</FieldLabel>
                 <Select value={customerId} onValueChange={(v) => v && setCustomerId(v)}>
