@@ -198,6 +198,32 @@ export default function PaymentsPage() {
                 })}
               </div>
             </div>
+            {/* ステータス */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">ステータス</span>
+              <div className="flex gap-1.5">
+                {([
+                  { id: "all",      label: "全て",           dot: null,             active_text: "text-zinc-900" },
+                  { id: "invoiced", label: "未入金（請求済）", dot: "bg-sky-500",     active_text: "text-sky-700" },
+                  { id: "paid",     label: "入金済",          dot: "bg-emerald-500", active_text: "text-emerald-700" },
+                ] as { id: "all" | "invoiced" | "paid"; label: string; dot: string | null; active_text: string }[]).map((item) => {
+                  const active = statusFilter === item.id;
+                  return (
+                    <button key={item.id} type="button" onClick={() => setStatusFilter(item.id)}
+                      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                        active
+                          ? item.id === "invoiced" ? "bg-sky-50 text-sky-700"
+                          : item.id === "paid"     ? "bg-emerald-50 text-emerald-700"
+                          : "bg-zinc-900 text-white"
+                          : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                      }`}>
+                      {item.dot && active && <span className={`h-1.5 w-1.5 rounded-full ${item.dot}`} />}
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
