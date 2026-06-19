@@ -25,11 +25,9 @@ const STATUS_STYLE: Record<SaleStatus, { bg: string; text: string; dot: string }
 };
 
 const statusFilters: { id: "all" | SaleStatus; label: string }[] = [
-  { id: "all",          label: "全て" },
-  { id: "uninvoiced",   label: "未請求" },
-  { id: "consolidated", label: "統合済み" },
-  { id: "invoiced",     label: "請求済" },
-  { id: "paid",         label: "入金済" },
+  { id: "all",        label: "全て" },
+  { id: "uninvoiced", label: "未請求" },
+  { id: "invoiced",   label: "請求済" },
 ];
 
 export default function SalesPage() {
