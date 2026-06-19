@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { Check, Copy, Link2, Mail, X } from "lucide-react";
+import { ArrowLeft, Check, Copy, Link2, Mail, X } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -111,8 +112,12 @@ export default function InvoicePreviewPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex items-end justify-between gap-4">
         <div>
+          <Link href="/billing" className="mb-2 inline-flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-900">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            請求一覧に戻る
+          </Link>
           <div className="text-sm font-medium text-zinc-500">Billing</div>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight">請求書プレビュー</h1>
+          <h1 className="mt-1 text-xl font-semibold text-zinc-900">請求書プレビュー</h1>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => window.print()}>
