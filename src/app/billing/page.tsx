@@ -197,6 +197,33 @@ export default function BillingPage() {
               </div>
             </div>
 
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">
+                請求書番号
+                <span className="ml-2 text-xs font-normal text-zinc-400">（空欄の場合は自動採番）</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={invoiceNo}
+                  onChange={(e) => setInvoiceNo(e.target.value)}
+                  placeholder={invoiceNumberForMonth(month)}
+                  className="h-10 w-72 rounded-lg border border-zinc-200 bg-white px-3 font-mono text-sm placeholder:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-accent"
+                />
+                {invoiceNo.trim() && (
+                  <button
+                    onClick={() => setInvoiceNo("")}
+                    className="text-xs text-zinc-400 hover:text-zinc-600"
+                  >
+                    リセット
+                  </button>
+                )}
+              </div>
+              <div className="text-xs text-zinc-500">
+                発行する請求書番号: <span className="font-mono font-medium text-zinc-800">{resolvedInvoiceNo}</span>
+              </div>
+            </div>
+
             <div className="flex justify-between gap-3">
               <Button variant="outline" onClick={() => setStep(0)}>
                 戻る
@@ -235,33 +262,6 @@ export default function BillingPage() {
                   <div className="font-medium text-zinc-500">請求金額（税込）</div>
                   <div className="text-lg font-semibold text-accent">{formatYen(total + tax)}</div>
                 </div>
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <label className="text-sm font-medium">
-                請求書番号
-                <span className="ml-2 text-xs font-normal text-zinc-400">（空欄の場合は自動採番）</span>
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={invoiceNo}
-                  onChange={(e) => setInvoiceNo(e.target.value)}
-                  placeholder={invoiceNumberForMonth(month)}
-                  className="h-10 w-72 rounded-lg border border-zinc-200 bg-white px-3 font-mono text-sm placeholder:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-accent"
-                />
-                {invoiceNo.trim() && (
-                  <button
-                    onClick={() => setInvoiceNo("")}
-                    className="text-xs text-zinc-400 hover:text-zinc-600"
-                  >
-                    リセット
-                  </button>
-                )}
-              </div>
-              <div className="text-xs text-zinc-500">
-                発行する請求書番号: <span className="font-mono font-medium text-zinc-800">{resolvedInvoiceNo}</span>
               </div>
             </div>
 
