@@ -37,14 +37,14 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                   active
-                    ? "border-l-2 border-[#00B98E] bg-[#F0FBF8] text-[#007A5E]"
-                    : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800"
+                    ? "bg-[#00B98E] text-white"
+                    : "text-zinc-500 hover:bg-white hover:text-zinc-800"
                 }`}
               >
                 <Icon
-                  className={`h-4 w-4 shrink-0 ${active ? "text-[#00B98E]" : "text-zinc-400"}`}
+                  className={`h-4 w-4 shrink-0 ${active ? "text-white" : "text-zinc-400"}`}
                 />
                 {item.label}
               </Link>
