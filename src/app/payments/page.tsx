@@ -148,10 +148,29 @@ export default function PaymentsPage() {
           <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Payments</p>
           <h1 className="mt-1 text-xl font-semibold text-zinc-900">入金管理</h1>
         </div>
-        <Button variant="outline">
-          <Upload className="h-4 w-4" />
-          CSV出力
-        </Button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleBulkPaid}
+            disabled={selected.size === 0}
+            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
+              selected.size > 0
+                ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                : "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+            }`}
+          >
+            まとめて入金済にする
+            {selected.size > 0 && (
+              <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-xs font-bold leading-none">
+                {selected.size}
+              </span>
+            )}
+          </button>
+          <Button variant="outline">
+            <Upload className="h-4 w-4" />
+            CSV出力
+          </Button>
+        </div>
       </div>
 
       {/* KPI */}
@@ -231,21 +250,6 @@ export default function PaymentsPage() {
               </div>
             </div>
 
-            {/* 一括操作 */}
-            {selected.size > 0 && (
-              <div className="ml-auto flex items-center gap-2">
-                <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600">
-                  {selected.size}件選択中
-                </span>
-                <button
-                  type="button"
-                  onClick={handleBulkPaid}
-                  className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors"
-                >
-                  まとめて入金済にする
-                </button>
-              </div>
-            )}
           </div>
         </CardHeader>
         <CardContent className="px-0 pb-0 pt-4">
@@ -338,17 +342,7 @@ export default function PaymentsPage() {
                           {statusLabels[st]}
                         </span>
                       </TableCell>
-                      <TableCell className="pr-5 text-right">
-                        {st === "invoiced" && (
-                          <button
-                            type="button"
-                            onClick={() => markPaidByIds(row.saleIds)}
-                            className="rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors"
-                          >
-                            入金済にする
-                          </button>
-                        )}
-                      </TableCell>
+                      <TableCell className="pr-5" />
                     </TableRow>
                     {isExpanded && (
                       <TableRow key={`${row.id}-detail`} className="bg-zinc-50/60 border-zinc-100">
