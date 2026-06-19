@@ -29,13 +29,6 @@ const STATUS_STYLE: Record<"invoiced" | "paid", { bg: string; text: string; dot:
   paid:     { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
 };
 
-// 請求一覧と同じ行ステータス判定
-function rowStatus(row: { uninvoiced: number; consolidated: number; invoiced: number; paid: number }): SaleStatus {
-  if (row.uninvoiced > 0)   return "uninvoiced";
-  if (row.consolidated > 0) return "consolidated";
-  if (row.invoiced > 0)     return "invoiced";
-  return "paid";
-}
 
 export default function PaymentsPage() {
   const sales = useSalesStore((s) => s.sales);
@@ -97,22 +90,28 @@ export default function PaymentsPage() {
     return Array.from(map.values()).sort((a, b) => b.month.localeCompare(a.month));
   }, [sales]);
 
-  // invoiced / paid 行のみ対象
+  // invoiced または paid が1件以上ある行を対象
+  // 同一行内にステータス混在する場合: invoiced>0 → 請求済（入金待ち）、全て paid → 入金済
+  const paymentRowStatus = (row: { invoiced: number; paid: number }): "invoiced" | "paid" =>
+    row.invoiced > 0 ? "invoiced" : "paid";
+
   const paymentRows = useMemo(() => {
     return invoiceRows.filter((row) => {
-      const st = rowStatus(row);
-      if (st !== "invoiced" && st !== "paid") return false;
+      if (row.invoiced === 0 && row.paid === 0) return false;
       if (monthFilter !== "all" && row.month !== monthFilter) return false;
       if (bizFilter !== "all" && !row.bizIds.includes(bizFilter)) return false;
+      const st = paymentRowStatus(row);
       if (statusFilter !== "all" && st !== statusFilter) return false;
       return true;
     });
   }, [invoiceRows, monthFilter, bizFilter, statusFilter]);
 
-  const paidTotal    = useMemo(() => paymentRows.filter((r) => rowStatus(r) === "paid").reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0), [paymentRows]);
-  const invoicedTotal = useMemo(() => paymentRows.filter((r) => rowStatus(r) === "invoiced").reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0), [paymentRows]);
-  const paidCount    = paymentRows.filter((r) => rowStatus(r) === "paid").length;
-  const invoicedCount = paymentRows.filter((r) => rowStatus(r) === "invoiced").length;
+  const paidRows     = useMemo(() => paymentRows.filter((r) => paymentRowStatus(r) === "paid"), [paymentRows]);
+  const invoicedRows = useMemo(() => paymentRows.filter((r) => paymentRowStatus(r) === "invoiced"), [paymentRows]);
+  const paidTotal    = paidRows.reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0);
+  const invoicedTotal = invoicedRows.reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0);
+  const paidCount    = paidRows.length;
+  const invoicedCount = invoicedRows.length;
 
   return (
     <div className="space-y-6">
@@ -227,7 +226,7 @@ export default function PaymentsPage() {
                 </TableRow>
               )}
               {paymentRows.map((row) => {
-                const st = rowStatus(row) as "invoiced" | "paid";
+                const st = paymentRowStatus(row);
                 const s = STATUS_STYLE[st];
                 const total = row.subtotal + Math.round(row.subtotal * 0.1);
                 const subject = row.bizNames.length === 1
