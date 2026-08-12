@@ -8,14 +8,18 @@ import {
   Table2,
   Banknote,
   Upload,
+  ShieldCheck,
+  History,
 } from "lucide-react";
 
 const nav = [
-  { href: "/dashboard", label: "ダッシュボード", icon: LayoutDashboard },
-  { href: "/sales",     label: "売上一覧",       icon: Table2 },
-  { href: "/billing",   label: "請求一覧",        icon: ReceiptText },
-  { href: "/payments",  label: "入金管理",        icon: Banknote },
-  { href: "/import",    label: "取込",           icon: Upload },
+  { href: "/dashboard",  label: "ダッシュボード", icon: LayoutDashboard },
+  { href: "/sales",      label: "売上一覧",       icon: Table2 },
+  { href: "/billing",    label: "請求一覧",        icon: ReceiptText },
+  { href: "/payments",   label: "入金管理",        icon: Banknote },
+  { href: "/import",     label: "取込",           icon: Upload },
+  { href: "/masters",    label: "マスタ管理",      icon: ShieldCheck },
+  { href: "/audit-log",  label: "操作ログ",        icon: History },
 ];
 
 export function Sidebar() {
