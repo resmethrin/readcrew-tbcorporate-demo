@@ -1303,7 +1303,7 @@
     "id": "s131",
     "customerId": "c005",
     "businessId": "b004",
-    "description": "おしぼり",
+    "description": "おしぼり（税込入力）",
     "amount": 180000,
     "month": "2026-06",
     "status": "uninvoiced",
