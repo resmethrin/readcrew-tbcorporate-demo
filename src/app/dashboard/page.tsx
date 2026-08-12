@@ -116,8 +116,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 3カラム KPI */}
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* 4カラム KPI */}
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {/* 今月着地予測 */}
         <Card className="rounded-2xl shadow-card bg-white">
           <CardContent className="p-6">
@@ -175,6 +175,36 @@ export default function DashboardPage() {
             <div className="mt-4 flex gap-3 text-xs">
               <span className="text-amber-600">未請求 {formatYen(uninvoicedTotal)}</span>
               <span className="text-zinc-400">請求済 {formatYen(invoicedTotal)}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 効果カード: 請求業務時間 */}
+        <Card className="rounded-2xl shadow-card bg-white">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-zinc-500">請求業務時間（月）</p>
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                <ArrowUpRight className="h-3 w-3 rotate-90" />-87.5%
+              </span>
+            </div>
+            <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">1.5H</p>
+            <p className="mt-1 text-xs text-zinc-400">現行 12.0H（6.0H×2名）基準</p>
+            <div className="mt-4 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <span className="w-10 shrink-0">現行</span>
+                <div className="h-1.5 flex-1 rounded-full bg-zinc-100 overflow-hidden">
+                  <div className="h-full rounded-full bg-zinc-300" style={{ width: "100%" }} />
+                </div>
+                <span className="w-10 shrink-0 text-right tabular-nums">12.0H</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <span className="w-10 shrink-0">本システム</span>
+                <div className="h-1.5 flex-1 rounded-full bg-zinc-100 overflow-hidden">
+                  <div className="h-full rounded-full bg-emerald-500" style={{ width: "12.5%" }} />
+                </div>
+                <span className="w-10 shrink-0 text-right tabular-nums">1.5H</span>
+              </div>
             </div>
           </CardContent>
         </Card>

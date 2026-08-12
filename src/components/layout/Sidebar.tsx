@@ -10,16 +10,18 @@ import {
   Upload,
   ShieldCheck,
   History,
+  PackageSearch,
 } from "lucide-react";
 
 const nav = [
-  { href: "/dashboard",  label: "ダッシュボード", icon: LayoutDashboard },
-  { href: "/sales",      label: "売上一覧",       icon: Table2 },
-  { href: "/billing",    label: "請求一覧",        icon: ReceiptText },
-  { href: "/payments",   label: "入金管理",        icon: Banknote },
-  { href: "/import",     label: "取込",           icon: Upload },
-  { href: "/masters",    label: "マスタ管理",      icon: ShieldCheck },
-  { href: "/audit-log",  label: "操作ログ",        icon: History },
+  { href: "/dashboard",    label: "ダッシュボード",              icon: LayoutDashboard },
+  { href: "/sales",        label: "売上一覧",                    icon: Table2 },
+  { href: "/billing",      label: "請求一覧",                     icon: ReceiptText },
+  { href: "/payments",     label: "入金管理",                     icon: Banknote },
+  { href: "/import",       label: "取込",                        icon: Upload },
+  { href: "/masters",      label: "マスタ管理",                   icon: ShieldCheck },
+  { href: "/audit-log",    label: "操作ログ",                     icon: History },
+  { href: "/procurement",  label: "発注・仕入・支払（Phase 1）",   icon: PackageSearch },
 ];
 
 export function Sidebar() {
@@ -61,7 +63,7 @@ export function Sidebar() {
             デモ用メモ
           </div>
           <p className="mt-2 text-xs leading-5 text-zinc-400">
-            顧客切替・月切替・事業別集計がそのまま動くことを優先しています。
+            貴社の運用フロー資料・経理からの要望を反映したデモです。
           </p>
         </div>
       </div>

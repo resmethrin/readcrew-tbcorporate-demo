@@ -382,7 +382,7 @@ export default function BillingPage() {
       <div className="flex items-end justify-between">
         <div>
           <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Billing</p>
-          <h1 className="mt-1 text-xl font-semibold text-zinc-900">請求一覧</h1>
+          <h1 className="mt-1 text-xl font-semibold text-zinc-900">請求一覧〈請求締処理〉</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline">
