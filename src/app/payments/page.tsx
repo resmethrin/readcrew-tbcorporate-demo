@@ -185,7 +185,7 @@ export default function PaymentsPage() {
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Payments</p>
-          <h1 className="mt-1 text-xl font-semibold text-zinc-900">入金管理</h1>
+          <h1 className="mt-1 text-xl font-semibold text-zinc-900">入金管理〈回収消込〉</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline">
