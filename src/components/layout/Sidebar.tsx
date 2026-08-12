@@ -65,6 +65,9 @@ export function Sidebar() {
           <p className="mt-2 text-xs leading-5 text-zinc-400">
             貴社の運用フロー資料・経理からの要望を反映したデモです。
           </p>
+          <p className="mt-2 text-[11px] font-medium leading-5 text-red-500">
+            デモ環境 — データはすべて架空です
+          </p>
         </div>
       </div>
     </aside>
