@@ -3,6 +3,8 @@ export interface Customer {
   name: string
   contact: string
   email?: string
+  billingType?: '都度請求' | '締め請求'
+  closingDay?: string
 }
 
 export interface Business {
@@ -13,7 +15,7 @@ export interface Business {
 
 export type SaleStatus = 'uninvoiced' | 'consolidated' | 'invoiced' | 'paid'
 
-export type BusinessColor = 'blue' | 'green' | 'orange'
+export type BusinessColor = 'blue' | 'green' | 'orange' | 'purple' | 'slate'
 
 export interface Sale {
   id: string

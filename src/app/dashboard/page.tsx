@@ -27,16 +27,18 @@ const MONTHLY_TARGET = 18_000_000;
 const CURRENT_MONTH = "2026-06";
 
 const actionItems = [
-  { type: "overdue",  label: "株式会社ニシカワ — 電気設備点検",  amount: 150_000, note: "支払期日 6/15 超過（4日）" },
-  { type: "overdue",  label: "山田商事 — 定期メンテナンス",       amount: 60_000,  note: "支払期日 6/16 超過（3日）" },
-  { type: "deadline", label: "未請求 5件 — 6月末締め切り",        amount: null,    note: "今月末までに請求書を発行してください" },
-  { type: "forecast", label: "来月見込み受注 — 改修工事",         amount: 890_000, note: "契約確定待ち（工事関連事業）" },
+  { type: "overdue",  label: "T紡織株式会社 — 喫食代（補助含む）", amount: 150_000, note: "支払期日 6/15 超過（4日）" },
+  { type: "overdue",  label: "派遣会社A — 人材派遣費",             amount: 60_000,  note: "支払期日 6/16 超過（3日）" },
+  { type: "deadline", label: "未請求 5件 — 6月末締め切り",         amount: null,    note: "今月末までに請求書を発行してください" },
+  { type: "forecast", label: "来月見込み受注 — 制服・安全靴",      amount: 890_000, note: "契約確定待ち（物販営業室）" },
 ];
 
 const bizAccent: Record<string, string> = {
   b001: "rgb(0 113 227)",
   b002: "#2563EB",
   b003: "#EA580C",
+  b004: "#7C3AED",
+  b005: "#64748B",
 };
 
 export default function DashboardPage() {
@@ -253,11 +255,11 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* 事業部別 */}
+      {/* 室別 */}
       <Card className="rounded-2xl shadow-card bg-white">
         <CardHeader className="px-7 pt-6 pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-semibold text-zinc-700">事業部別 売上状況</CardTitle>
+            <CardTitle className="text-sm font-semibold text-zinc-700">室別 売上状況</CardTitle>
             <div className="flex items-center gap-4 text-xs text-zinc-400">
               <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-[#0071e3]" />入金済</span>
               <span className="flex items-center gap-1.5"><span className="inline-block h-2 w-2 rounded-full bg-blue-400" />請求済</span>
@@ -291,7 +293,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-100">
                   <div className="flex h-full">
-                    <div className="bg-[#0071e3] transition-all" style={{ width: `${paidPct}%`, opacity: b.id === "b001" ? 1 : b.id === "b002" ? 0.9 : 0.8 }} />
+                    <div className="bg-[#0071e3] transition-all" style={{ width: `${paidPct}%` }} />
                     <div className="bg-blue-400 transition-all"  style={{ width: `${invPct}%` }} />
                     <div className="bg-amber-400 transition-all" style={{ width: `${uninvPct}%` }} />
                   </div>
