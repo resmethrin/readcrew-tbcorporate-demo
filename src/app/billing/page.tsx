@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Calendar, ChevronDown, ChevronRight, FileText, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Calendar, ChevronDown, ChevronRight, FileText, Info, RefreshCw, Upload, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,8 +46,13 @@ const STATUS_FILTERS: { id: "all" | SaleStatus; label: string }[] = [
   { id: "invoiced",     label: "請求済" },
 ];
 
+const RAKURAKU_FIELDS = ["請求書番号", "請求日", "得意先名", "品目", "数量", "単価", "金額", "消費税額", "担当室"];
+
 export default function BillingPage() {
   const sales = useSalesStore((s) => s.sales);
+  const markRakurakuSyncedByIds = useSalesStore((s) => s.markRakurakuSyncedByIds);
+  const [syncToast, setSyncToast] = useState<string | null>(null);
+  const [showRakurakuFields, setShowRakurakuFields] = useState(false);
 
   // ── 統合画面の状態 ────────────────────────────────────
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
@@ -72,6 +77,7 @@ export default function BillingPage() {
       month: string;
       bizNames: string[];
       bizIds: string[];
+      saleIds: string[];
       itemCount: number;
       subtotal: number;
       uninvoiced: number;
@@ -90,6 +96,7 @@ export default function BillingPage() {
         month: sale.month,
         bizNames: [],
         bizIds: [],
+        saleIds: [],
         itemCount: 0,
         subtotal: 0,
         uninvoiced: 0,
@@ -103,6 +110,7 @@ export default function BillingPage() {
         row.bizIds.push(sale.businessId);
         row.bizNames.push(bizName);
       }
+      row.saleIds.push(sale.id);
       row.itemCount += 1;
       row.subtotal += sale.amount;
       row[sale.status] += 1;
@@ -148,6 +156,18 @@ export default function BillingPage() {
     }),
     [invoiceRows, monthFilter, statusFilter],
   );
+
+  const invoicedFilteredRows = useMemo(
+    () => filtered.filter((row) => rowStatus(row) === "invoiced"),
+    [filtered],
+  );
+
+  const handleRakurakuSync = () => {
+    const ids = invoicedFilteredRows.flatMap((row) => row.saleIds);
+    markRakurakuSyncedByIds(ids);
+    setSyncToast(`楽楽明細向けデータを生成しました — Excel加工は不要です（${invoicedFilteredRows.length}件）`);
+    window.setTimeout(() => setSyncToast(null), 4000);
+  };
 
   // ── 統合画面（事業部選択）────────────────────────────
   const bizGroups = useMemo(() => {
@@ -364,11 +384,61 @@ export default function BillingPage() {
           <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Billing</p>
           <h1 className="mt-1 text-xl font-semibold text-zinc-900">請求一覧</h1>
         </div>
-        <Button variant="outline">
-          <Upload className="h-4 w-4" />
-          CSV出力
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline">
+            <Upload className="h-4 w-4" />
+            CSV出力
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleRakurakuSync}
+            disabled={invoicedFilteredRows.length === 0}
+          >
+            <RefreshCw className="h-4 w-4" />
+            楽楽明細へ連携
+          </Button>
+          <button
+            type="button"
+            onClick={() => setShowRakurakuFields(true)}
+            className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
+            aria-label="連携データに含まれる項目"
+          >
+            <Info className="h-4 w-4" />
+          </button>
+        </div>
       </div>
+
+      <p className="-mt-3 text-xs text-zinc-400">
+        現行: 商蔵→Excel加工→楽楽取込（3段階） → 本システム: 1クリック
+      </p>
+
+      {syncToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-3 text-sm text-white shadow-lg">
+          <RefreshCw className="h-4 w-4 text-emerald-400" />
+          {syncToast}
+        </div>
+      )}
+
+      {showRakurakuFields && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setShowRakurakuFields(false)}>
+          <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-3.5">
+              <span className="text-sm font-semibold text-zinc-900">連携データに含まれる項目</span>
+              <button type="button" onClick={() => setShowRakurakuFields(false)} className="rounded-lg p-1 hover:bg-zinc-100">
+                <X className="h-4 w-4 text-zinc-400" />
+              </button>
+            </div>
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-2 px-5 py-4 text-sm text-zinc-600">
+              {RAKURAKU_FIELDS.map((field) => (
+                <li key={field} className="flex items-center gap-1.5">
+                  <span className="h-1 w-1 rounded-full bg-zinc-300" />
+                  {field}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* KPI カード（ステータス別・クリックでフィルター） */}
       <div className="grid gap-3 md:grid-cols-3">
@@ -502,10 +572,15 @@ export default function BillingPage() {
                       </TableCell>
                       <TableCell className="text-sm text-zinc-500">{row.issuer}</TableCell>
                       <TableCell>
-                        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${s.bg} ${s.text} ${s.border}`}>
-                          <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
-                          {statusLabels[st]}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${s.bg} ${s.text} ${s.border}`}>
+                            <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+                            {statusLabels[st]}
+                          </span>
+                          {row.saleIds.length > 0 && row.saleIds.every((id) => sales.find((sale) => sale.id === id)?.rakurakuSynced) && (
+                            <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500">連携済</span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="pr-5 text-right">
                         <button

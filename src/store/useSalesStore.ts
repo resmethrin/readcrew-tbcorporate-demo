@@ -12,6 +12,7 @@ interface SalesStore {
   markInvoicedByIds: (ids: string[]) => void;
   markPaidByIds: (ids: string[]) => void;
   recordPartialPayment: (saleId: string, amount: number) => void;
+  markRakurakuSyncedByIds: (ids: string[]) => void;
 }
 
 export const useSalesStore = create<SalesStore>((set) => ({
@@ -50,5 +51,11 @@ export const useSalesStore = create<SalesStore>((set) => ({
         ...state.partialPayments,
         [saleId]: (state.partialPayments[saleId] ?? 0) + amount,
       },
+    })),
+  markRakurakuSyncedByIds: (ids) =>
+    set((state) => ({
+      sales: state.sales.map((sale) =>
+        ids.includes(sale.id) ? { ...sale, rakurakuSynced: true } : sale,
+      ),
     })),
 }));

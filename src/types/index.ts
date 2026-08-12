@@ -28,6 +28,7 @@ export interface Sale {
   month: string
   status: SaleStatus
   assignee?: string
+  rakurakuSynced?: boolean
 }
 
 export interface InvoiceGroup {
