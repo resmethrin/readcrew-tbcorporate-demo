@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { ArrowLeft, Check, Copy, Link2, Mail, X } from "lucide-react";
+import { ArrowLeft, Check, Copy, FileText, Link2, Mail, X } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,15 @@ export default function InvoicePreviewPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [markInvoiced, setMarkInvoiced] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+
+  // 未入金分別発行モーダル
+  const [showUnpaidModal, setShowUnpaidModal] = useState(false);
+
+  // 税抜統一 Before/After トグル
+  const [unifiedTaxDisplay, setUnifiedTaxDisplay] = useState(false);
+  const isTaxInclusiveInput = (description: string) => description.includes("（税込入力）");
+  const displayDescription = (description: string) => description.replace("（税込入力）", "");
+  const exclusiveAmount = (amount: number) => Math.round(amount / 1.1);
   const segments = params.id.split("-");
   const month = segments.slice(-2).join("-");
   const customerId = segments.slice(0, -2).join("-");
@@ -66,6 +75,11 @@ export default function InvoicePreviewPage() {
   const groups = useMemo(() => groupSalesByBusiness(targetSales), [targetSales]);
   const total = groups.reduce((sum, group) => sum + group.subtotal, 0);
   const tax = Math.round(total * 0.1);
+
+  const unpaidSales = useMemo(() => targetSales.filter((s) => s.status !== "paid"), [targetSales]);
+  const unpaidGroups = useMemo(() => groupSalesByBusiness(unpaidSales), [unpaidSales]);
+  const unpaidTotal = unpaidGroups.reduce((sum, group) => sum + group.subtotal, 0);
+  const unpaidTax = Math.round(unpaidTotal * 0.1);
 
   // メールモーダルを開く際に初期値をセット
   const openMailModal = () => {
@@ -131,7 +145,29 @@ export default function InvoicePreviewPage() {
             <Link2 className="h-4 w-4" />
             共有リンク
           </Button>
+          <Button variant="outline" onClick={() => setShowUnpaidModal(true)} disabled={unpaidSales.length === 0}>
+            <FileText className="h-4 w-4" />
+            未入金分請求書を別発行
+          </Button>
         </div>
+      </div>
+
+      <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-5 py-3 print:hidden">
+        <div className="text-sm">
+          <span className="font-medium text-zinc-700">税抜統一表示</span>
+          <span className="ml-2 text-xs text-zinc-400">
+            {unifiedTaxDisplay ? "After: 全明細を税抜表示に統一" : "Before: 税込入力の明細が混在したまま表示"}
+          </span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={unifiedTaxDisplay}
+          onClick={() => setUnifiedTaxDisplay((v) => !v)}
+          className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${unifiedTaxDisplay ? "bg-[#0071e3]" : "bg-zinc-200"}`}
+        >
+          <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${unifiedTaxDisplay ? "translate-x-5" : "translate-x-0.5"}`} />
+        </button>
       </div>
 
       <Card className="bg-white shadow-sm print:shadow-none">
@@ -212,17 +248,29 @@ export default function InvoicePreviewPage() {
                     <div className="text-right">単価</div>
                     <div className="text-right">金額</div>
                   </div>
-                  {group.items.map((sale) => (
-                    <div
-                      key={sale.id}
-                      className="grid grid-cols-[1fr_80px_130px_130px] gap-4 border-b border-zinc-100 px-4 py-2.5 last:border-b-0 text-sm"
-                    >
-                      <div>{sale.description}</div>
-                      <div className="text-right">{sale.qty ?? 1}</div>
-                      <div className="text-right">{formatYen(sale.unitPrice ?? Math.round(sale.amount / (sale.qty ?? 1)))}</div>
-                      <div className="text-right font-medium">{formatYen(sale.amount)}</div>
-                    </div>
-                  ))}
+                  {group.items.map((sale) => {
+                    const taxInclusiveInput = isTaxInclusiveInput(sale.description);
+                    const displayAmount = taxInclusiveInput && unifiedTaxDisplay ? exclusiveAmount(sale.amount) : sale.amount;
+                    return (
+                      <div
+                        key={sale.id}
+                        className="grid grid-cols-[1fr_80px_130px_130px] gap-4 border-b border-zinc-100 px-4 py-2.5 last:border-b-0 text-sm"
+                      >
+                        <div>
+                          {displayDescription(sale.description)}
+                          {taxInclusiveInput && !unifiedTaxDisplay && (
+                            <span className="ml-2 inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">税込</span>
+                          )}
+                          {taxInclusiveInput && unifiedTaxDisplay && (
+                            <div className="mt-0.5 text-[11px] text-zinc-400">参考価格: 税込{formatYen(sale.amount)}</div>
+                          )}
+                        </div>
+                        <div className="text-right">{sale.qty ?? 1}</div>
+                        <div className="text-right">{formatYen(sale.unitPrice ?? Math.round(displayAmount / (sale.qty ?? 1)))}</div>
+                        <div className="text-right font-medium">{formatYen(displayAmount)}</div>
+                      </div>
+                    );
+                  })}
                   <div className="flex justify-end border-t border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium">
                     小計: {formatYen(group.subtotal)}
                   </div>
@@ -417,6 +465,78 @@ export default function InvoicePreviewPage() {
                   閉じる
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── 未入金分別発行モーダル ── */}
+      {showUnpaidModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4">
+              <div className="flex items-center gap-2 font-semibold text-zinc-900">
+                <FileText className="h-4 w-4 text-zinc-500" />
+                未入金分請求書（別紙）
+              </div>
+              <button type="button" onClick={() => setShowUnpaidModal(false)} className="rounded-lg p-1 hover:bg-zinc-100">
+                <X className="h-4 w-4 text-zinc-400" />
+              </button>
+            </div>
+
+            <div className="space-y-5 px-6 py-5 text-sm">
+              <p className="text-zinc-600">
+                {customer?.name} 様の{monthToLabel(month)}分のうち、未入金の明細のみを抜粋した別紙です。
+              </p>
+
+              {unpaidSales.length === 0 ? (
+                <p className="text-zinc-400">未入金の明細はありません。</p>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    {unpaidGroups.map((group) => (
+                      <section key={group.businessId} className="space-y-2">
+                        <h3 className="text-xs font-semibold text-zinc-500">【{group.businessName}】</h3>
+                        <div className="rounded-lg border border-zinc-200 overflow-hidden">
+                          {group.items.map((sale) => (
+                            <div
+                              key={sale.id}
+                              className="grid grid-cols-[1fr_100px] gap-4 border-b border-zinc-100 px-3 py-2 last:border-b-0 text-sm"
+                            >
+                              <div>{displayDescription(sale.description)}</div>
+                              <div className="text-right font-medium">{formatYen(sale.amount)}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
+
+                  <div className="rounded-xl border border-zinc-200 overflow-hidden">
+                    <div className="flex justify-between px-4 py-2 text-sm text-zinc-600">
+                      <span>小計（税抜）</span>
+                      <span>{formatYen(unpaidTotal)}</span>
+                    </div>
+                    <div className="flex justify-between border-t border-zinc-100 px-4 py-2 text-sm text-zinc-600">
+                      <span>消費税（10%）</span>
+                      <span>{formatYen(unpaidTax)}</span>
+                    </div>
+                    <div className="flex justify-between border-t border-zinc-200 bg-zinc-50 px-4 py-2.5 text-base font-bold text-zinc-900">
+                      <span>未入金分 合計（税込）</span>
+                      <span className="text-accent">{formatYen(unpaidTotal + unpaidTax)}</span>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-zinc-100 px-6 py-4 print:hidden">
+              <Button variant="outline" onClick={() => window.print()} disabled={unpaidSales.length === 0}>
+                PDF出力
+              </Button>
+              <button type="button" onClick={() => setShowUnpaidModal(false)}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 transition-colors">
+                閉じる
+              </button>
             </div>
           </div>
         </div>
