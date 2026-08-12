@@ -15,7 +15,12 @@ export const businessColorClasses: Record<string, string> = {
   blue: "bg-sky-50 text-sky-700 border-sky-200",
   green: "bg-emerald-50 text-emerald-700 border-emerald-200",
   orange: "bg-orange-50 text-orange-700 border-orange-200",
+  purple: "bg-violet-50 text-violet-700 border-violet-200",
+  slate: "bg-slate-50 text-slate-700 border-slate-200",
 };
+
+export const getCustomerBillingType = (customerId: string) =>
+  demoCustomers.find((customer) => customer.id === customerId)?.billingType ?? "—";
 
 export const statusLabels: Record<SaleStatus, string> = {
   uninvoiced:   "未請求",

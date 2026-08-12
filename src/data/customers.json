@@ -1,5 +1,9 @@
 [
-  { "id": "c001", "name": "株式会社アルファテック", "contact": "山田 太郎", "email": "yamada@alphatech.co.jp" },
-  { "id": "c002", "name": "ベータ商事株式会社", "contact": "鈴木 花子", "email": "suzuki@beta-shoji.co.jp" },
-  { "id": "c003", "name": "ガンマ建設株式会社", "contact": "田中 一郎", "email": "tanaka@gamma-kensetsu.co.jp" }
+  { "id": "c001", "name": "T紡織株式会社", "contact": "経理部 担当者", "email": "demo-c001@example.com", "billingType": "締め請求", "closingDay": "25日締め" },
+  { "id": "c002", "name": "T紡織滋賀事業所", "contact": "総務部 担当者", "email": "demo-c002@example.com", "billingType": "締め請求", "closingDay": "月末締め" },
+  { "id": "c003", "name": "派遣会社A", "contact": "営業担当", "email": "demo-c003@example.com", "billingType": "締め請求", "closingDay": "月末締め" },
+  { "id": "c004", "name": "派遣会社B", "contact": "営業担当", "email": "demo-c004@example.com", "billingType": "締め請求", "closingDay": "月末締め" },
+  { "id": "c005", "name": "食堂委託会社", "contact": "運営担当", "email": "demo-c005@example.com", "billingType": "締め請求", "closingDay": "月末締め" },
+  { "id": "c006", "name": "TBJ従業員（給与天引）", "contact": "人事部", "email": "demo-c006@example.com", "billingType": "締め請求", "closingDay": "月末締め" },
+  { "id": "c007", "name": "強化クラブ・アラコ（スポット）", "contact": "都度担当", "email": "demo-c007@example.com", "billingType": "都度請求" }
 ]

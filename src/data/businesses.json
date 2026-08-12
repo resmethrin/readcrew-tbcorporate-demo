@@ -1,5 +1,7 @@
 [
-  { "id": "b001", "name": "設備販売事業", "color": "blue" },
-  { "id": "b002", "name": "保守サービス事業", "color": "green" },
-  { "id": "b003", "name": "工事関連事業", "color": "orange" }
+  { "id": "b001", "name": "物販営業室", "color": "blue" },
+  { "id": "b002", "name": "セキュリティサービス室", "color": "green" },
+  { "id": "b003", "name": "人材サービス室", "color": "orange" },
+  { "id": "b004", "name": "フードサービス室", "color": "purple" },
+  { "id": "b005", "name": "サービス企画室", "color": "slate" }
 ]

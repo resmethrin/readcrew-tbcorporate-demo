@@ -12,9 +12,11 @@ import { useSalesStore } from "@/store/useSalesStore";
 import type { Sale, SaleStatus } from "@/types";
 
 const BIZ_COLOR: Record<string, { dot: string; bg: string; text: string }> = {
-  b001: { dot: "bg-[#0071e3]",   bg: "bg-blue-50",   text: "text-blue-700" },
+  b001: { dot: "bg-[#0071e3]",   bg: "bg-blue-50",    text: "text-blue-700" },
   b002: { dot: "bg-emerald-500", bg: "bg-emerald-50", text: "text-emerald-700" },
   b003: { dot: "bg-orange-500",  bg: "bg-orange-50",  text: "text-orange-700" },
+  b004: { dot: "bg-violet-500",  bg: "bg-violet-50",  text: "text-violet-700" },
+  b005: { dot: "bg-slate-500",   bg: "bg-slate-50",   text: "text-slate-700" },
 };
 
 const STATUS_STYLE: Record<SaleStatus, { bg: string; text: string; dot: string }> = {
