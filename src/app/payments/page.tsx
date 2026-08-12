@@ -6,6 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   demoBusinesses,
   dueDateLabel,
@@ -36,6 +46,8 @@ const STATUS_STYLE: Record<"invoiced" | "paid", { bg: string; text: string; dot:
 export default function PaymentsPage() {
   const sales = useSalesStore((s) => s.sales);
   const markPaidByIds = useSalesStore((s) => s.markPaidByIds);
+  const partialPayments = useSalesStore((s) => s.partialPayments);
+  const recordPartialPayment = useSalesStore((s) => s.recordPartialPayment);
 
   const [monthFilter, setMonthFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "invoiced" | "paid">("all");
@@ -43,6 +55,31 @@ export default function PaymentsPage() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const toggleExpand = (id: string) =>
     setExpandedRows((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+
+  const [reconcileTarget, setReconcileTarget] = useState<{ id: string; description: string; remaining: number } | null>(null);
+  const [reconcileAmount, setReconcileAmount] = useState("");
+  const [reconcileError, setReconcileError] = useState<string | null>(null);
+
+  const openReconcile = (saleId: string, description: string, remaining: number) => {
+    setReconcileTarget({ id: saleId, description, remaining });
+    setReconcileAmount(String(remaining));
+    setReconcileError(null);
+  };
+
+  const submitReconcile = () => {
+    if (!reconcileTarget) return;
+    const amount = Number(reconcileAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setReconcileError("入金額を正しく入力してください");
+      return;
+    }
+    if (amount > reconcileTarget.remaining) {
+      setReconcileError(`残額（${formatYen(reconcileTarget.remaining)}）を超える金額は入力できません`);
+      return;
+    }
+    recordPartialPayment(reconcileTarget.id, amount);
+    setReconcileTarget(null);
+  };
 
   // 請求一覧と同じ「顧客×月」集計
   const invoiceRows = useMemo(() => {
@@ -157,6 +194,58 @@ export default function PaymentsPage() {
           </Button>
         </div>
       </div>
+
+      <Tabs defaultValue="voucher">
+        <TabsList variant="line">
+          <TabsTrigger value="voucher">伝票基準</TabsTrigger>
+          <TabsTrigger value="payment">入金基準</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="payment" className="pt-4">
+          <Card className="rounded-2xl shadow-card bg-white">
+            <CardHeader className="px-6 pt-5 pb-2">
+              <p className="text-sm font-semibold text-zinc-700">入金記録一覧</p>
+              <p className="text-xs text-zinc-400">伝票（売上）単位で記録された入金を時系列でなく金額基準に一覧表示</p>
+            </CardHeader>
+            <CardContent className="px-0 pb-4 pt-2">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-zinc-100 hover:bg-transparent">
+                    <TableHead className="pl-5 text-xs font-medium text-zinc-400">伝票ID</TableHead>
+                    <TableHead className="text-xs font-medium text-zinc-400">得意先</TableHead>
+                    <TableHead className="text-xs font-medium text-zinc-400">内容</TableHead>
+                    <TableHead className="text-xs font-medium text-zinc-400 text-right">伝票金額</TableHead>
+                    <TableHead className="text-xs font-medium text-zinc-400 text-right pr-5">入金累計</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Object.keys(partialPayments).length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="py-12 text-center text-sm text-zinc-400">
+                        入金記録がありません
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {Object.entries(partialPayments).map(([saleId, amount]) => {
+                    const sale = sales.find((s) => s.id === saleId);
+                    if (!sale) return null;
+                    return (
+                      <TableRow key={saleId} className="border-zinc-50">
+                        <TableCell className="pl-5 font-mono text-xs text-zinc-500">{saleId}</TableCell>
+                        <TableCell className="text-sm text-zinc-700">{getCustomerName(sale.customerId)}</TableCell>
+                        <TableCell className="text-sm text-zinc-600">{sale.description}</TableCell>
+                        <TableCell className="text-right text-sm text-zinc-500 tabular-nums">{formatYen(sale.amount)}</TableCell>
+                        <TableCell className="pr-5 text-right text-sm font-semibold text-emerald-700 tabular-nums">{formatYen(amount)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="voucher" className="space-y-6 pt-4">
 
       {/* KPI */}
       <div className="grid gap-3 sm:grid-cols-2">
@@ -359,13 +448,18 @@ export default function PaymentsPage() {
                                 <th className="pb-1.5 text-right font-medium">数量</th>
                                 <th className="pb-1.5 text-right font-medium">単価</th>
                                 <th className="pb-1.5 text-right font-medium">金額</th>
+                                <th className="pb-1.5 text-right font-medium">伝票消込（残額）</th>
+                                <th className="pb-1.5 text-right font-medium" />
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-zinc-100">
                               {rowSales.map((sale) => {
                                 const biz = demoBusinesses.find((b) => b.id === sale.businessId);
                                 const bc = BIZ_COLOR[sale.businessId];
-                                const sc = STATUS_STYLE[sale.status as "invoiced" | "paid"] ?? STATUS_STYLE.invoiced;
+                                const paidSoFar = partialPayments[sale.id] ?? 0;
+                                const remaining = sale.amount - paidSoFar;
+                                const isVoucherReconcilable = sale.status === "invoiced";
+                                const isVoucherSettled = isVoucherReconcilable && remaining <= 0;
                                 return (
                                   <tr key={sale.id} className="text-zinc-600">
                                     <td className="py-1.5 pr-3">
@@ -378,6 +472,28 @@ export default function PaymentsPage() {
                                     <td className="py-1.5 pr-3 text-right tabular-nums">{sale.qty ?? 1}</td>
                                     <td className="py-1.5 pr-3 text-right tabular-nums">{formatYen(sale.unitPrice ?? Math.round(sale.amount / (sale.qty ?? 1)))}</td>
                                     <td className="py-1.5 pr-3 text-right font-medium tabular-nums">{formatYen(sale.amount)}</td>
+                                    <td className="py-1.5 pr-3 text-right tabular-nums">
+                                      {isVoucherReconcilable ? (
+                                        isVoucherSettled ? (
+                                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">消込済</span>
+                                        ) : (
+                                          <span className="text-amber-600 font-medium">{formatYen(remaining)}</span>
+                                        )
+                                      ) : (
+                                        <span className="text-zinc-300">—</span>
+                                      )}
+                                    </td>
+                                    <td className="py-1.5 pl-2 text-right">
+                                      {isVoucherReconcilable && !isVoucherSettled && (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => openReconcile(sale.id, sale.description, remaining)}
+                                        >
+                                          消込
+                                        </Button>
+                                      )}
+                                    </td>
                                   </tr>
                                 );
                               })}
@@ -399,6 +515,36 @@ export default function PaymentsPage() {
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+      </Tabs>
+
+      <Dialog open={!!reconcileTarget} onOpenChange={(open) => !open && setReconcileTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>伝票単位で消込する</DialogTitle>
+          </DialogHeader>
+          {reconcileTarget && (
+            <div className="space-y-3">
+              <p className="text-sm text-zinc-600">{reconcileTarget.description}</p>
+              <p className="text-xs text-zinc-400">残額 {formatYen(reconcileTarget.remaining)}</p>
+              <div className="space-y-1">
+                <Label htmlFor="reconcile-amount">入金額</Label>
+                <Input
+                  id="reconcile-amount"
+                  type="number"
+                  value={reconcileAmount}
+                  onChange={(e) => setReconcileAmount(e.target.value)}
+                />
+              </div>
+              {reconcileError && <p className="text-xs text-red-600">{reconcileError}</p>}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReconcileTarget(null)}>キャンセル</Button>
+            <Button onClick={submitReconcile}>消込を確定</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

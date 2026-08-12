@@ -4,16 +4,19 @@ import type { Sale, SaleStatus } from "@/types";
 
 interface SalesStore {
   sales: Sale[];
+  partialPayments: Record<string, number>;
   addSale: (sale: Sale) => void;
   updateSale: (id: string, patch: Partial<Omit<Sale, "id">>) => void;
   updateStatus: (id: string, status: SaleStatus) => void;
   markConsolidatedByIds: (ids: string[]) => void;
   markInvoicedByIds: (ids: string[]) => void;
   markPaidByIds: (ids: string[]) => void;
+  recordPartialPayment: (saleId: string, amount: number) => void;
 }
 
 export const useSalesStore = create<SalesStore>((set) => ({
   sales: salesData as Sale[],
+  partialPayments: {},
   addSale: (sale) => set((state) => ({ sales: [...state.sales, sale] })),
   updateSale: (id, patch) =>
     set((state) => ({
@@ -40,5 +43,12 @@ export const useSalesStore = create<SalesStore>((set) => ({
       sales: state.sales.map((sale) =>
         ids.includes(sale.id) ? { ...sale, status: "paid" } : sale,
       ),
+    })),
+  recordPartialPayment: (saleId, amount) =>
+    set((state) => ({
+      partialPayments: {
+        ...state.partialPayments,
+        [saleId]: (state.partialPayments[saleId] ?? 0) + amount,
+      },
     })),
 }));
