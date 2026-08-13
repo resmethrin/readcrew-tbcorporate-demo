@@ -19,8 +19,26 @@ export const businessColorClasses: Record<string, string> = {
   slate: "bg-slate-50 text-slate-700 border-slate-200",
 };
 
+export const getCustomer = (customerId: string) =>
+  demoCustomers.find((customer) => customer.id === customerId);
+
 export const getCustomerBillingType = (customerId: string) =>
-  demoCustomers.find((customer) => customer.id === customerId)?.billingType ?? "—";
+  getCustomer(customerId)?.billingType ?? "—";
+
+/** 得意先の締日区分。都度請求先は締日を持たない */
+export const getCustomerClosingDay = (customerId: string) =>
+  getCustomer(customerId)?.closingDay ?? null;
+
+export const isDay25Closing = (closingDay?: string | null) =>
+  Boolean(closingDay?.startsWith("25"));
+
+/** 締日区分から決まる入金期日のルール。請求書プレビューの算出ロジックと対応する */
+export const paymentTermLabel = (customerId: string) => {
+  const customer = getCustomer(customerId);
+  if (!customer) return "—";
+  if (customer.billingType === "都度請求") return "請求書発行から30日";
+  return isDay25Closing(customer.closingDay) ? "当月末日" : "翌月末日";
+};
 
 export const statusLabels: Record<SaleStatus, string> = {
   uninvoiced:   "未請求",

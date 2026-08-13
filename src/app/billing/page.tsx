@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CustomerTermBadge } from "@/components/CustomerTermBadge";
 import {
   demoBusinesses,
   demoCustomers,
@@ -550,7 +551,12 @@ export default function BillingPage() {
                       <TableCell className="pl-5 font-mono text-xs text-zinc-500">
                         {invoiceNumberForMonth(row.month)}
                       </TableCell>
-                      <TableCell className="font-medium text-zinc-800">{row.customerName}</TableCell>
+                      <TableCell className="font-medium text-zinc-800">
+                        <span className="inline-flex items-center gap-1.5">
+                          {row.customerName}
+                          <CustomerTermBadge customerId={row.customerId} />
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <button
                           type="button"

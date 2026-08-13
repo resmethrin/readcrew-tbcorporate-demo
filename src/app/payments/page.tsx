@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CustomerTermBadge } from "@/components/CustomerTermBadge";
 import {
   demoBusinesses,
   dueDateLabel,
@@ -405,7 +406,12 @@ export default function PaymentsPage() {
                       <TableCell className="font-mono text-xs text-zinc-500">
                         {invoiceNumberForMonth(row.month)}
                       </TableCell>
-                      <TableCell className="font-medium text-zinc-800">{row.customerName}</TableCell>
+                      <TableCell className="font-medium text-zinc-800">
+                        <span className="inline-flex items-center gap-1.5">
+                          {row.customerName}
+                          <CustomerTermBadge customerId={row.customerId} />
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <button
                           type="button"

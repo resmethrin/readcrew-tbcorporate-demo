@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { CustomerTermBadge } from "@/components/CustomerTermBadge";
+import { demoCustomers, paymentTermLabel } from "@/lib/demo-data";
 import { useMasterApprovalStore } from "@/store/useMasterApprovalStore";
 
 interface SpotPartner {
@@ -53,6 +55,51 @@ export default function MastersPage() {
         <p className="text-xs font-medium uppercase tracking-widest text-zinc-400">Masters</p>
         <h1 className="mt-1 text-xl font-semibold text-zinc-900">マスタ管理</h1>
       </div>
+
+      {/* 得意先マスタ一覧（請求区分・締日） */}
+      <Card className="rounded-2xl shadow-card bg-white">
+        <CardHeader className="px-6 pt-5 pb-2">
+          <CardTitle className="text-sm font-semibold text-zinc-700">得意先マスタ〈得意先登録〉</CardTitle>
+          <p className="text-xs text-zinc-400">
+            請求区分（都度請求 / 締め請求）と締日を属性として保持し、請求書の対象期間・入金期日はここから自動で決まります
+          </p>
+        </CardHeader>
+        <CardContent className="px-6 pb-6">
+          <div className="rounded-xl border border-zinc-200 overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-zinc-100 bg-zinc-50 text-xs text-zinc-400">
+                  <th className="px-4 py-2 text-left font-medium">得意先</th>
+                  <th className="px-4 py-2 text-left font-medium">請求区分</th>
+                  <th className="px-4 py-2 text-left font-medium">締日</th>
+                  <th className="px-4 py-2 text-left font-medium">入金期日</th>
+                  <th className="px-4 py-2 text-left font-medium">窓口</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {demoCustomers.map((customer) => (
+                  <tr key={customer.id}>
+                    <td className="px-4 py-2.5 font-medium text-zinc-800">
+                      <span className="inline-flex items-center gap-1.5">
+                        {customer.name}
+                        <CustomerTermBadge customerId={customer.id} />
+                      </span>
+                    </td>
+                    <td className="px-4 py-2.5 text-zinc-600">{customer.billingType ?? "—"}</td>
+                    <td className="px-4 py-2.5 text-zinc-600">{customer.closingDay ?? "—"}</td>
+                    <td className="px-4 py-2.5 text-zinc-600">{paymentTermLabel(customer.id)}</td>
+                    <td className="px-4 py-2.5 text-zinc-500">{customer.contact}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <p className="mt-3 text-xs text-zinc-400">
+            25日締めの得意先は締日と入金期日が他社とずれるため、請求書は締日基準の対象期間で発行されます。
+          </p>
+        </CardContent>
+      </Card>
 
       {/* マスタ申請ワークフロー */}
       <Card className="rounded-2xl shadow-card bg-white">

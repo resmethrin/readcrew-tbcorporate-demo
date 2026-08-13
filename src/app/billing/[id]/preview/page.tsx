@@ -50,6 +50,8 @@ export default function InvoicePreviewPage() {
 
   // 税抜統一 Before/After トグル
   const [unifiedTaxDisplay, setUnifiedTaxDisplay] = useState(false);
+  // 繰越型（現行フォーム）/ 当月完結型 Before/After トグル
+  const [carryOverMode, setCarryOverMode] = useState(false);
   const isTaxInclusiveInput = (description: string) => description.includes("（税込入力）");
   const displayDescription = (description: string) => description.replace("（税込入力）", "");
   const exclusiveAmount = (amount: number) => Math.round(amount / 1.1);
@@ -115,12 +117,51 @@ export default function InvoicePreviewPage() {
     setLinkCopied(true);
   };
 
-  // 入金期限: 翌月末
+  // ── 締日・対象期間・入金期日 ────────────────────────
+  // 得意先マスタの締日区分で、請求対象期間と入金期日が変わる。
+  //   25日締め : 前月26日〜当月25日 / 当月末日入金（例: T紡織）
+  //   月末締め : 当月1日〜当月末日   / 翌月末日入金
   const [y, m] = month.split("-").map(Number);
-  const dueMonth = m === 12 ? 1 : m + 1;
-  const dueYear = m === 12 ? y + 1 : y;
-  const dueDaysInMonth = new Date(dueYear, dueMonth, 0).getDate();
-  const dueDateLabel = `${dueYear}年${dueMonth}月${dueDaysInMonth}日`;
+  const lastDayOf = (yy: number, mm: number) => new Date(yy, mm, 0).getDate();
+  const dateLabel = (yy: number, mm: number, dd: number) => `${yy}年${mm}月${dd}日`;
+
+  const prevYear = m === 1 ? y - 1 : y;
+  const prevMonth = m === 1 ? 12 : m - 1;
+  const nextYear = m === 12 ? y + 1 : y;
+  const nextMonth = m === 12 ? 1 : m + 1;
+
+  const closingLabel = customer?.closingDay ?? "月末締め";
+  const isDay25Closing = closingLabel.startsWith("25");
+
+  const periodLabel = isDay25Closing
+    ? `${dateLabel(prevYear, prevMonth, 26)} 〜 ${dateLabel(y, m, 25)}`
+    : `${dateLabel(y, m, 1)} 〜 ${dateLabel(y, m, lastDayOf(y, m))}`;
+  const closingDateLabel = isDay25Closing
+    ? dateLabel(y, m, 25)
+    : dateLabel(y, m, lastDayOf(y, m));
+  const dueDateLabel = isDay25Closing
+    ? dateLabel(y, m, lastDayOf(y, m))
+    : dateLabel(nextYear, nextMonth, lastDayOf(nextYear, nextMonth));
+
+  // ── 繰越型 Before/After 用: 前月分の請求・入金実績 ──────
+  const prevMonthKey = `${prevYear}-${String(prevMonth).padStart(2, "0")}`;
+  const prevSales = useMemo(
+    () =>
+      sales.filter(
+        (sale) =>
+          sale.customerId === customerId &&
+          sale.month === prevMonthKey &&
+          (bizIdFilter === null || bizIdFilter.has(sale.businessId)),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [customerId, prevMonthKey, sales, bizIdsParam],
+  );
+  const withTax = (amount: number) => amount + Math.round(amount * 0.1);
+  const prevBilled = withTax(prevSales.reduce((sum, sale) => sum + sale.amount, 0));
+  const prevPaid = withTax(
+    prevSales.filter((sale) => sale.status === "paid").reduce((sum, sale) => sum + sale.amount, 0),
+  );
+  const carryOver = prevBilled - prevPaid;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -152,22 +193,44 @@ export default function InvoicePreviewPage() {
         </div>
       </div>
 
-      <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-white px-5 py-3 print:hidden">
-        <div className="text-sm">
-          <span className="font-medium text-zinc-700">税抜統一表示</span>
-          <span className="ml-2 text-xs text-zinc-400">
-            {unifiedTaxDisplay ? "After: 全明細を税抜表示に統一" : "Before: 税込入力の明細が混在したまま表示"}
-          </span>
+      <div className="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white print:hidden">
+        <div className="flex items-center justify-between px-5 py-3">
+          <div className="text-sm">
+            <span className="font-medium text-zinc-700">税抜統一表示</span>
+            <span className="ml-2 text-xs text-zinc-400">
+              {unifiedTaxDisplay ? "After: 全明細を税抜表示に統一" : "Before: 税込入力の明細が混在したまま表示"}
+            </span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={unifiedTaxDisplay}
+            onClick={() => setUnifiedTaxDisplay((v) => !v)}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${unifiedTaxDisplay ? "bg-[#0071e3]" : "bg-zinc-200"}`}
+          >
+            <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${unifiedTaxDisplay ? "translate-x-5" : "translate-x-0.5"}`} />
+          </button>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={unifiedTaxDisplay}
-          onClick={() => setUnifiedTaxDisplay((v) => !v)}
-          className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${unifiedTaxDisplay ? "bg-[#0071e3]" : "bg-zinc-200"}`}
-        >
-          <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${unifiedTaxDisplay ? "translate-x-5" : "translate-x-0.5"}`} />
-        </button>
+
+        <div className="flex items-center justify-between px-5 py-3">
+          <div className="text-sm">
+            <span className="font-medium text-zinc-700">繰越型フォーム表示</span>
+            <span className="ml-2 text-xs text-zinc-400">
+              {carryOverMode
+                ? "Before: 現行フォーム（①前回御請求額 〜 ⑦累計御請求額）"
+                : "After: 当月完結型（繰越欄なし・当月分のみ）"}
+            </span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={carryOverMode}
+            onClick={() => setCarryOverMode((v) => !v)}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${carryOverMode ? "bg-amber-500" : "bg-zinc-200"}`}
+          >
+            <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${carryOverMode ? "translate-x-5" : "translate-x-0.5"}`} />
+          </button>
+        </div>
       </div>
 
       <Card className="bg-white shadow-sm print:shadow-none">
@@ -179,12 +242,12 @@ export default function InvoicePreviewPage() {
               <div className="text-3xl font-bold tracking-wide">請求書</div>
               <div className="mt-6 space-y-0.5 text-sm text-zinc-600">
                 <div className="flex items-center gap-2">
-                  <span className="w-20 text-zinc-400">入金期限</span>
+                  <span className="w-20 text-zinc-400">入金期日</span>
                   <span className="font-semibold text-zinc-900">{dueDateLabel}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-20 text-zinc-400">発行日</span>
-                  <span>2026年6月30日</span>
+                  <span>{closingDateLabel}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="w-20 text-zinc-400">請求書番号</span>
@@ -218,22 +281,68 @@ export default function InvoicePreviewPage() {
 
           {/* 請求先 */}
           <div className="border-b border-zinc-200 pb-5">
-            <div className="text-lg font-semibold">
-              {customer?.name} <span className="font-normal">御中</span>
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-semibold">
+                {customer?.name} <span className="font-normal">御中</span>
+              </span>
+              <span
+                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium ${
+                  isDay25Closing
+                    ? "border-sky-200 bg-sky-50 text-sky-700"
+                    : "border-zinc-200 bg-zinc-50 text-zinc-500"
+                }`}
+              >
+                {closingLabel}
+              </span>
             </div>
-            <p className="mt-2 text-zinc-600">
+
+            <div className="mt-3 grid gap-1 text-sm text-zinc-600 sm:grid-cols-3">
+              <div className="flex gap-2">
+                <span className="shrink-0 text-zinc-400">締日</span>
+                <span className="font-medium text-zinc-800">{closingDateLabel}</span>
+              </div>
+              <div className="flex gap-2 sm:col-span-2">
+                <span className="shrink-0 text-zinc-400">対象期間</span>
+                <span className="font-medium text-zinc-800">{periodLabel}</span>
+              </div>
+              <div className="flex gap-2">
+                <span className="shrink-0 text-zinc-400">入金期日</span>
+                <span className="font-medium text-zinc-800">{dueDateLabel}</span>
+              </div>
+            </div>
+
+            <p className="mt-3 text-zinc-600">
               下記の通りご請求申し上げます。
             </p>
           </div>
 
           {/* 請求金額サマリ */}
           <div className="rounded-xl bg-zinc-50 px-6 py-4">
-            <div className="text-sm text-zinc-500">ご請求金額（税込）</div>
-            <div className="mt-1 text-3xl font-bold text-accent">{formatYen(total + tax)}</div>
-            <div className="mt-2 flex gap-6 text-sm text-zinc-600">
-              <span>対象月: {monthToLabel(month)}</span>
-              <span>入金期限: {dueDateLabel}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-zinc-500">ご請求金額（税込）</span>
+              {carryOverMode ? (
+                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                  繰越型（現行フォーム）
+                </span>
+              ) : (
+                <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                  当月完結型
+                </span>
+              )}
             </div>
+            <div className="mt-1 text-3xl font-bold text-accent">
+              {formatYen(carryOverMode ? carryOver + total + tax : total + tax)}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-zinc-600">
+              <span>対象月: {monthToLabel(month)}</span>
+              <span>対象期間: {periodLabel}</span>
+              <span>入金期日: {dueDateLabel}</span>
+            </div>
+            {!carryOverMode && (
+              <p className="mt-2 text-xs text-zinc-400">
+                当月分のみを記載します。前回御請求額・差引繰越額の欄はありません。
+              </p>
+            )}
           </div>
 
           {/* 明細 */}
@@ -280,20 +389,71 @@ export default function InvoicePreviewPage() {
           </div>
 
           {/* 合計 */}
-          <div className="rounded-xl border border-zinc-200 overflow-hidden">
-            <div className="flex justify-between px-5 py-2.5 text-sm text-zinc-600">
-              <span>小計（税抜）</span>
-              <span>{formatYen(total)}</span>
+          {carryOverMode ? (
+            <div className="space-y-2">
+              <div className="rounded-xl border border-amber-200 overflow-hidden">
+                <div className="flex justify-between border-b border-amber-100 bg-amber-50/60 px-5 py-2.5 text-sm text-zinc-600">
+                  <span>① 前回御請求額</span>
+                  <span>{formatYen(prevBilled)}</span>
+                </div>
+                <div className="flex justify-between border-b border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
+                  <span>② 御入金額</span>
+                  <span>{formatYen(prevPaid)}</span>
+                </div>
+                <div className="flex justify-between border-b border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
+                  <span>③ 調整額</span>
+                  <span>{formatYen(0)}</span>
+                </div>
+                <div className="flex justify-between border-b border-amber-100 bg-amber-50/60 px-5 py-2.5 text-sm font-medium text-amber-800">
+                  <span>④ 差引繰越額</span>
+                  <span>{formatYen(carryOver)}</span>
+                </div>
+                <div className="flex justify-between border-b border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
+                  <span>⑤ 当月御買上額（税抜）</span>
+                  <span>{formatYen(total)}</span>
+                </div>
+                <div className="flex justify-between border-b border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
+                  <span>⑥ 消費税（10%）</span>
+                  <span>{formatYen(tax)}</span>
+                </div>
+                <div className="flex justify-between border-t border-amber-200 bg-amber-50 px-5 py-3 text-base font-bold text-zinc-900">
+                  <span>⑦ 累計御請求額</span>
+                  <span className="text-accent">{formatYen(carryOver + total + tax)}</span>
+                </div>
+              </div>
+
+              <p className="rounded-lg bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800 print:hidden">
+                {isDay25Closing ? (
+                  <>
+                    {closingLabel}の得意先では、締日（{closingDateLabel}）から入金期日（{dueDateLabel}）までの間に
+                    請求書が発行されるため、<span className="font-semibold">入金済でも④差引繰越額が残って見えます</span>。
+                    「払ったはずなのに繰越が立っている」という問合せの原因になります。
+                  </>
+                ) : (
+                  <>
+                    ①〜④が当月分に混ざるため、
+                    <span className="font-semibold">④差引繰越額が「当月の未払い」と誤解されます</span>。
+                    締日と入金期日がずれる得意先ほど問合せが増えます。
+                  </>
+                )}
+              </p>
             </div>
-            <div className="flex justify-between border-t border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
-              <span>消費税（10%）</span>
-              <span>{formatYen(tax)}</span>
+          ) : (
+            <div className="rounded-xl border border-zinc-200 overflow-hidden">
+              <div className="flex justify-between px-5 py-2.5 text-sm text-zinc-600">
+                <span>小計（税抜）</span>
+                <span>{formatYen(total)}</span>
+              </div>
+              <div className="flex justify-between border-t border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
+                <span>消費税（10%）</span>
+                <span>{formatYen(tax)}</span>
+              </div>
+              <div className="flex justify-between border-t border-zinc-200 bg-zinc-50 px-5 py-3 text-base font-bold text-zinc-900">
+                <span>合計（税込）</span>
+                <span className="text-accent">{formatYen(total + tax)}</span>
+              </div>
             </div>
-            <div className="flex justify-between border-t border-zinc-200 bg-zinc-50 px-5 py-3 text-base font-bold text-zinc-900">
-              <span>合計（税込）</span>
-              <span className="text-accent">{formatYen(total + tax)}</span>
-            </div>
-          </div>
+          )}
 
           {/* 振込先 */}
           <div className="rounded-xl border border-zinc-200 p-5 space-y-3">
