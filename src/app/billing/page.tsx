@@ -170,7 +170,7 @@ export default function BillingPage() {
     window.setTimeout(() => setSyncToast(null), 4000);
   };
 
-  // ── 統合画面（事業部選択）────────────────────────────
+  // ── 統合画面（室選択）────────────────────────────
   const bizGroups = useMemo(() => {
     if (!selectedCustomerId) return [];
     return groupSalesByBusiness(
@@ -334,7 +334,7 @@ export default function BillingPage() {
                 <div className="flex items-center justify-between rounded-xl bg-zinc-50 px-5 py-4">
                   <div className="space-y-0.5 text-sm">
                     <div className="text-zinc-500">
-                      {selectedBizIds.size}事業部 / {selectedGroups.reduce((n, g) => n + g.items.length, 0)}件選択
+                      {selectedBizIds.size}室 / {selectedGroups.reduce((n, g) => n + g.items.length, 0)}件選択
                     </div>
                     <div className="text-lg font-semibold text-zinc-900">
                       {formatYen(subtotal + tax)}
@@ -603,7 +603,7 @@ export default function BillingPage() {
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="text-zinc-400 border-b border-zinc-200">
-                                <th className="pb-1.5 text-left font-medium">事業部</th>
+                                <th className="pb-1.5 text-left font-medium">室</th>
                                 <th className="pb-1.5 text-left font-medium">内容</th>
                                 <th className="pb-1.5 text-right font-medium">数量</th>
                                 <th className="pb-1.5 text-right font-medium">単価</th>

@@ -160,7 +160,7 @@ export default function SalesPage() {
         </div>
       </div>
 
-      {/* 事業部別 ミニ KPI */}
+      {/* 室別 ミニ KPI */}
       <div className="grid gap-3 md:grid-cols-3">
         {bizTotals.map((b) => {
           const c = BIZ_COLOR[b.id];
@@ -215,10 +215,10 @@ export default function SalesPage() {
               </div>
             </div>
 
-            {/* 事業部フィルター */}
+            {/* 室フィルター */}
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-zinc-400 shrink-0" />
-              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">事業部</span>
+              <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">室</span>
               <div className="flex flex-wrap gap-1.5 ml-1">
                 <button
                   type="button"
@@ -316,7 +316,7 @@ export default function SalesPage() {
                   <Checkbox checked={allChecked} onCheckedChange={toggleAll} />
                 </TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">顧客名</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400">事業部</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400">室</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">内容</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">金額</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">担当</TableHead>
@@ -418,7 +418,7 @@ export default function SalesPage() {
                         <tr>
                           <th className="px-3 py-2 text-left font-medium">内容</th>
                           <th className="px-3 py-2 text-left font-medium">顧客</th>
-                          <th className="px-3 py-2 text-left font-medium">事業部</th>
+                          <th className="px-3 py-2 text-left font-medium">室</th>
                           <th className="px-3 py-2 text-left font-medium">月</th>
                           <th className="px-3 py-2 text-right font-medium">金額</th>
                         </tr>

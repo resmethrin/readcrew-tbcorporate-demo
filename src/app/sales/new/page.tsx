@@ -229,7 +229,7 @@ function NewSalePageInner() {
   const validate = () => {
     const e: Record<string, string> = {};
     if (!customerId)    e.customer = "取引先を選択してください";
-    if (!businessId)    e.business = "事業部を選択してください";
+    if (!businessId)    e.business = "室を選択してください";
     if (!subject.trim()) e.subject  = "件名を入力してください";
     if (lines.every((l) => !l.description.trim())) e.lines = "明細を1件以上入力してください";
     setErrors(e);
@@ -294,7 +294,7 @@ function NewSalePageInner() {
         {/* ── 左：フォーム ── */}
         <div className="min-w-0 flex-1 space-y-5">
 
-          {/* 取引先・事業部 */}
+          {/* 取引先・室 */}
           <div className="rounded-2xl bg-white shadow-card p-6 space-y-4">
             <SectionTitle>取引先情報</SectionTitle>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -313,13 +313,13 @@ function NewSalePageInner() {
                 {errors.customer && <p className="mt-1 text-xs text-red-500">{errors.customer}</p>}
               </div>
               <div>
-                <FieldLabel required>事業部</FieldLabel>
+                <FieldLabel required>室</FieldLabel>
                 <select
                   value={businessId}
                   onChange={(e) => setBusinessId(e.target.value)}
                   className={`block w-full rounded-md border bg-gray-50 px-3 py-2 text-sm text-zinc-800 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3] ${errors.business ? "border-red-400" : "border-zinc-200"}`}
                 >
-                  <option value="">事業部を選択</option>
+                  <option value="">室を選択</option>
                   {demoBusinesses.map((b) => (
                     <option key={b.id} value={b.id}>{b.name}</option>
                   ))}

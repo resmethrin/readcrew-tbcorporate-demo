@@ -137,7 +137,7 @@ export default function ImportPage() {
           <Card>
             <CardContent className="p-6 space-y-4">
               <p className="text-sm text-zinc-500">
-                列見出し「顧客ID/customerId, 事業部ID/businessId, 内容/description, 金額/amount, 数量, 単価, 月/month」に対応したExcel・CSVファイルを取込みます。
+                列見出し「顧客ID/customerId, 室ID（事業部ID）/businessId, 内容/description, 金額/amount, 数量, 単価, 月/month」に対応したExcel・CSVファイルを取込みます。
               </p>
               <input
                 ref={fileInputRef}

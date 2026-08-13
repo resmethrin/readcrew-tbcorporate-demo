@@ -449,7 +449,7 @@ export default function PaymentsPage() {
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="text-zinc-400 border-b border-zinc-200">
-                                <th className="pb-1.5 text-left font-medium">事業部</th>
+                                <th className="pb-1.5 text-left font-medium">室</th>
                                 <th className="pb-1.5 text-left font-medium">内容</th>
                                 <th className="pb-1.5 text-right font-medium">数量</th>
                                 <th className="pb-1.5 text-right font-medium">単価</th>
