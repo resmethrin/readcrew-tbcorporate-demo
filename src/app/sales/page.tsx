@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Building2, Calendar, FileSpreadsheet, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,8 @@ const STATUS_STYLE: Record<SaleStatus, { bg: string; text: string; dot: string }
   paid:         { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
 };
 
+const PAGE_SIZE = 50;
+
 const statusFilters: { id: "all" | SaleStatus; label: string }[] = [
   { id: "all",        label: "全て" },
   { id: "uninvoiced", label: "未請求" },
@@ -40,6 +42,7 @@ export default function SalesPage() {
   const [status, setStatus] = useState<"all" | SaleStatus>("all");
   const [monthFilter, setMonthFilter] = useState("all");
   const [selected, setSelected] = useState<string[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   // Excel 取り込み
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -114,6 +117,10 @@ export default function SalesPage() {
     [sales, status]
   );
 
+  // フード室のように件数が多い室でも一覧が重くならないよう、50件ずつ表示する
+  const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
+  useEffect(() => setVisibleCount(PAGE_SIZE), [businessId, monthFilter, status]);
+
   const toggleSelected = (id: string) =>
     setSelected((cur) => cur.includes(id) ? cur.filter((v) => v !== id) : [...cur, id]);
 
@@ -185,6 +192,10 @@ export default function SalesPage() {
           );
         })}
       </div>
+
+      <p className="-mt-3 text-xs text-zinc-400">
+        フードサービス室の2026年6月は実測件数（売上228件/月・3月・5月平均）に合わせています。金額は架空です。
+      </p>
 
       {/* フィルターバー */}
       <Card className="rounded-2xl shadow-card bg-white">
@@ -332,7 +343,7 @@ export default function SalesPage() {
                   </TableCell>
                 </TableRow>
               )}
-              {filtered.map((sale) => {
+              {visible.map((sale) => {
                 const customer = demoCustomers.find((c) => c.id === sale.customerId);
                 const business = demoBusinesses.find((b) => b.id === sale.businessId);
                 const bc = BIZ_COLOR[sale.businessId];
@@ -376,9 +387,24 @@ export default function SalesPage() {
             </TableBody>
           </Table>
 
+          {/* もっと見る */}
+          {visible.length < filtered.length && (
+            <div className="flex justify-center border-t border-zinc-50 px-6 py-3">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+                className="rounded-lg border border-zinc-200 bg-white px-4 py-2 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50"
+              >
+                もっと見る（残り {filtered.length - visible.length}件）
+              </button>
+            </div>
+          )}
+
           {/* フッター */}
           <div className="flex items-center justify-between border-t border-zinc-50 px-6 py-3">
-            <span className="text-xs text-zinc-400">{filtered.length}件表示</span>
+            <span className="text-xs text-zinc-400">
+              {visible.length}件表示 / 全{filtered.length}件
+            </span>
             <span className="text-xs font-semibold text-zinc-700">
               合計 {formatYen(filtered.reduce((n, s) => n + s.amount, 0))}
             </span>

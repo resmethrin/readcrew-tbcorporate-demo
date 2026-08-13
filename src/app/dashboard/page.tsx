@@ -127,7 +127,7 @@ export default function DashboardPage() {
                 <ArrowUpRight className="h-3 w-3" />+11.5%
               </span>
             </div>
-            <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">
+            <p className="text-3xl font-bold tracking-tight text-zinc-950 leading-none tabular-nums">
               {formatYen(currentMonthForecast)}
             </p>
             <div className="mt-4">
@@ -151,7 +151,7 @@ export default function DashboardPage() {
                 <TrendingUp className="h-4 w-4 text-[#0071e3]" />
               </div>
             </div>
-            <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">
+            <p className="text-3xl font-bold tracking-tight text-zinc-950 leading-none tabular-nums">
               {formatYen(paidTotal)}
             </p>
             <p className="mt-4 text-xs text-zinc-400">
@@ -169,7 +169,7 @@ export default function DashboardPage() {
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
               </div>
             </div>
-            <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">
+            <p className="text-3xl font-bold tracking-tight text-zinc-950 leading-none tabular-nums">
               {formatYen(invoicedTotal + uninvoicedTotal)}
             </p>
             <div className="mt-4 flex gap-3 text-xs">
@@ -188,7 +188,7 @@ export default function DashboardPage() {
                 <ArrowUpRight className="h-3 w-3 rotate-90" />-87.5%
               </span>
             </div>
-            <p className="text-4xl font-bold tracking-tight text-zinc-950 leading-none">1.5H</p>
+            <p className="text-3xl font-bold tracking-tight text-zinc-950 leading-none tabular-nums">1.5H</p>
             <p className="mt-1 text-xs text-zinc-400">現行 12.0H（6.0H×2名）基準</p>
             <div className="mt-4 space-y-1.5">
               <div className="flex items-center gap-2 text-xs text-zinc-400">
