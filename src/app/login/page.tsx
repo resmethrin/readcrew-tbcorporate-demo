@@ -94,11 +94,6 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-10">
       <div className="w-full max-w-sm space-y-6">
-        <div className="border-l-2 border-[#0071e3] pl-3">
-          <div className="text-lg font-semibold text-zinc-900">販売・請求ハブ</div>
-          <div className="mt-1 text-xs text-zinc-400">TBコーポレート様</div>
-        </div>
-
         <div className="rounded-2xl border bg-white p-7 shadow-sm" style={{ borderColor: "rgb(243 244 246)" }}>
           <div className="mb-5 flex items-center gap-2">
             <Lock className="h-4 w-4 text-zinc-400" />
