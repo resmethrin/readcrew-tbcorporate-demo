@@ -182,7 +182,7 @@ export default function BillingPage() {
           unpaid === 0 ? "paid" : paid > 0 ? "partial" : "awaiting";
         const overdue = unpaid > 0 && isPastDue(row.customerId, row.month);
 
-        return { ...row, billed, paidAmount: paid, unpaid, status, overdue };
+        return { ...row, billed, paidAmount: paid, unpaid, status, overdue, billedIds: rowSales.map((s) => s.id) };
       });
   }, [invoiceRows, partialPayments, sales]);
 
@@ -505,11 +505,8 @@ export default function BillingPage() {
                 const isSelectable = row.status !== "paid";
                 const isSelected = selected.has(row.id);
                 const isExpanded = expandedRows.has(row.id);
-                const rowSales = sales.filter((sale) =>
-                  sale.customerId === row.customerId &&
-                  sale.month === row.month &&
-                  row.bizIds.includes(sale.businessId)
-                );
+                // 一覧の金額と対象を揃えるため、請求済み以降の伝票だけを内訳に出す
+                const rowSales = sales.filter((sale) => row.billedIds.includes(sale.id));
                 return (
                   <React.Fragment key={row.id}>
                     <TableRow
@@ -583,7 +580,7 @@ export default function BillingPage() {
                       </TableCell>
                       <TableCell className="pr-5 text-right">
                         <Link
-                          href={`/billing/${row.customerId}-${row.month}/preview?bizIds=${row.bizIds.join(",")}&invoiceNo=${invoiceNumberForMonth(row.month)}`}
+                          href={`/billing/${row.customerId}-${row.month}/preview?saleIds=${row.billedIds.join(",")}&invoiceNo=${invoiceNumberForMonth(row.month)}`}
                           className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800"
                         >
                           <span className="whitespace-nowrap">請求書</span>
@@ -601,8 +598,9 @@ export default function BillingPage() {
                                 <th className="pb-1.5 text-left font-medium">内容</th>
                                 <th className="pb-1.5 text-right font-medium">数量</th>
                                 <th className="pb-1.5 text-right font-medium">単価</th>
-                                <th className="pb-1.5 text-right font-medium">金額</th>
-                                <th className="pb-1.5 text-right font-medium">伝票消込（残額）</th>
+                                <th className="pb-1.5 text-right font-medium">金額（税抜）</th>
+                                <th className="pb-1.5 text-right font-medium">金額（税込）</th>
+                                <th className="pb-1.5 text-right font-medium">伝票消込（残額・税込）</th>
                                 <th className="pb-1.5 text-right font-medium" />
                               </tr>
                             </thead>
@@ -625,13 +623,14 @@ export default function BillingPage() {
                                     <td className="py-1.5 pr-3">{sale.description}</td>
                                     <td className="py-1.5 pr-3 text-right tabular-nums">{sale.qty ?? 1}</td>
                                     <td className="py-1.5 pr-3 text-right tabular-nums">{formatYen(sale.unitPrice ?? Math.round(sale.amount / (sale.qty ?? 1)))}</td>
-                                    <td className="py-1.5 pr-3 text-right font-medium tabular-nums">{formatYen(sale.amount)}</td>
+                                    <td className="py-1.5 pr-3 text-right tabular-nums">{formatYen(sale.amount)}</td>
+                                    <td className="py-1.5 pr-3 text-right font-medium tabular-nums">{formatYen(withTax(sale.amount))}</td>
                                     <td className="py-1.5 pr-3 text-right tabular-nums">
                                       {isVoucherReconcilable ? (
                                         isVoucherSettled ? (
                                           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">消込済</span>
                                         ) : (
-                                          <span className="text-amber-600 font-medium">{formatYen(remaining)}</span>
+                                          <span className="text-amber-600 font-medium">{formatYen(withTax(remaining))}</span>
                                         )
                                       ) : (
                                         <span className="text-zinc-300">—</span>
@@ -652,6 +651,18 @@ export default function BillingPage() {
                                 );
                               })}
                             </tbody>
+                            <tfoot>
+                              <tr className="border-t border-zinc-200 text-zinc-600">
+                                <td colSpan={5} className="py-1.5 pr-3 text-right font-medium">請求額（税込）</td>
+                                <td className="py-1.5 pr-3 text-right font-semibold tabular-nums text-zinc-900">
+                                  {formatYen(row.billed)}
+                                </td>
+                                <td className="py-1.5 pr-3 text-right font-medium tabular-nums text-red-600">
+                                  {row.unpaid > 0 ? `未入金 ${formatYen(row.unpaid)}` : ""}
+                                </td>
+                                <td />
+                              </tr>
+                            </tfoot>
                           </table>
                         </TableCell>
                       </TableRow>

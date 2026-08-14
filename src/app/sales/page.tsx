@@ -41,6 +41,7 @@ export default function SalesPage() {
   const markInvoicedByIds = useSalesStore((s) => s.markInvoicedByIds);
   const addSale = useSalesStore((s) => s.addSale);
   const [businessId, setBusinessId] = useState("all");
+  const [customerId, setCustomerId] = useState("all");
   const [status, setStatus] = useState<"all" | SaleStatus>("all");
   const [monthFilter, setMonthFilter] = useState("all");
   const [selected, setSelected] = useState<string[]>([]);
@@ -101,11 +102,12 @@ export default function SalesPage() {
       sales.filter((s) => {
         if (s.status !== "uninvoiced" && s.status !== "invoiced") return false;
         const bizMatch    = businessId === "all" || s.businessId === businessId;
+        const custMatch   = customerId === "all" || s.customerId === customerId;
         const statusMatch = status === "all"     || s.status === status;
         const monthMatch  = monthFilter === "all" || s.month === monthFilter;
-        return bizMatch && statusMatch && monthMatch;
+        return bizMatch && custMatch && statusMatch && monthMatch;
       }),
-    [businessId, monthFilter, sales, status],
+    [businessId, customerId, monthFilter, sales, status],
   );
 
   const bizTotals = useMemo(() =>
@@ -121,7 +123,7 @@ export default function SalesPage() {
 
   // フード室のように件数が多い室でも一覧が重くならないよう、50件ずつ表示する
   const visible = useMemo(() => filtered.slice(0, visibleCount), [filtered, visibleCount]);
-  useEffect(() => setVisibleCount(PAGE_SIZE), [businessId, monthFilter, status]);
+  useEffect(() => setVisibleCount(PAGE_SIZE), [businessId, customerId, monthFilter, status]);
 
   const toggleSelected = (id: string) =>
     setSelected((cur) => cur.includes(id) ? cur.filter((v) => v !== id) : [...cur, id]);
@@ -157,10 +159,11 @@ export default function SalesPage() {
 
   const previewUrl = () => {
     const { targets } = consolidation;
-    const customerId = targets[0].customerId;
+    const targetCustomerId = targets[0].customerId;
     const month = targets[0].month;
-    const bizIds = [...new Set(targets.map((s) => s.businessId))];
-    return `/billing/${customerId}-${month}/preview?bizIds=${bizIds.join(",")}&invoiceNo=${invoiceNumberForMonth(month)}`;
+    return `/billing/${targetCustomerId}-${month}/preview?saleIds=${targets
+      .map((s) => s.id)
+      .join(",")}&invoiceNo=${invoiceNumberForMonth(month)}`;
   };
 
   /** 発行せずに請求書の内容だけ確認する */
@@ -250,6 +253,24 @@ export default function SalesPage() {
       <Card className="rounded-2xl shadow-card bg-white">
         <CardHeader className="px-6 pt-5 pb-0">
           <div className="flex flex-wrap items-center gap-6">
+            {/* 得意先フィルター */}
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 shrink-0 text-zinc-400" />
+              <span className="whitespace-nowrap text-xs font-medium text-zinc-400">得意先</span>
+              <select
+                value={customerId}
+                onChange={(e) => setCustomerId(e.target.value)}
+                className="ml-1 h-8 rounded-lg border border-zinc-200 bg-white px-2.5 text-xs font-medium text-zinc-700 focus:border-[#0071e3] focus:outline-none"
+              >
+                <option value="all">すべての得意先</option>
+                {demoCustomers.map((customer) => (
+                  <option key={customer.id} value={customer.id}>
+                    {customer.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* 期間フィルター */}
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-zinc-400 shrink-0" />
