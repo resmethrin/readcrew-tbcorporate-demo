@@ -88,6 +88,8 @@ export default function InvoicePreviewPage() {
   const [markInvoiced, setMarkInvoiced] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
 
+  const [pdfBusy, setPdfBusy] = useState(false);
+
   // 未入金分別発行モーダル
   const [showUnpaidModal, setShowUnpaidModal] = useState(false);
 
@@ -209,6 +211,57 @@ export default function InvoicePreviewPage() {
   );
   const carryOver = prevBilled - prevPaid;
 
+  /** 帳票レイアウトからPDFを生成してダウンロードする */
+  const handleDownloadPdf = async () => {
+    setPdfBusy(true);
+    try {
+      const [{ pdf }, { InvoicePdf }] = await Promise.all([
+        import("@react-pdf/renderer"),
+        import("@/components/invoice/InvoicePdf"),
+      ]);
+      const blob = await pdf(
+        <InvoicePdf
+          invoiceNo={invoiceNo}
+          customerName={customer?.name ?? customerId}
+          closingLabel={closingLabel}
+          closingDateLabel={closingDateLabel}
+          periodLabel={periodLabel}
+          dueDateLabel={dueDateLabel}
+          monthLabel={monthToLabel(month)}
+          groups={groups}
+          total={total}
+          tax={tax}
+          carryOverMode={carryOverMode}
+          carryOver={carryOver}
+          prevBilled={prevBilled}
+          prevPaid={prevPaid}
+          issuer={ISSUER}
+          bank={BANK}
+          displayAmountOf={(sale) =>
+            isTaxInclusiveInput(sale.description) && unifiedTaxDisplay
+              ? exclusiveAmount(sale.amount)
+              : sale.amount
+          }
+          displayDescriptionOf={(sale) => displayDescription(sale.description)}
+          referenceNoteOf={(sale) =>
+            isTaxInclusiveInput(sale.description) && unifiedTaxDisplay
+              ? `参考価格: 税込${formatYen(sale.amount)}`
+              : ""
+          }
+        />,
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${invoiceNo}_${customer?.name ?? customerId}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex items-end justify-between gap-4">
@@ -229,8 +282,8 @@ export default function InvoicePreviewPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => window.print()}>
-            PDF出力
+          <Button variant="outline" onClick={handleDownloadPdf} disabled={pdfBusy}>
+            {pdfBusy ? "PDF作成中…" : "PDF出力"}
           </Button>
           <Button variant="outline" onClick={openMailModal}>
             <Mail className="h-4 w-4" />
