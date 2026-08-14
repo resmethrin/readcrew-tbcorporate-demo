@@ -225,7 +225,8 @@
     "status": "paid",
     "assignee": "中村 あかり",
     "orderDate": "2026-01-06",
-    "voucherNo": "596004"
+    "voucherNo": "596004",
+    "note": "提案書 別途送付"
   },
   {
     "id": "s020",
@@ -273,7 +274,8 @@
     "status": "paid",
     "assignee": "佐藤 健太",
     "orderDate": "2026-01-12",
-    "voucherNo": "596022"
+    "voucherNo": "596022",
+    "note": "従No. 記載分"
   },
   {
     "id": "s024",
@@ -285,7 +287,8 @@
     "status": "paid",
     "assignee": "田村 誠",
     "orderDate": "2026-01-12",
-    "voucherNo": "596023"
+    "voucherNo": "596023",
+    "note": "お渡し：5/15 刈谷メール室"
   },
   {
     "id": "s025",
@@ -525,7 +528,8 @@
     "status": "paid",
     "assignee": "中村 あかり",
     "orderDate": "2026-02-06",
-    "voucherNo": "596029"
+    "voucherNo": "596029",
+    "note": "提案書 別途送付"
   },
   {
     "id": "s045",
@@ -573,7 +577,8 @@
     "status": "paid",
     "assignee": "佐藤 健太",
     "orderDate": "2026-02-11",
-    "voucherNo": "596047"
+    "voucherNo": "596047",
+    "note": "従No. 記載分"
   },
   {
     "id": "s049",
@@ -585,7 +590,8 @@
     "status": "paid",
     "assignee": "田村 誠",
     "orderDate": "2026-02-11",
-    "voucherNo": "596048"
+    "voucherNo": "596048",
+    "note": "お渡し：5/15 刈谷メール室"
   },
   {
     "id": "s050",
@@ -825,7 +831,8 @@
     "status": "paid",
     "assignee": "中村 あかり",
     "orderDate": "2026-03-08",
-    "voucherNo": "596054"
+    "voucherNo": "596054",
+    "note": "提案書 別途送付"
   },
   {
     "id": "s070",
@@ -873,7 +880,8 @@
     "status": "paid",
     "assignee": "佐藤 健太",
     "orderDate": "2026-03-12",
-    "voucherNo": "596072"
+    "voucherNo": "596072",
+    "note": "従No. 記載分"
   },
   {
     "id": "s074",
@@ -885,7 +893,8 @@
     "status": "paid",
     "assignee": "田村 誠",
     "orderDate": "2026-03-12",
-    "voucherNo": "596073"
+    "voucherNo": "596073",
+    "note": "お渡し：5/15 刈谷メール室"
   },
   {
     "id": "s075",
@@ -1125,7 +1134,8 @@
     "status": "paid",
     "assignee": "中村 あかり",
     "orderDate": "2026-04-06",
-    "voucherNo": "596079"
+    "voucherNo": "596079",
+    "note": "提案書 別途送付"
   },
   {
     "id": "s095",
@@ -1173,7 +1183,8 @@
     "status": "paid",
     "assignee": "佐藤 健太",
     "orderDate": "2026-04-12",
-    "voucherNo": "596097"
+    "voucherNo": "596097",
+    "note": "従No. 記載分"
   },
   {
     "id": "s099",
@@ -1185,7 +1196,8 @@
     "status": "paid",
     "assignee": "田村 誠",
     "orderDate": "2026-04-12",
-    "voucherNo": "596098"
+    "voucherNo": "596098",
+    "note": "お渡し：5/15 刈谷メール室"
   },
   {
     "id": "s100",
@@ -1425,7 +1437,8 @@
     "status": "paid",
     "assignee": "中村 あかり",
     "orderDate": "2026-05-07",
-    "voucherNo": "596104"
+    "voucherNo": "596104",
+    "note": "提案書 別途送付"
   },
   {
     "id": "s120",
@@ -1473,7 +1486,8 @@
     "status": "paid",
     "assignee": "佐藤 健太",
     "orderDate": "2026-05-13",
-    "voucherNo": "596122"
+    "voucherNo": "596122",
+    "note": "従No. 記載分"
   },
   {
     "id": "s124",
@@ -1485,7 +1499,8 @@
     "status": "paid",
     "assignee": "田村 誠",
     "orderDate": "2026-05-13",
-    "voucherNo": "596123"
+    "voucherNo": "596123",
+    "note": "お渡し：5/15 刈谷メール室"
   },
   {
     "id": "s125",
@@ -1725,7 +1740,8 @@
     "status": "uninvoiced",
     "assignee": "中村 あかり",
     "orderDate": "2026-06-07",
-    "voucherNo": "596129"
+    "voucherNo": "596129",
+    "note": "提案書 別途送付"
   },
   {
     "id": "s145",
@@ -1773,7 +1789,8 @@
     "status": "uninvoiced",
     "assignee": "佐藤 健太",
     "orderDate": "2026-06-12",
-    "voucherNo": "596148"
+    "voucherNo": "596148",
+    "note": "従No. 記載分"
   },
   {
     "id": "s149",
@@ -1785,7 +1802,8 @@
     "status": "uninvoiced",
     "assignee": "田村 誠",
     "orderDate": "2026-06-12",
-    "voucherNo": "596149"
+    "voucherNo": "596149",
+    "note": "お渡し：5/15 刈谷メール室"
   },
   {
     "id": "s150",

@@ -32,6 +32,10 @@ export interface Sale {
   voucherNo?: string
   /** 単位（足・通・枚 など）。未設定なら品名から推定する */
   unit?: string
+  /** 税率（%）。未設定は10%扱い */
+  taxRate?: number
+  /** 商品名の下に出す注記（例: お渡し：5/15 刈谷メール室） */
+  note?: string
   status: SaleStatus
   assignee?: string
   rakurakuSynced?: boolean
