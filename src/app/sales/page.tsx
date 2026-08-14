@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Building2, Calendar, FileSpreadsheet, Plus, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Building2, Calendar, FileSpreadsheet, FileText, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { demoBusinesses, demoCustomers, formatMonth, formatYen, statusLabels, PERIOD_MONTHS } from "@/lib/demo-data";
+import { demoBusinesses, demoCustomers, formatMonth, formatYen, getCustomerName, groupSalesByBusiness, invoiceNumberForMonth, monthToLabel, statusLabels, PERIOD_MONTHS } from "@/lib/demo-data";
 import { useSalesStore } from "@/store/useSalesStore";
 import type { Sale, SaleStatus } from "@/types";
 
@@ -35,6 +36,7 @@ const statusFilters: { id: "all" | SaleStatus; label: string }[] = [
 ];
 
 export default function SalesPage() {
+  const router = useRouter();
   const sales = useSalesStore((s) => s.sales);
   const markInvoicedByIds = useSalesStore((s) => s.markInvoicedByIds);
   const addSale = useSalesStore((s) => s.addSale);
@@ -125,6 +127,46 @@ export default function SalesPage() {
     setSelected((cur) => cur.includes(id) ? cur.filter((v) => v !== id) : [...cur, id]);
 
   const allFilteredIds = filtered.map((s) => s.id);
+
+  // ── 統合して請求書を作成 ──────────────────────────────
+  // 1枚の請求書にできるのは「同じ得意先・同じ月の未請求データ」だけ
+  const [showConsolidate, setShowConsolidate] = useState(false);
+
+  const consolidation = useMemo(() => {
+    const targets = sales.filter((s) => selected.includes(s.id) && s.status === "uninvoiced");
+    if (targets.length === 0) {
+      return { targets, groups: [], total: 0, canConsolidate: false, reason: selected.length > 0 ? "未請求の売上を選択してください" : null };
+    }
+    const customerIds = new Set(targets.map((s) => s.customerId));
+    const months = new Set(targets.map((s) => s.month));
+    if (customerIds.size > 1) {
+      return { targets, groups: [], total: 0, canConsolidate: false, reason: "得意先ごとに選択してください" };
+    }
+    if (months.size > 1) {
+      return { targets, groups: [], total: 0, canConsolidate: false, reason: "対象月ごとに選択してください" };
+    }
+    return {
+      targets,
+      groups: groupSalesByBusiness(targets),
+      total: targets.reduce((n, s) => n + s.amount, 0),
+      canConsolidate: true,
+      reason: null,
+    };
+  }, [sales, selected]);
+
+  const handleConsolidate = () => {
+    const { targets } = consolidation;
+    if (targets.length === 0) return;
+    const customerId = targets[0].customerId;
+    const month = targets[0].month;
+    const bizIds = [...new Set(targets.map((s) => s.businessId))];
+    markInvoicedByIds(targets.map((s) => s.id));
+    setSelected([]);
+    setShowConsolidate(false);
+    router.push(
+      `/billing/${customerId}-${month}/preview?bizIds=${bizIds.join(",")}&invoiceNo=${invoiceNumberForMonth(month)}`,
+    );
+  };
 
   // 選択中アイテムのステータス分類
   const selectedSales = sales.filter((s) => selected.includes(s.id));
@@ -294,23 +336,18 @@ export default function SalesPage() {
                 <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600">
                   {selected.length}件選択中
                 </span>
-                {hasUninvoiced && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      markInvoicedByIds(selected.filter((id) => sales.find((s) => s.id === id)?.status === "uninvoiced"));
-                      setSelected([]);
-                    }}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100"
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      <span className="rounded-full bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-white">未請求</span>
-                      <ArrowRight className="h-3 w-3 text-blue-400" />
-                      <span className="rounded-full bg-[#0071e3] px-1.5 py-0.5 text-[10px] font-bold text-white">請求済</span>
-                    </span>
-                    にする
-                  </button>
+                {consolidation.reason && (
+                  <span className="text-xs text-amber-600">{consolidation.reason}</span>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setShowConsolidate(true)}
+                  disabled={!consolidation.canConsolidate}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0071e3] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#005fc2] disabled:bg-zinc-100 disabled:text-zinc-400"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  統合して請求書を作成
+                </button>
               </div>
             )}
           </div>
@@ -407,6 +444,85 @@ export default function SalesPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 統合して請求書を作成モーダル */}
+      {showConsolidate && consolidation.canConsolidate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4">
+              <div className="flex items-center gap-2 font-semibold text-zinc-900">
+                <FileText className="h-4 w-4 text-zinc-500" />
+                統合して請求書を作成
+              </div>
+              <button type="button" onClick={() => setShowConsolidate(false)} className="rounded-lg p-1 hover:bg-zinc-100">
+                <X className="h-4 w-4 text-zinc-400" />
+              </button>
+            </div>
+
+            <div className="space-y-4 px-6 py-5 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="text-xs text-zinc-400">得意先</div>
+                  <div className="mt-0.5 font-medium text-zinc-800">
+                    {getCustomerName(consolidation.targets[0].customerId)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-zinc-400">対象月</div>
+                  <div className="mt-0.5 font-medium text-zinc-800">{monthToLabel(consolidation.targets[0].month)}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-zinc-400">請求番号</div>
+                  <div className="mt-0.5 font-mono font-medium text-zinc-800">
+                    {invoiceNumberForMonth(consolidation.targets[0].month)}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs text-zinc-400">件数</div>
+                  <div className="mt-0.5 font-medium text-zinc-800">{consolidation.targets.length}件</div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-zinc-200 overflow-hidden">
+                <div className="border-b border-zinc-100 bg-zinc-50 px-4 py-2 text-xs font-medium text-zinc-400">
+                  室別の内訳
+                </div>
+                {consolidation.groups.map((group) => (
+                  <div key={group.businessId} className="flex items-center justify-between border-b border-zinc-100 px-4 py-2 last:border-b-0">
+                    <span className="text-sm text-zinc-700">{group.businessName}</span>
+                    <span className="text-sm text-zinc-500">
+                      {group.items.length}件
+                      <span className="ml-3 font-semibold tabular-nums text-zinc-800">{formatYen(group.subtotal)}</span>
+                    </span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between bg-zinc-50 px-4 py-2.5">
+                  <span className="text-sm font-medium text-zinc-700">合計（税込）</span>
+                  <span className="text-base font-bold tabular-nums text-zinc-900">
+                    {formatYen(consolidation.total + Math.round(consolidation.total * 0.1))}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-xs text-zinc-400">
+                作成すると対象の売上は請求済みになり、売上一覧から請求一覧へ移ります。
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-zinc-100 px-6 py-4">
+              <button type="button" onClick={() => setShowConsolidate(false)}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100">
+                キャンセル
+              </button>
+              <button type="button" onClick={handleConsolidate}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#005fc2]">
+                <FileText className="h-4 w-4" />
+                請求書を作成してプレビュー
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Excel 取り込みモーダル */}
       {(importRows.length > 0 || importError || importDone) && (
