@@ -7,7 +7,9 @@
     "amount": 180000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596005"
   },
   {
     "id": "s002",
@@ -17,7 +19,9 @@
     "amount": 195000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596006"
   },
   {
     "id": "s003",
@@ -27,7 +31,9 @@
     "amount": 210000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596007"
   },
   {
     "id": "s004",
@@ -37,7 +43,9 @@
     "amount": 225000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596008"
   },
   {
     "id": "s005",
@@ -47,7 +55,9 @@
     "amount": 240000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596009"
   },
   {
     "id": "s006",
@@ -57,7 +67,9 @@
     "amount": 180000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596010"
   },
   {
     "id": "s007",
@@ -67,7 +79,9 @@
     "amount": 195000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596011"
   },
   {
     "id": "s008",
@@ -77,7 +91,9 @@
     "amount": 210000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596012"
   },
   {
     "id": "s009",
@@ -87,7 +103,9 @@
     "amount": 225000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596013"
   },
   {
     "id": "s010",
@@ -97,7 +115,9 @@
     "amount": 240000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596014"
   },
   {
     "id": "s011",
@@ -107,7 +127,9 @@
     "amount": 180000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596015"
   },
   {
     "id": "s012",
@@ -117,7 +139,9 @@
     "amount": 195000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596016"
   },
   {
     "id": "s013",
@@ -127,7 +151,9 @@
     "amount": 240000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-01-06",
+    "voucherNo": "596000"
   },
   {
     "id": "s014",
@@ -137,7 +163,9 @@
     "amount": 255000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596017"
   },
   {
     "id": "s015",
@@ -147,7 +175,9 @@
     "amount": 270000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-01-06",
+    "voucherNo": "596001"
   },
   {
     "id": "s016",
@@ -157,7 +187,9 @@
     "amount": 285000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596018"
   },
   {
     "id": "s017",
@@ -167,7 +199,9 @@
     "amount": 90000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-01-06",
+    "voucherNo": "596002"
   },
   {
     "id": "s018",
@@ -177,7 +211,9 @@
     "amount": 105000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-01-06",
+    "voucherNo": "596003"
   },
   {
     "id": "s019",
@@ -187,7 +223,9 @@
     "amount": 120000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-01-06",
+    "voucherNo": "596004"
   },
   {
     "id": "s020",
@@ -197,7 +235,9 @@
     "amount": 320000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596019"
   },
   {
     "id": "s021",
@@ -207,7 +247,9 @@
     "amount": 335000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596020"
   },
   {
     "id": "s022",
@@ -217,7 +259,9 @@
     "amount": 150000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596021"
   },
   {
     "id": "s023",
@@ -227,7 +271,9 @@
     "amount": 165000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596022"
   },
   {
     "id": "s024",
@@ -237,7 +283,9 @@
     "amount": 180000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596023"
   },
   {
     "id": "s025",
@@ -247,7 +295,9 @@
     "amount": 80000,
     "month": "2026-01",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-01-12",
+    "voucherNo": "596024"
   },
   {
     "id": "s026",
@@ -257,7 +307,9 @@
     "amount": 180000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596030"
   },
   {
     "id": "s027",
@@ -267,7 +319,9 @@
     "amount": 195000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596031"
   },
   {
     "id": "s028",
@@ -277,7 +331,9 @@
     "amount": 210000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596032"
   },
   {
     "id": "s029",
@@ -287,7 +343,9 @@
     "amount": 225000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596033"
   },
   {
     "id": "s030",
@@ -297,7 +355,9 @@
     "amount": 240000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596034"
   },
   {
     "id": "s031",
@@ -307,7 +367,9 @@
     "amount": 180000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596035"
   },
   {
     "id": "s032",
@@ -317,7 +379,9 @@
     "amount": 195000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596036"
   },
   {
     "id": "s033",
@@ -327,7 +391,9 @@
     "amount": 210000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596037"
   },
   {
     "id": "s034",
@@ -337,7 +403,9 @@
     "amount": 225000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596038"
   },
   {
     "id": "s035",
@@ -347,7 +415,9 @@
     "amount": 240000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596039"
   },
   {
     "id": "s036",
@@ -357,7 +427,9 @@
     "amount": 180000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596040"
   },
   {
     "id": "s037",
@@ -367,7 +439,9 @@
     "amount": 195000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596041"
   },
   {
     "id": "s038",
@@ -377,7 +451,9 @@
     "amount": 240000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-02-06",
+    "voucherNo": "596025"
   },
   {
     "id": "s039",
@@ -387,7 +463,9 @@
     "amount": 255000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596042"
   },
   {
     "id": "s040",
@@ -397,7 +475,9 @@
     "amount": 270000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-02-06",
+    "voucherNo": "596026"
   },
   {
     "id": "s041",
@@ -407,7 +487,9 @@
     "amount": 285000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596043"
   },
   {
     "id": "s042",
@@ -417,7 +499,9 @@
     "amount": 90000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-02-06",
+    "voucherNo": "596027"
   },
   {
     "id": "s043",
@@ -427,7 +511,9 @@
     "amount": 105000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-02-06",
+    "voucherNo": "596028"
   },
   {
     "id": "s044",
@@ -437,7 +523,9 @@
     "amount": 120000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-02-06",
+    "voucherNo": "596029"
   },
   {
     "id": "s045",
@@ -447,7 +535,9 @@
     "amount": 320000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596044"
   },
   {
     "id": "s046",
@@ -457,7 +547,9 @@
     "amount": 335000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596045"
   },
   {
     "id": "s047",
@@ -467,7 +559,9 @@
     "amount": 150000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596046"
   },
   {
     "id": "s048",
@@ -477,7 +571,9 @@
     "amount": 165000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596047"
   },
   {
     "id": "s049",
@@ -487,7 +583,9 @@
     "amount": 180000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596048"
   },
   {
     "id": "s050",
@@ -497,7 +595,9 @@
     "amount": 95000,
     "month": "2026-02",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-02-11",
+    "voucherNo": "596049"
   },
   {
     "id": "s051",
@@ -507,7 +607,9 @@
     "amount": 180000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596055"
   },
   {
     "id": "s052",
@@ -517,7 +619,9 @@
     "amount": 195000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596056"
   },
   {
     "id": "s053",
@@ -527,7 +631,9 @@
     "amount": 210000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596057"
   },
   {
     "id": "s054",
@@ -537,7 +643,9 @@
     "amount": 225000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596058"
   },
   {
     "id": "s055",
@@ -547,7 +655,9 @@
     "amount": 240000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596059"
   },
   {
     "id": "s056",
@@ -557,7 +667,9 @@
     "amount": 180000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596060"
   },
   {
     "id": "s057",
@@ -567,7 +679,9 @@
     "amount": 195000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596061"
   },
   {
     "id": "s058",
@@ -577,7 +691,9 @@
     "amount": 210000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596062"
   },
   {
     "id": "s059",
@@ -587,7 +703,9 @@
     "amount": 225000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596063"
   },
   {
     "id": "s060",
@@ -597,7 +715,9 @@
     "amount": 240000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596064"
   },
   {
     "id": "s061",
@@ -607,7 +727,9 @@
     "amount": 180000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596065"
   },
   {
     "id": "s062",
@@ -617,7 +739,9 @@
     "amount": 195000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596066"
   },
   {
     "id": "s063",
@@ -627,7 +751,9 @@
     "amount": 240000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-03-08",
+    "voucherNo": "596050"
   },
   {
     "id": "s064",
@@ -637,7 +763,9 @@
     "amount": 255000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596067"
   },
   {
     "id": "s065",
@@ -647,7 +775,9 @@
     "amount": 270000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-03-08",
+    "voucherNo": "596051"
   },
   {
     "id": "s066",
@@ -657,7 +787,9 @@
     "amount": 285000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596068"
   },
   {
     "id": "s067",
@@ -667,7 +799,9 @@
     "amount": 90000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-03-08",
+    "voucherNo": "596052"
   },
   {
     "id": "s068",
@@ -677,7 +811,9 @@
     "amount": 105000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-03-08",
+    "voucherNo": "596053"
   },
   {
     "id": "s069",
@@ -687,7 +823,9 @@
     "amount": 120000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-03-08",
+    "voucherNo": "596054"
   },
   {
     "id": "s070",
@@ -697,7 +835,9 @@
     "amount": 320000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596069"
   },
   {
     "id": "s071",
@@ -707,7 +847,9 @@
     "amount": 335000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596070"
   },
   {
     "id": "s072",
@@ -717,7 +859,9 @@
     "amount": 150000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596071"
   },
   {
     "id": "s073",
@@ -727,7 +871,9 @@
     "amount": 165000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596072"
   },
   {
     "id": "s074",
@@ -737,7 +883,9 @@
     "amount": 180000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596073"
   },
   {
     "id": "s075",
@@ -747,7 +895,9 @@
     "amount": 110000,
     "month": "2026-03",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-03-12",
+    "voucherNo": "596074"
   },
   {
     "id": "s076",
@@ -757,7 +907,9 @@
     "amount": 180000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596080"
   },
   {
     "id": "s077",
@@ -767,7 +919,9 @@
     "amount": 195000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596081"
   },
   {
     "id": "s078",
@@ -777,7 +931,9 @@
     "amount": 210000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596082"
   },
   {
     "id": "s079",
@@ -787,7 +943,9 @@
     "amount": 225000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596083"
   },
   {
     "id": "s080",
@@ -797,7 +955,9 @@
     "amount": 240000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596084"
   },
   {
     "id": "s081",
@@ -807,7 +967,9 @@
     "amount": 180000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596085"
   },
   {
     "id": "s082",
@@ -817,7 +979,9 @@
     "amount": 195000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596086"
   },
   {
     "id": "s083",
@@ -827,7 +991,9 @@
     "amount": 210000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596087"
   },
   {
     "id": "s084",
@@ -837,7 +1003,9 @@
     "amount": 225000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596088"
   },
   {
     "id": "s085",
@@ -847,7 +1015,9 @@
     "amount": 240000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596089"
   },
   {
     "id": "s086",
@@ -857,7 +1027,9 @@
     "amount": 180000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596090"
   },
   {
     "id": "s087",
@@ -867,7 +1039,9 @@
     "amount": 195000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596091"
   },
   {
     "id": "s088",
@@ -877,7 +1051,9 @@
     "amount": 240000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-04-06",
+    "voucherNo": "596075"
   },
   {
     "id": "s089",
@@ -887,7 +1063,9 @@
     "amount": 255000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596092"
   },
   {
     "id": "s090",
@@ -897,7 +1075,9 @@
     "amount": 270000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-04-06",
+    "voucherNo": "596076"
   },
   {
     "id": "s091",
@@ -907,7 +1087,9 @@
     "amount": 285000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596093"
   },
   {
     "id": "s092",
@@ -917,7 +1099,9 @@
     "amount": 90000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-04-06",
+    "voucherNo": "596077"
   },
   {
     "id": "s093",
@@ -927,7 +1111,9 @@
     "amount": 105000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-04-06",
+    "voucherNo": "596078"
   },
   {
     "id": "s094",
@@ -937,7 +1123,9 @@
     "amount": 120000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-04-06",
+    "voucherNo": "596079"
   },
   {
     "id": "s095",
@@ -947,7 +1135,9 @@
     "amount": 320000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596094"
   },
   {
     "id": "s096",
@@ -957,7 +1147,9 @@
     "amount": 335000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596095"
   },
   {
     "id": "s097",
@@ -967,7 +1159,9 @@
     "amount": 150000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596096"
   },
   {
     "id": "s098",
@@ -977,7 +1171,9 @@
     "amount": 165000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596097"
   },
   {
     "id": "s099",
@@ -987,7 +1183,9 @@
     "amount": 180000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596098"
   },
   {
     "id": "s100",
@@ -997,7 +1195,9 @@
     "amount": 125000,
     "month": "2026-04",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-04-12",
+    "voucherNo": "596099"
   },
   {
     "id": "s101",
@@ -1007,7 +1207,9 @@
     "amount": 180000,
     "month": "2026-05",
     "status": "invoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596105"
   },
   {
     "id": "s102",
@@ -1017,7 +1219,9 @@
     "amount": 195000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596106"
   },
   {
     "id": "s103",
@@ -1027,7 +1231,9 @@
     "amount": 210000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596107"
   },
   {
     "id": "s104",
@@ -1037,7 +1243,9 @@
     "amount": 225000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596108"
   },
   {
     "id": "s105",
@@ -1047,7 +1255,9 @@
     "amount": 240000,
     "month": "2026-05",
     "status": "invoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596109"
   },
   {
     "id": "s106",
@@ -1057,7 +1267,9 @@
     "amount": 180000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596110"
   },
   {
     "id": "s107",
@@ -1067,7 +1279,9 @@
     "amount": 195000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596111"
   },
   {
     "id": "s108",
@@ -1077,7 +1291,9 @@
     "amount": 210000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596112"
   },
   {
     "id": "s109",
@@ -1087,7 +1303,9 @@
     "amount": 225000,
     "month": "2026-05",
     "status": "invoiced",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596113"
   },
   {
     "id": "s110",
@@ -1097,7 +1315,9 @@
     "amount": 240000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596114"
   },
   {
     "id": "s111",
@@ -1107,7 +1327,9 @@
     "amount": 180000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596115"
   },
   {
     "id": "s112",
@@ -1117,7 +1339,9 @@
     "amount": 195000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596116"
   },
   {
     "id": "s113",
@@ -1127,7 +1351,9 @@
     "amount": 240000,
     "month": "2026-05",
     "status": "invoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-05-07",
+    "voucherNo": "596100"
   },
   {
     "id": "s114",
@@ -1137,7 +1363,9 @@
     "amount": 255000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596117"
   },
   {
     "id": "s115",
@@ -1147,7 +1375,9 @@
     "amount": 270000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-05-07",
+    "voucherNo": "596101"
   },
   {
     "id": "s116",
@@ -1157,7 +1387,9 @@
     "amount": 285000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596118"
   },
   {
     "id": "s117",
@@ -1167,7 +1399,9 @@
     "amount": 90000,
     "month": "2026-05",
     "status": "invoiced",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-05-07",
+    "voucherNo": "596102"
   },
   {
     "id": "s118",
@@ -1177,7 +1411,9 @@
     "amount": 105000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-05-07",
+    "voucherNo": "596103"
   },
   {
     "id": "s119",
@@ -1187,7 +1423,9 @@
     "amount": 120000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-05-07",
+    "voucherNo": "596104"
   },
   {
     "id": "s120",
@@ -1197,7 +1435,9 @@
     "amount": 320000,
     "month": "2026-05",
     "status": "invoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596119"
   },
   {
     "id": "s121",
@@ -1207,7 +1447,9 @@
     "amount": 335000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596120"
   },
   {
     "id": "s122",
@@ -1217,7 +1459,9 @@
     "amount": 150000,
     "month": "2026-05",
     "status": "invoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596121"
   },
   {
     "id": "s123",
@@ -1227,7 +1471,9 @@
     "amount": 165000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596122"
   },
   {
     "id": "s124",
@@ -1237,7 +1483,9 @@
     "amount": 180000,
     "month": "2026-05",
     "status": "paid",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596123"
   },
   {
     "id": "s125",
@@ -1247,7 +1495,9 @@
     "amount": 140000,
     "month": "2026-05",
     "status": "invoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-05-13",
+    "voucherNo": "596124"
   },
   {
     "id": "s126",
@@ -1257,7 +1507,9 @@
     "amount": 180000,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596131"
   },
   {
     "id": "s127",
@@ -1267,7 +1519,9 @@
     "amount": 195000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596132"
   },
   {
     "id": "s128",
@@ -1277,7 +1531,9 @@
     "amount": 210000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596133"
   },
   {
     "id": "s129",
@@ -1287,7 +1543,9 @@
     "amount": 225000,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596134"
   },
   {
     "id": "s130",
@@ -1297,7 +1555,9 @@
     "amount": 240000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596135"
   },
   {
     "id": "s131",
@@ -1307,7 +1567,9 @@
     "amount": 180000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596136"
   },
   {
     "id": "s132",
@@ -1317,7 +1579,9 @@
     "amount": 195000,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596137"
   },
   {
     "id": "s133",
@@ -1327,7 +1591,9 @@
     "amount": 210000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596138"
   },
   {
     "id": "s134",
@@ -1337,7 +1603,9 @@
     "amount": 225000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596139"
   },
   {
     "id": "s135",
@@ -1347,7 +1615,9 @@
     "amount": 240000,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596140"
   },
   {
     "id": "s136",
@@ -1357,7 +1627,9 @@
     "amount": 180000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596141"
   },
   {
     "id": "s137",
@@ -1367,7 +1639,9 @@
     "amount": 195000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596142"
   },
   {
     "id": "s138",
@@ -1377,7 +1651,9 @@
     "amount": 240000,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-06-07",
+    "voucherNo": "596125"
   },
   {
     "id": "s139",
@@ -1387,7 +1663,9 @@
     "amount": 255000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596143"
   },
   {
     "id": "s140",
@@ -1397,7 +1675,9 @@
     "amount": 270000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-06-07",
+    "voucherNo": "596126"
   },
   {
     "id": "s141",
@@ -1407,7 +1687,9 @@
     "amount": 285000,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596144"
   },
   {
     "id": "s142",
@@ -1417,7 +1699,9 @@
     "amount": 90000,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-06-07",
+    "voucherNo": "596127"
   },
   {
     "id": "s143",
@@ -1427,7 +1711,9 @@
     "amount": 105000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-06-07",
+    "voucherNo": "596128"
   },
   {
     "id": "s144",
@@ -1437,7 +1723,9 @@
     "amount": 120000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-06-07",
+    "voucherNo": "596129"
   },
   {
     "id": "s145",
@@ -1447,7 +1735,9 @@
     "amount": 320000,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596145"
   },
   {
     "id": "s146",
@@ -1457,7 +1747,9 @@
     "amount": 335000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596146"
   },
   {
     "id": "s147",
@@ -1467,7 +1759,9 @@
     "amount": 150000,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "中村 あかり"
+    "assignee": "中村 あかり",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596147"
   },
   {
     "id": "s148",
@@ -1477,7 +1771,9 @@
     "amount": 165000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "佐藤 健太"
+    "assignee": "佐藤 健太",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596148"
   },
   {
     "id": "s149",
@@ -1487,7 +1783,9 @@
     "amount": 180000,
     "month": "2026-06",
     "status": "uninvoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596149"
   },
   {
     "id": "s150",
@@ -1497,7 +1795,9 @@
     "amount": 80000,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-06-12",
+    "voucherNo": "596150"
   },
   {
     "id": "s151",
@@ -1507,6 +1807,8 @@
     "amount": 4889500,
     "month": "2026-06",
     "status": "invoiced",
-    "assignee": "田村 誠"
+    "assignee": "田村 誠",
+    "orderDate": "2026-06-07",
+    "voucherNo": "596130"
   }
 ]

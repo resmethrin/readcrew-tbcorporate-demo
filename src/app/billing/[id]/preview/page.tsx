@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { demoCustomers, formatYen, groupSalesByBusiness, invoiceNumberForMonth, monthToLabel } from "@/lib/demo-data";
+import { demoCustomers, formatYen, groupSalesByBusiness, invoiceNumberForMonth, monthToLabel, unitFor, voucherDateLabel } from "@/lib/demo-data";
 import { useSalesStore } from "@/store/useSalesStore";
 
 const ISSUER = {
@@ -117,7 +117,10 @@ export default function InvoicePreviewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [customerId, month, sales, bizIdsParam],
   );
-  const groups = useMemo(() => groupSalesByBusiness(targetSales), [targetSales]);
+  const groups = useMemo(() => {
+    const sorted = [...targetSales].sort((a, b) => (a.orderDate ?? "").localeCompare(b.orderDate ?? ""));
+    return groupSalesByBusiness(sorted);
+  }, [targetSales]);
   const total = groups.reduce((sum, group) => sum + group.subtotal, 0);
   const tax = Math.round(total * 0.1);
 
@@ -388,10 +391,14 @@ export default function InvoicePreviewPage() {
                   <table className="w-full table-fixed text-sm">
                     <thead>
                       <tr className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium text-zinc-500">
-                        <th className="px-4 py-2 text-left font-medium">内容</th>
-                        <th className="w-20 px-4 py-2 text-right font-medium">数量</th>
-                        <th className="w-32 px-4 py-2 text-right font-medium">単価</th>
-                        <th className="w-32 px-4 py-2 text-right font-medium">金額</th>
+                        <th className="w-20 px-3 py-2 text-left font-medium">年月日</th>
+                        <th className="w-20 px-3 py-2 text-left font-medium">伝票No.</th>
+                        <th className="px-3 py-2 text-left font-medium">商品名</th>
+                        <th className="w-16 px-3 py-2 text-right font-medium">数量</th>
+                        <th className="w-12 px-3 py-2 text-center font-medium">単位</th>
+                        <th className="w-24 px-3 py-2 text-right font-medium">単価</th>
+                        <th className="w-28 px-3 py-2 text-right font-medium">金額</th>
+                        <th className="w-28 px-3 py-2 text-left font-medium">備考</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -400,27 +407,30 @@ export default function InvoicePreviewPage() {
                         const displayAmount = taxInclusiveInput && unifiedTaxDisplay ? exclusiveAmount(sale.amount) : sale.amount;
                         return (
                           <tr key={sale.id} className="border-b border-zinc-100 last:border-b-0 align-top">
-                            <td className="px-4 py-2.5">
+                            <td className="px-3 py-2.5 tabular-nums text-zinc-500">{voucherDateLabel(sale.orderDate)}</td>
+                            <td className="px-3 py-2.5 font-mono text-xs tabular-nums text-zinc-500">{sale.voucherNo ?? "—"}</td>
+                            <td className="px-3 py-2.5">
                               {displayDescription(sale.description)}
                               {taxInclusiveInput && !unifiedTaxDisplay && (
                                 <span className="ml-2 inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">税込</span>
                               )}
-                              {taxInclusiveInput && unifiedTaxDisplay && (
-                                <div className="mt-0.5 text-[11px] text-zinc-400">参考価格: 税込{formatYen(sale.amount)}</div>
-                              )}
                             </td>
-                            <td className="px-4 py-2.5 text-right tabular-nums">{sale.qty ?? 1}</td>
-                            <td className="px-4 py-2.5 text-right tabular-nums">
+                            <td className="px-3 py-2.5 text-right tabular-nums">{sale.qty ?? 1}</td>
+                            <td className="px-3 py-2.5 text-center text-zinc-500">{sale.unit ?? unitFor(sale.description)}</td>
+                            <td className="px-3 py-2.5 text-right tabular-nums">
                               {formatYen(sale.unitPrice ?? Math.round(displayAmount / (sale.qty ?? 1)))}
                             </td>
-                            <td className="px-4 py-2.5 text-right font-medium tabular-nums">{formatYen(displayAmount)}</td>
+                            <td className="px-3 py-2.5 text-right font-medium tabular-nums">{formatYen(displayAmount)}</td>
+                            <td className="px-3 py-2.5 text-[11px] text-zinc-400">
+                              {taxInclusiveInput && unifiedTaxDisplay ? `参考価格: 税込${formatYen(sale.amount)}` : ""}
+                            </td>
                           </tr>
                         );
                       })}
                     </tbody>
                     <tfoot>
                       <tr className="border-t border-zinc-200 bg-zinc-50 text-sm font-medium">
-                        <td colSpan={4} className="px-4 py-2 text-right">小計: {formatYen(group.subtotal)}</td>
+                        <td colSpan={8} className="px-3 py-2 text-right">小計: {formatYen(group.subtotal)}</td>
                       </tr>
                     </tfoot>
                   </table>
