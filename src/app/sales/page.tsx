@@ -193,10 +193,6 @@ export default function SalesPage() {
         })}
       </div>
 
-      <p className="-mt-3 text-xs text-zinc-400">
-        フードサービス室の2026年6月は実測件数（売上228件/月・3月・5月平均）に合わせています。金額は架空です。
-      </p>
-
       {/* フィルターバー */}
       <Card className="rounded-2xl shadow-card bg-white">
         <CardHeader className="px-6 pt-5 pb-0">

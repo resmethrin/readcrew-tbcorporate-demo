@@ -27,6 +27,49 @@ const BANK = {
   holder: "カ)エキサイター",
 };
 
+/**
+ * Before / After を切り替えるセグメントコントロール。
+ * つまみが移動するスイッチだと選択位置がずれて見えるため、
+ * 幅が変わらない2択のボタン列にしている。
+ */
+function BeforeAfterControl({
+  label,
+  beforeLabel,
+  afterLabel,
+  note,
+  isAfter,
+  onChange,
+}: {
+  label: string;
+  beforeLabel: string;
+  afterLabel: string;
+  note: string;
+  isAfter: boolean;
+  onChange: (isAfter: boolean) => void;
+}) {
+  const optionClass = (active: boolean) =>
+    `w-28 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+      active ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
+    }`;
+
+  return (
+    <div className="flex items-center justify-between gap-4 px-5 py-3">
+      <div className="text-sm">
+        <span className="font-medium text-zinc-700">{label}</span>
+        <span className="ml-2 text-xs text-zinc-400">{note}</span>
+      </div>
+      <div role="radiogroup" aria-label={label} className="flex shrink-0 gap-1 rounded-lg bg-zinc-100 p-1">
+        <button type="button" role="radio" aria-checked={!isAfter} onClick={() => onChange(false)} className={optionClass(!isAfter)}>
+          {beforeLabel}
+        </button>
+        <button type="button" role="radio" aria-checked={isAfter} onClick={() => onChange(true)} className={optionClass(isAfter)}>
+          {afterLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function InvoicePreviewPage() {
   const params = useParams<{ id: string }>();
   const searchParams = useSearchParams();
@@ -172,7 +215,15 @@ export default function InvoicePreviewPage() {
             請求一覧に戻る
           </Link>
           <div className="text-sm font-medium text-zinc-500">Billing</div>
-          <h1 className="mt-1 text-xl font-semibold text-zinc-900">請求書プレビュー</h1>
+          <div className="mt-1 flex flex-wrap items-center gap-3">
+            <h1 className="text-xl font-semibold text-zinc-900">請求書プレビュー</h1>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-2.5 py-0.5 text-xs text-zinc-500">
+              請求番号 <span className="font-mono font-medium text-zinc-800">{invoiceNo}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 bg-white px-2.5 py-0.5 text-xs text-zinc-500">
+              請求日 <span className="font-medium text-zinc-800">{closingDateLabel}</span>
+            </span>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => window.print()}>
@@ -194,43 +245,26 @@ export default function InvoicePreviewPage() {
       </div>
 
       <div className="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white print:hidden">
-        <div className="flex items-center justify-between px-5 py-3">
-          <div className="text-sm">
-            <span className="font-medium text-zinc-700">税抜統一表示</span>
-            <span className="ml-2 text-xs text-zinc-400">
-              {unifiedTaxDisplay ? "After: 全明細を税抜表示に統一" : "Before: 税込入力の明細が混在したまま表示"}
-            </span>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={unifiedTaxDisplay}
-            onClick={() => setUnifiedTaxDisplay((v) => !v)}
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${unifiedTaxDisplay ? "bg-[#0071e3]" : "bg-zinc-200"}`}
-          >
-            <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${unifiedTaxDisplay ? "translate-x-5" : "translate-x-0.5"}`} />
-          </button>
-        </div>
-
-        <div className="flex items-center justify-between px-5 py-3">
-          <div className="text-sm">
-            <span className="font-medium text-zinc-700">繰越型フォーム表示</span>
-            <span className="ml-2 text-xs text-zinc-400">
-              {carryOverMode
-                ? "Before: 現行フォーム（①前回御請求額 〜 ⑦累計御請求額）"
-                : "After: 当月完結型（繰越欄なし・当月分のみ）"}
-            </span>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={carryOverMode}
-            onClick={() => setCarryOverMode((v) => !v)}
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${carryOverMode ? "bg-amber-500" : "bg-zinc-200"}`}
-          >
-            <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${carryOverMode ? "translate-x-5" : "translate-x-0.5"}`} />
-          </button>
-        </div>
+        <BeforeAfterControl
+          label="税抜表示"
+          beforeLabel="Before"
+          afterLabel="After"
+          note={unifiedTaxDisplay ? "全明細を税抜表示に統一" : "税込入力の明細が混在したまま表示"}
+          isAfter={unifiedTaxDisplay}
+          onChange={setUnifiedTaxDisplay}
+        />
+        <BeforeAfterControl
+          label="請求書フォーム"
+          beforeLabel="繰越型"
+          afterLabel="当月完結型"
+          note={
+            carryOverMode
+              ? "現行フォーム（①前回御請求額 〜 ⑦累計御請求額）"
+              : "当月分のみ・繰越欄なし"
+          }
+          isAfter={!carryOverMode}
+          onChange={(isAfter) => setCarryOverMode(!isAfter)}
+        />
       </div>
 
       <Card className="bg-white shadow-sm print:shadow-none">
