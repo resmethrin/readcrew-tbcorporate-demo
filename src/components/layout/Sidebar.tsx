@@ -41,7 +41,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-20 w-72 border-r bg-gray-50" style={{ borderColor: "rgb(243 244 246)" }}>
+    <aside className="fixed inset-y-0 left-0 z-20 w-72 border-r bg-gray-50 print:hidden" style={{ borderColor: "rgb(243 244 246)" }}>
       <div className="flex h-full flex-col px-5 py-7">
         <div className="mb-8 border-l-2 border-[#0071e3] pl-3">
           <div className="text-lg font-semibold text-zinc-900">販売・請求ハブ</div>

@@ -145,3 +145,32 @@
     box-shadow: var(--shadow-card);
   }
 }
+
+/* ── 印刷（請求書PDF出力）─────────────────────────────
+   明細が2ページ以上になっても崩れないようにする。
+   列見出しは thead を使うことで各ページの先頭で繰り返される。 */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  body {
+    background-color: #fff;
+  }
+
+  /* 明細1行・小計・合計・振込先などのブロックを改ページで分断しない */
+  .print-keep,
+  table tr {
+    break-inside: avoid;
+  }
+
+  /* セクション見出しがページ末尾に取り残されないようにする */
+  .print-section > h2 {
+    break-after: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+}

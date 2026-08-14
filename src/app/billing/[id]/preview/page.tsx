@@ -351,7 +351,7 @@ export default function InvoicePreviewPage() {
           </div>
 
           {/* 請求金額サマリ */}
-          <div className="rounded-xl bg-zinc-50 px-6 py-4">
+          <div className="print-keep rounded-xl bg-zinc-50 px-6 py-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-zinc-500">ご請求金額（税込）</span>
               {carryOverMode ? (
@@ -379,44 +379,51 @@ export default function InvoicePreviewPage() {
             )}
           </div>
 
-          {/* 明細 */}
+          {/* 明細（印刷時は thead が各ページの先頭で繰り返される）*/}
           <div className="space-y-6">
             {groups.map((group) => (
-              <section key={group.businessId} className="space-y-3">
+              <section key={group.businessId} className="print-section space-y-3">
                 <h2 className="font-semibold text-zinc-700">【{group.businessName}】</h2>
                 <div className="rounded-lg border border-zinc-200 overflow-hidden">
-                  <div className="grid grid-cols-[1fr_80px_130px_130px] gap-4 border-b border-zinc-200 bg-zinc-50 px-4 py-2 text-xs font-medium text-zinc-500">
-                    <div>内容</div>
-                    <div className="text-right">数量</div>
-                    <div className="text-right">単価</div>
-                    <div className="text-right">金額</div>
-                  </div>
-                  {group.items.map((sale) => {
-                    const taxInclusiveInput = isTaxInclusiveInput(sale.description);
-                    const displayAmount = taxInclusiveInput && unifiedTaxDisplay ? exclusiveAmount(sale.amount) : sale.amount;
-                    return (
-                      <div
-                        key={sale.id}
-                        className="grid grid-cols-[1fr_80px_130px_130px] gap-4 border-b border-zinc-100 px-4 py-2.5 last:border-b-0 text-sm"
-                      >
-                        <div>
-                          {displayDescription(sale.description)}
-                          {taxInclusiveInput && !unifiedTaxDisplay && (
-                            <span className="ml-2 inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">税込</span>
-                          )}
-                          {taxInclusiveInput && unifiedTaxDisplay && (
-                            <div className="mt-0.5 text-[11px] text-zinc-400">参考価格: 税込{formatYen(sale.amount)}</div>
-                          )}
-                        </div>
-                        <div className="text-right">{sale.qty ?? 1}</div>
-                        <div className="text-right">{formatYen(sale.unitPrice ?? Math.round(displayAmount / (sale.qty ?? 1)))}</div>
-                        <div className="text-right font-medium">{formatYen(displayAmount)}</div>
-                      </div>
-                    );
-                  })}
-                  <div className="flex justify-end border-t border-zinc-200 bg-zinc-50 px-4 py-2 text-sm font-medium">
-                    小計: {formatYen(group.subtotal)}
-                  </div>
+                  <table className="w-full table-fixed text-sm">
+                    <thead>
+                      <tr className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium text-zinc-500">
+                        <th className="px-4 py-2 text-left font-medium">内容</th>
+                        <th className="w-20 px-4 py-2 text-right font-medium">数量</th>
+                        <th className="w-32 px-4 py-2 text-right font-medium">単価</th>
+                        <th className="w-32 px-4 py-2 text-right font-medium">金額</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.items.map((sale) => {
+                        const taxInclusiveInput = isTaxInclusiveInput(sale.description);
+                        const displayAmount = taxInclusiveInput && unifiedTaxDisplay ? exclusiveAmount(sale.amount) : sale.amount;
+                        return (
+                          <tr key={sale.id} className="border-b border-zinc-100 last:border-b-0 align-top">
+                            <td className="px-4 py-2.5">
+                              {displayDescription(sale.description)}
+                              {taxInclusiveInput && !unifiedTaxDisplay && (
+                                <span className="ml-2 inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">税込</span>
+                              )}
+                              {taxInclusiveInput && unifiedTaxDisplay && (
+                                <div className="mt-0.5 text-[11px] text-zinc-400">参考価格: 税込{formatYen(sale.amount)}</div>
+                              )}
+                            </td>
+                            <td className="px-4 py-2.5 text-right tabular-nums">{sale.qty ?? 1}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums">
+                              {formatYen(sale.unitPrice ?? Math.round(displayAmount / (sale.qty ?? 1)))}
+                            </td>
+                            <td className="px-4 py-2.5 text-right font-medium tabular-nums">{formatYen(displayAmount)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t border-zinc-200 bg-zinc-50 text-sm font-medium">
+                        <td colSpan={4} className="px-4 py-2 text-right">小計: {formatYen(group.subtotal)}</td>
+                      </tr>
+                    </tfoot>
+                  </table>
                 </div>
               </section>
             ))}
@@ -424,7 +431,7 @@ export default function InvoicePreviewPage() {
 
           {/* 合計 */}
           {carryOverMode ? (
-            <div className="space-y-2">
+            <div className="print-keep space-y-2">
               <div className="rounded-xl border border-amber-200 overflow-hidden">
                 <div className="flex justify-between border-b border-amber-100 bg-amber-50/60 px-5 py-2.5 text-sm text-zinc-600">
                   <span>① 前回御請求額</span>
@@ -473,7 +480,7 @@ export default function InvoicePreviewPage() {
               </p>
             </div>
           ) : (
-            <div className="rounded-xl border border-zinc-200 overflow-hidden">
+            <div className="print-keep rounded-xl border border-zinc-200 overflow-hidden">
               <div className="flex justify-between px-5 py-2.5 text-sm text-zinc-600">
                 <span>小計（税抜）</span>
                 <span>{formatYen(total)}</span>
@@ -490,7 +497,7 @@ export default function InvoicePreviewPage() {
           )}
 
           {/* 振込先 */}
-          <div className="rounded-xl border border-zinc-200 p-5 space-y-3">
+          <div className="print-keep rounded-xl border border-zinc-200 p-5 space-y-3">
             <div className="font-semibold text-zinc-800">お振込先</div>
             <div className="grid gap-2 sm:grid-cols-2 text-sm">
               <div className="flex gap-2">
