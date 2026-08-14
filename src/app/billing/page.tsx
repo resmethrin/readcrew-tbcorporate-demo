@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { Calendar, ChevronDown, ChevronRight, Info, RefreshCw, Upload, X } from "lucide-react";
+import { ArrowRight, Calendar, ChevronDown, ChevronRight, Info, RefreshCw, Upload, X } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -49,6 +50,14 @@ const STATUS_STYLE: Record<BillingStatus | "overdue", { label: string; bg: strin
 };
 
 const withTax = (amount: number) => amount + Math.round(amount * 0.1);
+
+/** 一覧用の短い日付表記（2026年6月30日 → 2026/06/30）*/
+const shortDate = (label: string) => {
+  const matched = label.match(/(\d+)年(\d+)月(\d+)日/);
+  if (!matched) return label;
+  const [, y, m, d] = matched;
+  return `${y}/${m.padStart(2, "0")}/${d.padStart(2, "0")}`;
+};
 
 const RAKURAKU_FIELDS = ["請求書番号", "請求日", "得意先名", "品目", "数量", "単価", "金額", "消費税額", "担当室"];
 
@@ -473,9 +482,8 @@ export default function BillingPage() {
                 <TableHead className="text-xs font-medium text-zinc-400">請求番号</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">顧客</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">件名</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400">請求日 / 入金期限</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400 text-right">請求額 / 入金済 / 未入金（税込）</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400">確認者</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400 whitespace-nowrap">請求日 / 期日</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400 text-right whitespace-nowrap">請求 / 入金 / 未入金</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">ステータス</TableHead>
                 <TableHead className="pr-5" />
               </TableRow>
@@ -483,7 +491,7 @@ export default function BillingPage() {
             <TableBody>
               {paymentRows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-12 text-center text-sm text-zinc-400">
+                  <TableCell colSpan={8} className="py-12 text-center text-sm text-zinc-400">
                     該当するデータがありません
                   </TableCell>
                 </TableRow>
@@ -517,7 +525,7 @@ export default function BillingPage() {
                         )}
                       </TableCell>
                       <TableCell className="font-mono text-xs text-zinc-500">
-                        <div>{invoiceNumberForMonth(row.month)}</div>
+                        <div className="whitespace-nowrap text-[11px]">{invoiceNumberForMonth(row.month)}</div>
                         {row.saleIds.length > 0 && row.saleIds.every((id) => sales.find((sale) => sale.id === id)?.rakurakuSynced) && (
                           <span className="mt-1 inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500">
                             連携済
@@ -525,10 +533,10 @@ export default function BillingPage() {
                         )}
                       </TableCell>
                       <TableCell className="font-medium text-zinc-800">
-                        <span className="inline-flex items-center gap-1.5">
-                          {row.customerName}
+                        <div className="max-w-[150px] whitespace-normal break-words leading-tight">{row.customerName}</div>
+                        <div className="mt-0.5">
                           <CustomerTermBadge customerId={row.customerId} />
-                        </span>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <button
@@ -541,19 +549,21 @@ export default function BillingPage() {
                             : <ChevronRight className="h-3.5 w-3.5 shrink-0 text-zinc-400" />}
                           <div>
                             <div className="text-sm text-zinc-700">{subject}</div>
-                            <div className="text-xs text-zinc-400">{row.itemCount}件</div>
+                            <div className="text-xs text-zinc-400">
+                              {row.itemCount}件 ／ 確認者 {row.confirmer}
+                            </div>
                           </div>
                         </button>
                       </TableCell>
                       <TableCell>
-                        <div className="text-xs text-zinc-500 tabular-nums">{invoiceDateLabel(row.month)}</div>
-                        <div className={`mt-0.5 text-xs tabular-nums ${row.overdue ? "font-semibold text-red-600" : "text-zinc-400"}`}>
-                          {dueDateInfo(row.customerId, row.month).label}
+                        <div className="whitespace-nowrap text-xs text-zinc-500 tabular-nums">{shortDate(invoiceDateLabel(row.month))}</div>
+                        <div className={`mt-0.5 whitespace-nowrap text-xs tabular-nums ${row.overdue ? "font-semibold text-red-600" : "text-zinc-400"}`}>
+                          {shortDate(dueDateInfo(row.customerId, row.month).label)}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="font-semibold text-zinc-900 tabular-nums">{formatYen(row.billed)}</div>
-                        <div className="mt-0.5 flex justify-end gap-3 text-xs tabular-nums">
+                        <div className="mt-0.5 flex justify-end gap-2 text-[10px] tabular-nums whitespace-nowrap">
                           <span className="text-zinc-400">
                             入金 <span className="font-medium text-emerald-600">{formatYen(row.paidAmount)}</span>
                           </span>
@@ -565,18 +575,25 @@ export default function BillingPage() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-zinc-500">{row.confirmer}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${rowStyle.bg} ${rowStyle.text} ${rowStyle.border}`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${rowStyle.dot}`} />
                           {rowStyle.label}
                         </span>
                       </TableCell>
-                      <TableCell className="pr-5" />
+                      <TableCell className="pr-5 text-right">
+                        <Link
+                          href={`/billing/${row.customerId}-${row.month}/preview?bizIds=${row.bizIds.join(",")}&invoiceNo=${invoiceNumberForMonth(row.month)}`}
+                          className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800"
+                        >
+                          <span className="whitespace-nowrap">請求書</span>
+                          <ArrowRight className="h-3 w-3" />
+                        </Link>
+                      </TableCell>
                     </TableRow>
                     {isExpanded && (
                       <TableRow key={`${row.id}-detail`} className="bg-zinc-50/60 border-zinc-100">
-                        <TableCell colSpan={9} className="px-8 py-3">
+                        <TableCell colSpan={8} className="px-8 py-3">
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="text-zinc-400 border-b border-zinc-200">

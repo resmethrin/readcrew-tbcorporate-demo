@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row" },
   spaceBetween: { flexDirection: "row", justifyContent: "space-between" },
   title: { fontSize: 20, fontWeight: 700, letterSpacing: 2 },
-  issuer: { textAlign: "right", color: COLORS.muted, lineHeight: 1.5 },
+  issuer: { textAlign: "right", color: COLORS.muted, lineHeight: 1.15 },
   seal: {
     width: 46,
     height: 46,
@@ -188,12 +188,12 @@ export function InvoicePdf(props: InvoicePdfProps) {
 
           <View style={styles.row}>
             <View style={styles.issuer}>
-              <Text style={{ fontSize: 10, fontWeight: 700, color: COLORS.text }}>{issuer.name}</Text>
+              <Text style={{ fontSize: 10, fontWeight: 700, color: COLORS.text, marginBottom: 2 }}>{issuer.name}</Text>
               <Text>{issuer.postal}</Text>
               <Text>{issuer.address}</Text>
               <Text>TEL: {issuer.tel}</Text>
               <Text>{issuer.email}</Text>
-              <Text style={{ marginTop: 3, fontSize: 7 }}>適格請求書発行事業者登録番号</Text>
+              <Text style={{ marginTop: 2, fontSize: 7 }}>適格請求書発行事業者登録番号</Text>
               <Text style={{ fontSize: 7, color: COLORS.text }}>{issuer.registrationNo}</Text>
             </View>
             <Text style={styles.seal}>各印</Text>
