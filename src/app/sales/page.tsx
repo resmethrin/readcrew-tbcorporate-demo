@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Building2, Calendar, FileSpreadsheet, FileText, Plus, X } from "lucide-react";
+import { ArrowRight, Building2, Calendar, Eye, FileSpreadsheet, FileText, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -154,18 +154,28 @@ export default function SalesPage() {
     };
   }, [sales, selected]);
 
-  const handleConsolidate = () => {
+  const previewUrl = () => {
     const { targets } = consolidation;
-    if (targets.length === 0) return;
     const customerId = targets[0].customerId;
     const month = targets[0].month;
     const bizIds = [...new Set(targets.map((s) => s.businessId))];
-    markInvoicedByIds(targets.map((s) => s.id));
+    return `/billing/${customerId}-${month}/preview?bizIds=${bizIds.join(",")}&invoiceNo=${invoiceNumberForMonth(month)}`;
+  };
+
+  /** 発行せずに請求書の内容だけ確認する */
+  const handlePreview = () => {
+    if (!consolidation.canConsolidate) return;
+    router.push(previewUrl());
+  };
+
+  /** 統合して請求済みにし、プレビューへ遷移する */
+  const handleConsolidate = () => {
+    if (!consolidation.canConsolidate) return;
+    const url = previewUrl();
+    markInvoicedByIds(consolidation.targets.map((s) => s.id));
     setSelected([]);
     setShowConsolidate(false);
-    router.push(
-      `/billing/${customerId}-${month}/preview?bizIds=${bizIds.join(",")}&invoiceNo=${invoiceNumberForMonth(month)}`,
-    );
+    router.push(url);
   };
 
   // 選択中アイテムのステータス分類
@@ -330,26 +340,37 @@ export default function SalesPage() {
               </div>
             </div>
 
-            {/* 一括操作 */}
-            {selected.length > 0 && (
-              <div className="ml-auto flex items-center gap-2">
+            {/* 一括操作（常時表示。未選択のときは操作方法を出す）*/}
+            <div className="flex w-full flex-wrap items-center justify-end gap-2 border-t border-zinc-100 pt-3">
+              {selected.length > 0 ? (
                 <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-600">
                   {selected.length}件選択中
                 </span>
-                {consolidation.reason && (
-                  <span className="text-xs text-amber-600">{consolidation.reason}</span>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setShowConsolidate(true)}
-                  disabled={!consolidation.canConsolidate}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#0071e3] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#005fc2] disabled:bg-zinc-100 disabled:text-zinc-400"
-                >
-                  <FileText className="h-3.5 w-3.5" />
-                  統合して請求書を作成
-                </button>
-              </div>
-            )}
+              ) : (
+                <span className="text-xs text-zinc-400">請求する売上にチェックを入れてください</span>
+              )}
+              {consolidation.reason && (
+                <span className="text-xs text-amber-600">{consolidation.reason}</span>
+              )}
+              <button
+                type="button"
+                onClick={handlePreview}
+                disabled={!consolidation.canConsolidate}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:border-zinc-100 disabled:bg-zinc-50 disabled:text-zinc-300"
+              >
+                <Eye className="h-3.5 w-3.5" />
+                請求書プレビュー
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowConsolidate(true)}
+                disabled={!consolidation.canConsolidate}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#0071e3] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#005fc2] disabled:bg-zinc-100 disabled:text-zinc-400"
+              >
+                <FileText className="h-3.5 w-3.5" />
+                統合して請求書を作成
+              </button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="px-0 pb-0 pt-4">
@@ -513,6 +534,11 @@ export default function SalesPage() {
               <button type="button" onClick={() => setShowConsolidate(false)}
                 className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100">
                 キャンセル
+              </button>
+              <button type="button" onClick={handlePreview}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50">
+                <Eye className="h-4 w-4" />
+                発行せずにプレビュー
               </button>
               <button type="button" onClick={handleConsolidate}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-[#0071e3] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#005fc2]">
