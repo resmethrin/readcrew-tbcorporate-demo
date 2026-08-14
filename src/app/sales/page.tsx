@@ -126,7 +126,8 @@ export default function SalesPage() {
   const toggleSelected = (id: string) =>
     setSelected((cur) => cur.includes(id) ? cur.filter((v) => v !== id) : [...cur, id]);
 
-  const allFilteredIds = filtered.map((s) => s.id);
+  // 請求書にできるのは未請求だけなので、選択対象も未請求に限定する
+  const allFilteredIds = filtered.filter((s) => s.status === "uninvoiced").map((s) => s.id);
 
   // ── 統合して請求書を作成 ──────────────────────────────
   // 1枚の請求書にできるのは「同じ得意先・同じ月の未請求データ」だけ
@@ -403,13 +404,18 @@ export default function SalesPage() {
                 const bc = BIZ_COLOR[sale.businessId];
                 const sc = STATUS_STYLE[sale.status];
                 const isSelected = selected.includes(sale.id);
+                const isSelectable = sale.status === "uninvoiced";
                 return (
                   <TableRow
                     key={sale.id}
                     className={`border-zinc-50 transition-colors ${isSelected ? "bg-blue-50/50" : "hover:bg-zinc-50/50"}`}
                   >
                     <TableCell className="pl-6">
-                      <Checkbox checked={isSelected} onCheckedChange={() => toggleSelected(sale.id)} />
+                      {isSelectable ? (
+                        <Checkbox checked={isSelected} onCheckedChange={() => toggleSelected(sale.id)} />
+                      ) : (
+                        <span className="inline-block h-4 w-4" title="請求済みのため選択できません" />
+                      )}
                     </TableCell>
                     <TableCell className="font-medium text-zinc-800">{customer?.name}</TableCell>
                     <TableCell>
