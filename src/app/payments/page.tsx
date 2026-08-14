@@ -19,13 +19,13 @@ import { Label } from "@/components/ui/label";
 import { CustomerTermBadge } from "@/components/CustomerTermBadge";
 import {
   demoBusinesses,
-  dueDateLabel,
+  dueDateInfo,
   formatMonth,
   formatYen,
   getCustomerName,
   invoiceDateLabel,
   invoiceNumberForMonth,
-  statusLabels,
+  isPastDue,
   PERIOD_MONTHS,
 } from "@/lib/demo-data";
 import { useSalesStore } from "@/store/useSalesStore";
@@ -39,10 +39,16 @@ const BIZ_COLOR: Record<string, { dot: string; bg: string; text: string }> = {
   b005: { dot: "bg-slate-500",   bg: "bg-slate-50",   text: "text-slate-700" },
 };
 
-const STATUS_STYLE: Record<"invoiced" | "paid", { bg: string; text: string; dot: string; border: string }> = {
-  invoiced: { bg: "bg-sky-50",     text: "text-sky-700",     dot: "bg-sky-500",     border: "border-sky-200" },
-  paid:     { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
+type BillingStatus = "awaiting" | "partial" | "paid";
+
+const STATUS_STYLE: Record<BillingStatus | "overdue", { label: string; bg: string; text: string; dot: string; border: string }> = {
+  awaiting: { label: "入金待ち",  bg: "bg-sky-50",     text: "text-sky-700",     dot: "bg-sky-500",     border: "border-sky-200" },
+  partial:  { label: "一部入金",  bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-500",   border: "border-amber-200" },
+  paid:     { label: "入金済",    bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", border: "border-emerald-200" },
+  overdue:  { label: "期限超過",  bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-500",     border: "border-red-200" },
 };
+
+const withTax = (amount: number) => amount + Math.round(amount * 0.1);
 
 export default function PaymentsPage() {
   const sales = useSalesStore((s) => s.sales);
@@ -51,7 +57,7 @@ export default function PaymentsPage() {
   const recordPartialPayment = useSalesStore((s) => s.recordPartialPayment);
 
   const [monthFilter, setMonthFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState<"all" | "invoiced" | "paid">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "overdue" | BillingStatus>("all");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const toggleExpand = (id: string) =>
@@ -136,23 +142,64 @@ export default function PaymentsPage() {
     return Array.from(map.values()).sort((a, b) => b.month.localeCompare(a.month));
   }, [sales]);
 
-  const paymentRowStatus = (row: { invoiced: number; paid: number }): "invoiced" | "paid" =>
-    row.invoiced > 0 ? "invoiced" : "paid";
+  // 請求済み以降の行に、請求額・入金済み額・未入金額の3数字と期日超過判定を付ける
+  const billingRows = useMemo(() => {
+    return invoiceRows
+      .filter((row) => row.invoiced > 0 || row.paid > 0)
+      .map((row) => {
+        const rowSales = sales.filter(
+          (sale) =>
+            sale.customerId === row.customerId &&
+            sale.month === row.month &&
+            row.bizIds.includes(sale.businessId) &&
+            (sale.status === "invoiced" || sale.status === "paid"),
+        );
+        // 税抜で集計してから税込に直す（消込の記録は伝票の税抜金額基準）
+        const billedNet = rowSales.reduce((n, sale) => n + sale.amount, 0);
+        const paidNet = rowSales.reduce(
+          (n, sale) => n + (sale.status === "paid" ? sale.amount : partialPayments[sale.id] ?? 0),
+          0,
+        );
+        const billed = withTax(billedNet);
+        const paid = withTax(paidNet);
+        const unpaid = Math.max(0, billed - paid);
 
-  const paymentRows = useMemo(() => {
-    return invoiceRows.filter((row) => {
-      if (row.invoiced === 0 && row.paid === 0) return false;
-      if (monthFilter !== "all" && row.month !== monthFilter) return false;
-      const st = paymentRowStatus(row);
-      if (statusFilter !== "all" && st !== statusFilter) return false;
-      return true;
-    });
-  }, [invoiceRows, monthFilter, statusFilter]);
+        const status: BillingStatus =
+          unpaid === 0 ? "paid" : paid > 0 ? "partial" : "awaiting";
+        const overdue = unpaid > 0 && isPastDue(row.customerId, row.month);
 
-  const paidRows      = useMemo(() => paymentRows.filter((r) => paymentRowStatus(r) === "paid"), [paymentRows]);
-  const invoicedRows  = useMemo(() => paymentRows.filter((r) => paymentRowStatus(r) === "invoiced"), [paymentRows]);
-  const paidTotal     = paidRows.reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0);
-  const invoicedTotal = invoicedRows.reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0);
+        return { ...row, billed, paidAmount: paid, unpaid, status, overdue };
+      });
+  }, [invoiceRows, partialPayments, sales]);
+
+  const counts = useMemo(
+    () => ({
+      all: billingRows.length,
+      overdue: billingRows.filter((r) => r.overdue).length,
+      partial: billingRows.filter((r) => r.status === "partial").length,
+      awaiting: billingRows.filter((r) => r.status === "awaiting").length,
+      paid: billingRows.filter((r) => r.status === "paid").length,
+    }),
+    [billingRows],
+  );
+
+  const paymentRows = useMemo(
+    () =>
+      billingRows.filter((row) => {
+        if (monthFilter !== "all" && row.month !== monthFilter) return false;
+        if (statusFilter === "all") return true;
+        if (statusFilter === "overdue") return row.overdue;
+        return row.status === statusFilter;
+      }),
+    [billingRows, monthFilter, statusFilter],
+  );
+
+  const billedTotal = billingRows.reduce((n, r) => n + r.billed, 0);
+  const paidTotal   = billingRows.reduce((n, r) => n + r.paidAmount, 0);
+  const unpaidTotal = billingRows.reduce((n, r) => n + r.unpaid, 0);
+  const overdueTotal = billingRows.filter((r) => r.overdue).reduce((n, r) => n + r.unpaid, 0);
+
+  const invoicedRows = useMemo(() => paymentRows.filter((r) => r.status !== "paid"), [paymentRows]);
 
   // 選択操作（請求済み行のみ選択可）
   const selectableIds = invoicedRows.map((r) => r.id);
@@ -249,33 +296,22 @@ export default function PaymentsPage() {
         <TabsContent value="voucher" className="space-y-6 pt-4">
 
       {/* KPI */}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => setStatusFilter(statusFilter === "invoiced" ? "all" : "invoiced")}
-          className={`rounded-2xl border bg-white p-4 text-left shadow-card transition-all ${statusFilter === "invoiced" ? "ring-2 ring-sky-500 ring-offset-1" : "hover:shadow-md"}`}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-block h-2 w-2 rounded-full bg-sky-500" />
-            <span className={`text-xs font-medium ${statusFilter === "invoiced" ? "text-sky-600" : "text-zinc-500"}`}>未入金（請求済）</span>
-            {statusFilter === "invoiced" && <span className="ml-auto text-[10px] font-medium text-sky-600">選択中</span>}
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { key: "billed",  label: "請求額",   value: billedTotal,  count: counts.all,      dot: "bg-zinc-400",    text: "text-zinc-900" },
+          { key: "paid",    label: "入金済",   value: paidTotal,    count: counts.paid,     dot: "bg-emerald-500", text: "text-zinc-900" },
+          { key: "unpaid",  label: "未入金",   value: unpaidTotal,  count: counts.awaiting + counts.partial, dot: "bg-sky-500", text: "text-zinc-900" },
+          { key: "overdue", label: "期限超過", value: overdueTotal, count: counts.overdue,  dot: "bg-red-500",     text: "text-red-600" },
+        ].map((kpi) => (
+          <div key={kpi.key} className="rounded-2xl border bg-white p-4 shadow-card">
+            <div className="mb-2 flex items-center gap-2">
+              <span className={`inline-block h-2 w-2 rounded-full ${kpi.dot}`} />
+              <span className="text-xs font-medium text-zinc-500">{kpi.label}</span>
+            </div>
+            <p className={`text-lg font-bold tracking-tight tabular-nums ${kpi.text}`}>{formatYen(kpi.value)}</p>
+            <p className="mt-0.5 text-xs text-zinc-400">{kpi.count}件</p>
           </div>
-          <p className="text-xl font-bold text-zinc-900 tracking-tight">{formatYen(invoicedTotal)}</p>
-          <p className="mt-0.5 text-xs text-zinc-400">{invoicedRows.length}件</p>
-        </button>
-        <button
-          type="button"
-          onClick={() => setStatusFilter(statusFilter === "paid" ? "all" : "paid")}
-          className={`rounded-2xl border bg-white p-4 text-left shadow-card transition-all ${statusFilter === "paid" ? "ring-2 ring-emerald-500 ring-offset-1" : "hover:shadow-md"}`}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-            <span className={`text-xs font-medium ${statusFilter === "paid" ? "text-emerald-600" : "text-zinc-500"}`}>入金済</span>
-            {statusFilter === "paid" && <span className="ml-auto text-[10px] font-medium text-emerald-600">選択中</span>}
-          </div>
-          <p className="text-xl font-bold text-zinc-900 tracking-tight">{formatYen(paidTotal)}</p>
-          <p className="mt-0.5 text-xs text-zinc-400">{paidRows.length}件</p>
-        </button>
+        ))}
       </div>
 
       {/* フィルターバー + テーブル */}
@@ -299,26 +335,38 @@ export default function PaymentsPage() {
                 ))}
               </div>
             </div>
-            {/* ステータス */}
+            {/* ステータス（バッジで絞り込み） */}
             <div className="flex items-center gap-2">
               <span className="text-xs font-medium text-zinc-400 whitespace-nowrap">ステータス</span>
-              <div className="flex gap-1.5">
+              <div className="flex flex-wrap gap-1.5">
                 {([
-                  { id: "all",      label: "全て" },
-                  { id: "invoiced", label: "未入金（請求済）" },
-                  { id: "paid",     label: "入金済" },
-                ] as { id: "all" | "invoiced" | "paid"; label: string }[]).map((item) => {
+                  { id: "all",      label: "全て",     count: counts.all },
+                  { id: "overdue",  label: "期限超過", count: counts.overdue },
+                  { id: "partial",  label: "一部入金", count: counts.partial },
+                  { id: "awaiting", label: "入金待ち", count: counts.awaiting },
+                  { id: "paid",     label: "入金済",   count: counts.paid },
+                ] as { id: "all" | "overdue" | BillingStatus; label: string; count: number }[]).map((item) => {
                   const active = statusFilter === item.id;
+                  const isOverdueBadge = item.id === "overdue";
                   return (
-                    <button key={item.id} type="button" onClick={() => setStatusFilter(item.id)}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setStatusFilter(item.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
                         active
-                          ? item.id === "invoiced" ? "bg-sky-50 text-sky-700"
-                          : item.id === "paid"     ? "bg-emerald-50 text-emerald-700"
-                          : "bg-zinc-900 text-white"
-                          : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                      }`}>
+                          ? isOverdueBadge ? "bg-red-600 text-white" : "bg-zinc-900 text-white"
+                          : isOverdueBadge && item.count > 0
+                            ? "bg-red-50 text-red-700 hover:bg-red-100"
+                            : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                      }`}
+                    >
                       {item.label}
+                      <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none ${
+                        active ? "bg-white/20" : "bg-white/70 text-zinc-500"
+                      }`}>
+                        {item.count}
+                      </span>
                     </button>
                   );
                 })}
@@ -362,7 +410,7 @@ export default function PaymentsPage() {
                 <TableHead className="text-xs font-medium text-zinc-400">顧客</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">件名</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">請求日 / 入金期限</TableHead>
-                <TableHead className="text-xs font-medium text-zinc-400 text-right">金額（税込）</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-400 text-right">請求額 / 入金済 / 未入金（税込）</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">確認者</TableHead>
                 <TableHead className="text-xs font-medium text-zinc-400">ステータス</TableHead>
                 <TableHead className="pr-5" />
@@ -377,13 +425,12 @@ export default function PaymentsPage() {
                 </TableRow>
               )}
               {paymentRows.map((row) => {
-                const st = paymentRowStatus(row);
-                const rowStyle = STATUS_STYLE[st];
-                const total = row.subtotal + Math.round(row.subtotal * 0.1);
+                // 期日超過は他のステータスより優先して表示する
+                const rowStyle = STATUS_STYLE[row.overdue ? "overdue" : row.status];
                 const subject = row.bizNames.length === 1
                   ? row.bizNames[0]
                   : `${row.bizNames[0]} 他${row.bizNames.length - 1}件`;
-                const isSelectable = st === "invoiced";
+                const isSelectable = row.status !== "paid";
                 const isSelected = selected.has(row.id);
                 const isExpanded = expandedRows.has(row.id);
                 const rowSales = sales.filter((sale) =>
@@ -394,9 +441,11 @@ export default function PaymentsPage() {
                 return (
                   <React.Fragment key={row.id}>
                     <TableRow
-                      className={`border-zinc-50 transition-colors ${isSelected ? "bg-emerald-50/40" : "hover:bg-zinc-50/50"}`}
+                      className={`border-zinc-50 transition-colors ${
+                        isSelected ? "bg-emerald-50/40" : row.overdue ? "bg-red-50/50 hover:bg-red-50" : "hover:bg-zinc-50/50"
+                      }`}
                     >
-                      <TableCell className="pl-5">
+                      <TableCell className={`pl-5 ${row.overdue ? "border-l-2 border-l-red-500" : ""}`}>
                         {isSelectable ? (
                           <Checkbox checked={isSelected} onCheckedChange={() => toggleRow(row.id)} />
                         ) : (
@@ -429,16 +478,29 @@ export default function PaymentsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="text-xs text-zinc-500 tabular-nums">{invoiceDateLabel(row.month)}</div>
-                        <div className="text-xs text-zinc-400 tabular-nums mt-0.5">{dueDateLabel(row.month)}</div>
+                        <div className={`mt-0.5 text-xs tabular-nums ${row.overdue ? "font-semibold text-red-600" : "text-zinc-400"}`}>
+                          {dueDateInfo(row.customerId, row.month).label}
+                        </div>
                       </TableCell>
-                      <TableCell className="text-right font-semibold text-zinc-900 tabular-nums">
-                        {formatYen(total)}
+                      <TableCell className="text-right">
+                        <div className="font-semibold text-zinc-900 tabular-nums">{formatYen(row.billed)}</div>
+                        <div className="mt-0.5 flex justify-end gap-3 text-xs tabular-nums">
+                          <span className="text-zinc-400">
+                            入金 <span className="font-medium text-emerald-600">{formatYen(row.paidAmount)}</span>
+                          </span>
+                          <span className="text-zinc-400">
+                            未入金{" "}
+                            <span className={`font-medium ${row.unpaid > 0 ? "text-red-600" : "text-zinc-400"}`}>
+                              {formatYen(row.unpaid)}
+                            </span>
+                          </span>
+                        </div>
                       </TableCell>
                       <TableCell className="text-sm text-zinc-500">{row.confirmer}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${rowStyle.bg} ${rowStyle.text} ${rowStyle.border}`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${rowStyle.dot}`} />
-                          {statusLabels[st]}
+                          {rowStyle.label}
                         </span>
                       </TableCell>
                       <TableCell className="pr-5" />
@@ -516,7 +578,10 @@ export default function PaymentsPage() {
           <div className="flex items-center justify-between border-t border-zinc-50 px-5 py-3">
             <span className="text-xs text-zinc-400">{paymentRows.length}件表示</span>
             <span className="text-xs font-semibold text-zinc-700">
-              合計 {formatYen(paymentRows.reduce((n, r) => n + r.subtotal + Math.round(r.subtotal * 0.1), 0))}
+              請求 {formatYen(paymentRows.reduce((n, r) => n + r.billed, 0))}
+              <span className="ml-3 text-zinc-400">
+                未入金 <span className="text-red-600">{formatYen(paymentRows.reduce((n, r) => n + r.unpaid, 0))}</span>
+              </span>
             </span>
           </div>
         </CardContent>

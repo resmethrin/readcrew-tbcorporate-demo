@@ -90,6 +90,32 @@ export const monthToLabel = (month: string) => {
 // 2026-01 から現在（デモ: 2026-06）までの全月リスト（新しい順）
 export const PERIOD_MONTHS = ["2026-06","2026-05","2026-04","2026-03","2026-02","2026-01"];
 
+// デモ上の「今日」。2026年6月分を締めた直後の想定。
+// 未入金アラート（入金期日超過）の判定基準に使う。
+export const DEMO_TODAY = "2026-07-01";
+
+/**
+ * 得意先の締日区分から決まる入金期日。
+ *   25日締め : 当月末日
+ *   月末締め : 翌月末日
+ * 請求書プレビューの表示と同じルール。
+ */
+export const dueDateInfo = (customerId: string, month: string) => {
+  const [y, m] = month.split("-").map(Number);
+  const day25 = isDay25Closing(getCustomer(customerId)?.closingDay);
+  const year = day25 ? y : m === 12 ? y + 1 : y;
+  const mon = day25 ? m : m === 12 ? 1 : m + 1;
+  const day = new Date(year, mon, 0).getDate();
+  return {
+    iso: `${year}-${String(mon).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
+    label: `${year}年${mon}月${day}日`,
+  };
+};
+
+/** 入金期日を過ぎているか（未入金が残っているかは呼び出し側で判定する） */
+export const isPastDue = (customerId: string, month: string) =>
+  dueDateInfo(customerId, month).iso < DEMO_TODAY;
+
 // 当月末を "YYYY年M月D日" 形式で返す（請求日）
 export const invoiceDateLabel = (month: string): string => {
   const [y, m] = month.split("-").map(Number);
