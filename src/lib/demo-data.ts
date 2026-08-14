@@ -90,6 +90,27 @@ export const monthToLabel = (month: string) => {
 // 2026-01 から現在（デモ: 2026-06）までの全月リスト（新しい順）
 export const PERIOD_MONTHS = ["2026-06","2026-05","2026-04","2026-03","2026-02","2026-01"];
 
+/** 請求書明細の「年月日」表記。請求書サンプルに合わせて「26 6 7」形式で返す */
+export const voucherDateLabel = (orderDate?: string) => {
+  if (!orderDate) return "—";
+  const [y, m, d] = orderDate.split("-").map(Number);
+  return `${String(y).slice(-2)} ${m} ${d}`;
+};
+
+/** 品目から単位を決める。請求書サンプルの「足 / 通 / 枚」等に合わせる */
+export const unitFor = (description: string) => {
+  const rules: [RegExp, string][] = [
+    [/安全靴/, "足"],
+    [/レタックス|弔電/, "通"],
+    [/タオル|ハンカチ|おしぼり/, "枚"],
+    [/制服/, "着"],
+    [/弁当|喫食/, "食"],
+    [/食材|廃油/, "kg"],
+    [/手数料|販売|あっせん|委託|派遣|警備|点検|設営|提案/, "式"],
+  ];
+  return rules.find(([pattern]) => pattern.test(description))?.[1] ?? "式";
+};
+
 // デモ上の「今日」。2026年6月分を締めた直後の想定。
 // 未入金アラート（入金期日超過）の判定基準に使う。
 export const DEMO_TODAY = "2026-07-01";

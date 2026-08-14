@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, Plus, Trash2 } from "lucide-react";
 import { demoBusinesses, demoCustomers, formatYen } from "@/lib/demo-data";
@@ -10,22 +10,27 @@ type TaxRate = 10 | 8 | 0;
 
 interface LineItem {
   id: string;
+  /** 年月日（発注日）。請求書明細の先頭列 */
+  orderDate: string;
+  /** 伝票No.。空欄なら保存時に採番する */
+  voucherNo: string;
   description: string;
   qty: number;
   unit: string;
   unitPrice: number;
   taxRate: TaxRate;
+  /** 商品名の下に出す注記（例: お渡し：5/15 刈谷メール室） */
+  note: string;
 }
 
 const TAX_LABEL: Record<TaxRate, string> = { 10: "10%", 8: "8%", 0: "非課税" };
-const UNITS = ["式", "個", "本", "時間", "日", "月", "回"];
-
-function newLine(): LineItem {
-  return { id: crypto.randomUUID(), description: "", qty: 1, unit: "式", unitPrice: 0, taxRate: 10 };
-}
-
+const UNITS = ["式", "個", "本", "枚", "足", "通", "着", "食", "kg", "時間", "日", "月", "回"];
 const INVOICE_NUM = `INV-202606-001`;
 const TODAY = "2026-06-19";
+
+function newLine(): LineItem {
+  return { id: crypto.randomUUID(), orderDate: TODAY, voucherNo: "", description: "", qty: 1, unit: "式", unitPrice: 0, taxRate: 10, note: "" };
+}
 
 /* ─── フィールドラベル ─── */
 function FieldLabel({ children, required }: { children: React.ReactNode; required?: boolean }) {
@@ -186,6 +191,7 @@ function NewSalePageInner() {
 
   const sales    = useSalesStore((s) => s.sales);
   const addSale  = useSalesStore((s) => s.addSale);
+  const issuedVoucherNos = useRef(0);
   const updateSale = useSalesStore((s) => s.updateSale);
 
   const editSale = editId ? sales.find((s) => s.id === editId) : null;
@@ -197,7 +203,17 @@ function NewSalePageInner() {
   const [subject, setSubject]         = useState(editSale?.description ?? "");
   const [lines, setLines]             = useState<LineItem[]>(
     editSale
-      ? [{ id: crypto.randomUUID(), description: editSale.description, qty: editSale.qty ?? 1, unit: "式", unitPrice: editSale.unitPrice ?? editSale.amount, taxRate: 10 }]
+      ? [{
+          id: crypto.randomUUID(),
+          orderDate: editSale.orderDate ?? `${editSale.month}-01`,
+          voucherNo: editSale.voucherNo ?? "",
+          description: editSale.description,
+          qty: editSale.qty ?? 1,
+          unit: "式",
+          unitPrice: editSale.unitPrice ?? editSale.amount,
+          taxRate: (editSale.taxRate ?? 10) as TaxRate,
+          note: editSale.note ?? "",
+        }]
       : [newLine()]
   );
   const [notes, setNotes]             = useState("");
@@ -236,6 +252,13 @@ function NewSalePageInner() {
     return Object.keys(e).length === 0;
   };
 
+  // 伝票No.が未入力なら既存の最大値+1で採番する
+  const nextVoucherNo = () => {
+    const max = sales.reduce((n, sale) => Math.max(n, Number(sale.voucherNo) || 0), 0);
+    issuedVoucherNos.current += 1;
+    return String(max + issuedVoucherNos.current);
+  };
+
   const handleSave = () => {
     if (!validate()) return;
     const month = invoiceDate.slice(0, 7);
@@ -249,7 +272,12 @@ function NewSalePageInner() {
           amount: firstLine.qty * firstLine.unitPrice,
           qty: firstLine.qty,
           unitPrice: firstLine.unitPrice,
-          month,
+          month: firstLine.orderDate ? firstLine.orderDate.slice(0, 7) : month,
+          orderDate: firstLine.orderDate,
+          voucherNo: firstLine.voucherNo.trim() || nextVoucherNo(),
+          unit: firstLine.unit,
+          taxRate: firstLine.taxRate,
+          note: firstLine.note.trim() || undefined,
         });
       }
     } else {
@@ -264,7 +292,12 @@ function NewSalePageInner() {
             amount: l.qty * l.unitPrice,
             qty: l.qty,
             unitPrice: l.unitPrice,
-            month,
+            month: l.orderDate ? l.orderDate.slice(0, 7) : month,
+            orderDate: l.orderDate,
+            voucherNo: l.voucherNo.trim() || nextVoucherNo(),
+            unit: l.unit,
+            taxRate: l.taxRate,
+            note: l.note.trim() || undefined,
             status: "uninvoiced",
           });
         });
@@ -373,8 +406,10 @@ function NewSalePageInner() {
 
             {/* テーブルヘッダー */}
             <div className="mb-1 grid text-[11px] font-medium text-zinc-400"
-              style={{ gridTemplateColumns: "1fr 64px 64px 120px 80px 100px 32px" }}>
-              <span className="pl-1">摘要</span>
+              style={{ gridTemplateColumns: "116px 92px 1fr 56px 60px 108px 76px 100px 32px" }}>
+              <span className="pl-1">年月日</span>
+              <span className="pl-1">伝票No.</span>
+              <span className="pl-1">商品名</span>
               <span className="pl-1">数量</span>
               <span className="pl-1">単位</span>
               <span className="pl-1">単価</span>
@@ -385,12 +420,28 @@ function NewSalePageInner() {
 
             <div className="space-y-2">
               {lines.map((line, idx) => (
+                <div key={line.id} className="rounded-xl bg-zinc-50 px-2 py-2">
                 <div
-                  key={line.id}
-                  className="grid items-center gap-1.5 rounded-xl bg-zinc-50 px-2 py-2"
-                  style={{ gridTemplateColumns: "1fr 64px 64px 120px 80px 100px 32px" }}
+                  className="grid items-center gap-1.5"
+                  style={{ gridTemplateColumns: "116px 92px 1fr 56px 60px 108px 76px 100px 32px" }}
                 >
-                  {/* 摘要 */}
+                  {/* 年月日 */}
+                  <input
+                    type="date"
+                    value={line.orderDate}
+                    onChange={(e) => updateLine(line.id, { orderDate: e.target.value })}
+                    className="rounded-md border border-zinc-200 bg-white px-1.5 py-1.5 text-xs tabular-nums text-zinc-700 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3]"
+                  />
+                  {/* 伝票No. */}
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={line.voucherNo}
+                    onChange={(e) => updateLine(line.id, { voucherNo: e.target.value })}
+                    placeholder="自動採番"
+                    className="rounded-md border border-zinc-200 bg-white px-2 py-1.5 text-center font-mono text-xs tabular-nums text-zinc-700 placeholder:font-sans placeholder:text-[10px] placeholder:text-zinc-300 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3]"
+                  />
+                  {/* 商品名 */}
                   <input
                     type="text"
                     value={line.description}
@@ -446,6 +497,21 @@ function NewSalePageInner() {
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
+                </div>
+
+                {/* 商品名の下のコメント（請求書にそのまま印字される）*/}
+                <div className="mt-1.5 grid gap-1.5" style={{ gridTemplateColumns: "116px 92px 1fr 344px" }}>
+                  <span />
+                  <span />
+                  <input
+                    type="text"
+                    value={line.note}
+                    onChange={(e) => updateLine(line.id, { note: e.target.value })}
+                    placeholder="コメント（例: お渡し：5/15 刈谷メール室）"
+                    className="rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-xs text-zinc-600 placeholder:text-zinc-300 focus:border-[#0071e3] focus:outline-none focus:ring-1 focus:ring-[#0071e3]"
+                  />
+                  <span />
+                </div>
                 </div>
               ))}
             </div>

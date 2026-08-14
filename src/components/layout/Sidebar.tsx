@@ -10,7 +10,6 @@ import {
   Upload,
   ShieldCheck,
   History,
-  PackageSearch,
   LogOut,
 } from "lucide-react";
 
@@ -21,7 +20,6 @@ const nav = [
   { href: "/import",       label: "取込",                        icon: Upload },
   { href: "/masters",      label: "マスタ管理",                   icon: ShieldCheck },
   { href: "/audit-log",    label: "操作ログ",                     icon: History },
-  { href: "/procurement",  label: "発注・仕入・支払（Phase 1）",   icon: PackageSearch },
 ];
 
 export function Sidebar() {

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { demoCustomers, formatYen, groupSalesByBusiness, invoiceNumberForMonth, monthToLabel } from "@/lib/demo-data";
+import { demoCustomers, formatYen, groupSalesByBusiness, invoiceNumberForMonth, monthToLabel, unitFor, voucherDateLabel } from "@/lib/demo-data";
 import { useSalesStore } from "@/store/useSalesStore";
 
 const ISSUER = {
@@ -88,6 +88,8 @@ export default function InvoicePreviewPage() {
   const [markInvoiced, setMarkInvoiced] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
 
+  const [pdfBusy, setPdfBusy] = useState(false);
+
   // 未入金分別発行モーダル
   const [showUnpaidModal, setShowUnpaidModal] = useState(false);
 
@@ -117,7 +119,10 @@ export default function InvoicePreviewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [customerId, month, sales, bizIdsParam],
   );
-  const groups = useMemo(() => groupSalesByBusiness(targetSales), [targetSales]);
+  const groups = useMemo(() => {
+    const sorted = [...targetSales].sort((a, b) => (a.orderDate ?? "").localeCompare(b.orderDate ?? ""));
+    return groupSalesByBusiness(sorted);
+  }, [targetSales]);
   const total = groups.reduce((sum, group) => sum + group.subtotal, 0);
   const tax = Math.round(total * 0.1);
 
@@ -206,6 +211,57 @@ export default function InvoicePreviewPage() {
   );
   const carryOver = prevBilled - prevPaid;
 
+  /** 帳票レイアウトからPDFを生成してダウンロードする */
+  const handleDownloadPdf = async () => {
+    setPdfBusy(true);
+    try {
+      const [{ pdf }, { InvoicePdf }] = await Promise.all([
+        import("@react-pdf/renderer"),
+        import("@/components/invoice/InvoicePdf"),
+      ]);
+      const blob = await pdf(
+        <InvoicePdf
+          invoiceNo={invoiceNo}
+          customerName={customer?.name ?? customerId}
+          closingLabel={closingLabel}
+          closingDateLabel={closingDateLabel}
+          periodLabel={periodLabel}
+          dueDateLabel={dueDateLabel}
+          monthLabel={monthToLabel(month)}
+          groups={groups}
+          total={total}
+          tax={tax}
+          carryOverMode={carryOverMode}
+          carryOver={carryOver}
+          prevBilled={prevBilled}
+          prevPaid={prevPaid}
+          issuer={ISSUER}
+          bank={BANK}
+          displayAmountOf={(sale) =>
+            isTaxInclusiveInput(sale.description) && unifiedTaxDisplay
+              ? exclusiveAmount(sale.amount)
+              : sale.amount
+          }
+          displayDescriptionOf={(sale) => displayDescription(sale.description)}
+          referenceNoteOf={(sale) =>
+            isTaxInclusiveInput(sale.description) && unifiedTaxDisplay
+              ? `参考価格: 税込${formatYen(sale.amount)}`
+              : ""
+          }
+        />,
+      ).toBlob();
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${invoiceNo}_${customer?.name ?? customerId}.pdf`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex items-end justify-between gap-4">
@@ -226,8 +282,8 @@ export default function InvoicePreviewPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => window.print()}>
-            PDF出力
+          <Button variant="outline" onClick={handleDownloadPdf} disabled={pdfBusy}>
+            {pdfBusy ? "PDF作成中…" : "PDF出力"}
           </Button>
           <Button variant="outline" onClick={openMailModal}>
             <Mail className="h-4 w-4" />
@@ -346,8 +402,66 @@ export default function InvoicePreviewPage() {
             </div>
 
             <p className="mt-3 text-zinc-600">
-              下記の通りご請求申し上げます。
+              毎度有難うございます。下記の通り御請求申し上げます。
             </p>
+
+            {/* 繰越型フォームの7項目（現行の請求書と同じ並び）*/}
+            {carryOverMode && (
+              <div className="print-keep mt-4 overflow-x-auto">
+                <table className="w-full min-w-[720px] table-fixed border border-zinc-300 text-center text-xs">
+                  <thead>
+                    <tr>
+                      {[
+                        "① 前回御請求額",
+                        "② 御入金金額",
+                        "③ 差引繰越額",
+                        "④ 今回御買上額",
+                        "⑤ 消費税",
+                        "⑥ 今回御請求額",
+                        "⑦ 累計御請求額",
+                      ].map((label) => (
+                        <th
+                          key={label}
+                          className={`border border-zinc-300 px-1 py-1.5 font-medium ${
+                            label.startsWith("⑥")
+                              ? "bg-sky-100 text-sky-900"
+                              : "bg-emerald-50 text-zinc-700"
+                          }`}
+                        >
+                          {label}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="tabular-nums">
+                      {[prevBilled, prevPaid, carryOver, total, tax, total + tax, carryOver + total + tax].map(
+                        (value, index) => (
+                          <td
+                            key={index}
+                            className={`border border-zinc-300 px-1 py-2 ${
+                              index === 5 ? "font-bold text-zinc-900" : "text-zinc-700"
+                            }`}
+                          >
+                            {formatYen(value)}
+                          </td>
+                        ),
+                      )}
+                    </tr>
+                  </tbody>
+                </table>
+                {/* 実物と同じく、各項目の真下に算式を置く */}
+                <div className="mt-1 grid min-w-[720px] grid-cols-7 text-center text-[10px] text-zinc-400">
+                  <span />
+                  <span />
+                  <span>③＝①−②</span>
+                  <span />
+                  <span className="text-red-400">非課税商品を除く</span>
+                  <span>⑥＝④＋⑤</span>
+                  <span>⑦＝③＋⑥</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 請求金額サマリ */}
@@ -388,10 +502,14 @@ export default function InvoicePreviewPage() {
                   <table className="w-full table-fixed text-sm">
                     <thead>
                       <tr className="border-b border-zinc-200 bg-zinc-50 text-xs font-medium text-zinc-500">
-                        <th className="px-4 py-2 text-left font-medium">内容</th>
-                        <th className="w-20 px-4 py-2 text-right font-medium">数量</th>
-                        <th className="w-32 px-4 py-2 text-right font-medium">単価</th>
-                        <th className="w-32 px-4 py-2 text-right font-medium">金額</th>
+                        <th className="w-20 px-3 py-2 text-left font-medium">年月日</th>
+                        <th className="w-20 px-3 py-2 text-left font-medium">伝票No.</th>
+                        <th className="px-3 py-2 text-left font-medium">商品名</th>
+                        <th className="w-16 px-3 py-2 text-right font-medium">数量</th>
+                        <th className="w-12 px-3 py-2 text-center font-medium">単位</th>
+                        <th className="w-24 px-3 py-2 text-right font-medium">単価</th>
+                        <th className="w-28 px-3 py-2 text-right font-medium">金額</th>
+                        <th className="w-28 px-3 py-2 text-left font-medium">備考</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -400,27 +518,36 @@ export default function InvoicePreviewPage() {
                         const displayAmount = taxInclusiveInput && unifiedTaxDisplay ? exclusiveAmount(sale.amount) : sale.amount;
                         return (
                           <tr key={sale.id} className="border-b border-zinc-100 last:border-b-0 align-top">
-                            <td className="px-4 py-2.5">
-                              {displayDescription(sale.description)}
-                              {taxInclusiveInput && !unifiedTaxDisplay && (
-                                <span className="ml-2 inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">税込</span>
-                              )}
-                              {taxInclusiveInput && unifiedTaxDisplay && (
-                                <div className="mt-0.5 text-[11px] text-zinc-400">参考価格: 税込{formatYen(sale.amount)}</div>
-                              )}
+                            <td className="px-3 py-2.5 tabular-nums text-zinc-500">{voucherDateLabel(sale.orderDate)}</td>
+                            <td className="px-3 py-2.5 font-mono text-xs tabular-nums text-zinc-500">{sale.voucherNo ?? "—"}</td>
+                            <td className="px-3 py-2.5">
+                              <div className="flex items-baseline justify-between gap-3">
+                                <span>
+                                  {displayDescription(sale.description)}
+                                  {taxInclusiveInput && !unifiedTaxDisplay && (
+                                    <span className="ml-2 inline-flex items-center rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-amber-700">税込</span>
+                                  )}
+                                </span>
+                                <span className="shrink-0 text-xs tabular-nums text-zinc-500">{sale.taxRate ?? 10}%</span>
+                              </div>
+                              {sale.note && <div className="mt-0.5 text-[11px] text-zinc-500">（{sale.note}）</div>}
                             </td>
-                            <td className="px-4 py-2.5 text-right tabular-nums">{sale.qty ?? 1}</td>
-                            <td className="px-4 py-2.5 text-right tabular-nums">
+                            <td className="px-3 py-2.5 text-right tabular-nums">{sale.qty ?? 1}</td>
+                            <td className="px-3 py-2.5 text-center text-zinc-500">{sale.unit ?? unitFor(sale.description)}</td>
+                            <td className="px-3 py-2.5 text-right tabular-nums">
                               {formatYen(sale.unitPrice ?? Math.round(displayAmount / (sale.qty ?? 1)))}
                             </td>
-                            <td className="px-4 py-2.5 text-right font-medium tabular-nums">{formatYen(displayAmount)}</td>
+                            <td className="px-3 py-2.5 text-right font-medium tabular-nums">{formatYen(displayAmount)}</td>
+                            <td className="px-3 py-2.5 text-[11px] text-zinc-400">
+                              {taxInclusiveInput && unifiedTaxDisplay ? `参考価格: 税込${formatYen(sale.amount)}` : ""}
+                            </td>
                           </tr>
                         );
                       })}
                     </tbody>
                     <tfoot>
                       <tr className="border-t border-zinc-200 bg-zinc-50 text-sm font-medium">
-                        <td colSpan={4} className="px-4 py-2 text-right">小計: {formatYen(group.subtotal)}</td>
+                        <td colSpan={8} className="px-3 py-2 text-right">小計: {formatYen(group.subtotal)}</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -430,70 +557,45 @@ export default function InvoicePreviewPage() {
           </div>
 
           {/* 合計 */}
-          {carryOverMode ? (
-            <div className="print-keep space-y-2">
-              <div className="rounded-xl border border-amber-200 overflow-hidden">
-                <div className="flex justify-between border-b border-amber-100 bg-amber-50/60 px-5 py-2.5 text-sm text-zinc-600">
-                  <span>① 前回御請求額</span>
-                  <span>{formatYen(prevBilled)}</span>
-                </div>
-                <div className="flex justify-between border-b border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
-                  <span>② 御入金額</span>
-                  <span>{formatYen(prevPaid)}</span>
-                </div>
-                <div className="flex justify-between border-b border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
-                  <span>③ 調整額</span>
-                  <span>{formatYen(0)}</span>
-                </div>
-                <div className="flex justify-between border-b border-amber-100 bg-amber-50/60 px-5 py-2.5 text-sm font-medium text-amber-800">
-                  <span>④ 差引繰越額</span>
-                  <span>{formatYen(carryOver)}</span>
-                </div>
-                <div className="flex justify-between border-b border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
-                  <span>⑤ 当月御買上額（税抜）</span>
-                  <span>{formatYen(total)}</span>
-                </div>
-                <div className="flex justify-between border-b border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
-                  <span>⑥ 消費税（10%）</span>
-                  <span>{formatYen(tax)}</span>
-                </div>
-                <div className="flex justify-between border-t border-amber-200 bg-amber-50 px-5 py-3 text-base font-bold text-zinc-900">
-                  <span>⑦ 累計御請求額</span>
-                  <span className="text-accent">{formatYen(carryOver + total + tax)}</span>
-                </div>
+          <div className="print-keep rounded-xl border border-zinc-200 overflow-hidden">
+            <div className="flex justify-between px-5 py-2.5 text-sm text-zinc-600">
+              <span>{carryOverMode ? "④ 今回御買上額（税抜）" : "小計（税抜）"}</span>
+              <span className="tabular-nums">{formatYen(total)}</span>
+            </div>
+            <div className="flex justify-between border-t border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
+              <span>{carryOverMode ? "⑤ 消費税（10%）" : "消費税（10%）"}</span>
+              <span className="tabular-nums">{formatYen(tax)}</span>
+            </div>
+            {carryOverMode && (
+              <div className="flex justify-between border-t border-zinc-100 bg-amber-50/60 px-5 py-2.5 text-sm font-medium text-amber-800">
+                <span>③ 差引繰越額</span>
+                <span className="tabular-nums">{formatYen(carryOver)}</span>
               </div>
+            )}
+            <div className="flex justify-between border-t border-zinc-200 bg-zinc-50 px-5 py-3 text-base font-bold text-zinc-900">
+              <span>{carryOverMode ? "⑦ 累計御請求額（税込）" : "合計（税込）"}</span>
+              <span className="text-accent tabular-nums">
+                {formatYen(carryOverMode ? carryOver + total + tax : total + tax)}
+              </span>
+            </div>
+          </div>
 
-              <p className="rounded-lg bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800 print:hidden">
-                {isDay25Closing ? (
-                  <>
-                    {closingLabel}の得意先では、締日（{closingDateLabel}）から入金期日（{dueDateLabel}）までの間に
-                    請求書が発行されるため、<span className="font-semibold">入金済でも④差引繰越額が残って見えます</span>。
-                    「払ったはずなのに繰越が立っている」という問合せの原因になります。
-                  </>
-                ) : (
-                  <>
-                    ①〜④が当月分に混ざるため、
-                    <span className="font-semibold">④差引繰越額が「当月の未払い」と誤解されます</span>。
-                    締日と入金期日がずれる得意先ほど問合せが増えます。
-                  </>
-                )}
-              </p>
-            </div>
-          ) : (
-            <div className="print-keep rounded-xl border border-zinc-200 overflow-hidden">
-              <div className="flex justify-between px-5 py-2.5 text-sm text-zinc-600">
-                <span>小計（税抜）</span>
-                <span>{formatYen(total)}</span>
-              </div>
-              <div className="flex justify-between border-t border-zinc-100 px-5 py-2.5 text-sm text-zinc-600">
-                <span>消費税（10%）</span>
-                <span>{formatYen(tax)}</span>
-              </div>
-              <div className="flex justify-between border-t border-zinc-200 bg-zinc-50 px-5 py-3 text-base font-bold text-zinc-900">
-                <span>合計（税込）</span>
-                <span className="text-accent">{formatYen(total + tax)}</span>
-              </div>
-            </div>
+          {carryOverMode && (
+            <p className="rounded-lg bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800 print:hidden">
+              {isDay25Closing ? (
+                <>
+                  {closingLabel}の得意先では、締日（{closingDateLabel}）から入金期日（{dueDateLabel}）までの間に
+                  請求書が発行されるため、<span className="font-semibold">入金済でも③差引繰越額が残って見えます</span>。
+                  「払ったはずなのに繰越が立っている」という問合せの原因になります。
+                </>
+              ) : (
+                <>
+                  ①〜③が当月分に混ざるため、
+                  <span className="font-semibold">③差引繰越額が「当月の未払い」と誤解されます</span>。
+                  締日と入金期日がずれる得意先ほど問合せが増えます。
+                </>
+              )}
+            </p>
           )}
 
           {/* 振込先 */}
