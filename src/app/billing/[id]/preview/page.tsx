@@ -93,8 +93,8 @@ export default function InvoicePreviewPage() {
   // 未入金分別発行モーダル
   const [showUnpaidModal, setShowUnpaidModal] = useState(false);
 
-  // 税抜統一 Before/After トグル
-  const [unifiedTaxDisplay, setUnifiedTaxDisplay] = useState(false);
+  // 明細は常に税抜表示に統一する（税込入力の明細は備考に参考価格を出す）
+  const unifiedTaxDisplay = true;
   // 繰越型（現行フォーム）/ 当月完結型 Before/After トグル
   const [carryOverMode, setCarryOverMode] = useState(false);
   const isTaxInclusiveInput = (description: string) => description.includes("（税込入力）");
@@ -107,17 +107,22 @@ export default function InvoicePreviewPage() {
   const invoiceNo = searchParams.get("invoiceNo") || invoiceNumberForMonth(month);
   const bizIdsParam = searchParams.get("bizIds");
   const bizIdFilter = bizIdsParam ? new Set(bizIdsParam.split(",")) : null;
+  // 呼び出し元で選択した伝票が渡されていれば、それだけで請求書を構成する
+  const saleIdsParam = searchParams.get("saleIds");
+  const saleIdFilter = saleIdsParam ? new Set(saleIdsParam.split(",")) : null;
 
   const targetSales = useMemo(
     () =>
-      sales.filter(
-        (sale) =>
-          sale.customerId === customerId &&
-          sale.month === month &&
-          (bizIdFilter === null || bizIdFilter.has(sale.businessId)),
-      ),
+      saleIdFilter
+        ? sales.filter((sale) => saleIdFilter.has(sale.id))
+        : sales.filter(
+            (sale) =>
+              sale.customerId === customerId &&
+              sale.month === month &&
+              (bizIdFilter === null || bizIdFilter.has(sale.businessId)),
+          ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [customerId, month, sales, bizIdsParam],
+    [customerId, month, sales, bizIdsParam, saleIdsParam],
   );
   const groups = useMemo(() => {
     const sorted = [...targetSales].sort((a, b) => (a.orderDate ?? "").localeCompare(b.orderDate ?? ""));
@@ -300,15 +305,7 @@ export default function InvoicePreviewPage() {
         </div>
       </div>
 
-      <div className="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white print:hidden">
-        <BeforeAfterControl
-          label="税抜表示"
-          beforeLabel="Before"
-          afterLabel="After"
-          note={unifiedTaxDisplay ? "全明細を税抜表示に統一" : "税込入力の明細が混在したまま表示"}
-          isAfter={unifiedTaxDisplay}
-          onChange={setUnifiedTaxDisplay}
-        />
+      <div className="rounded-xl border border-zinc-200 bg-white print:hidden">
         <BeforeAfterControl
           label="請求書フォーム"
           beforeLabel="繰越型"
